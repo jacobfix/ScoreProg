@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jacobfix.scorepredictor.SpreadView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView android:id="@+id/value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:drawableTop="@drawable/ic_arrow_upward_black_24dp"
+        android:drawableTint="@android:color/holo_red_light"
+        android:gravity="center"
+        android:textSize="26dp"
+        android:text="27"/>
+
+</jacobfix.scorepredictor.SpreadView>

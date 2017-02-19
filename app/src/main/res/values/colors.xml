@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="standard_text">#8A000000</color>
+    <color name="default_gray">#808080</color>
+    <color name="light_gray">#f5f5f5</color>
+    <color name="darker_light_gray">#efefef</color>
+    <color name="enter_green">#108732</color>
+    <color name="delete_red">#d0021b</color>
+</resources>

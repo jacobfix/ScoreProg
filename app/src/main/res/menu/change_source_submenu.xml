@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_change_source_live"
+        android:title="Live NFL Games"/>
+    <item
+        android:id="@+id/action_change_source_local_pregame"
+        android:title="Mock Games (Pregame)"/>
+    <item
+        android:id="@+id/action_change_source_local_in_progress"
+        android:title="Mock Games (In Progress)"/>
+    <item
+        android:id="@+id/action_change_source_local_final"
+        android:title="Mock Games (Final)"/>
+</menu>

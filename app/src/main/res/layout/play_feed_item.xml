@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="70dp">
+
+    <RelativeLayout android:id="@+id/normal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+        <!-- <FrameLayout android:id="@+id/side_container_left"
+            android:layout_width="44dp"
+            android:layout_height="match_parent"
+            android:layout_centerVertical="true"
+            android:layout_alignParentLeft="true"
+            android:background="@android:color/holo_red_light"
+            android:visibility="visible">
+
+        </FrameLayout> -->
+
+        <View android:id="@+id/away_team_stripe"
+            android:layout_width="7dp"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_marginRight="8dp"
+            android:background="@android:color/holo_red_light"
+            android:visibility="invisible"/>
+
+        <View android:id="@+id/home_team_stripe"
+            android:layout_width="7dp"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:layout_marginLeft="8dp"
+            android:background="@android:color/holo_red_light"
+            android:visibility="invisible"/>
+
+        <TextView android:id="@+id/side_text_left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/away_team_stripe"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="16dp"
+            android:gravity="center"
+            android:textSize="18dp"
+            android:text="1st\n10"/>
+
+        <LinearLayout android:id="@+id/middle_text_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_toLeftOf="@id/home_team_stripe"
+            android:layout_toRightOf="@id/side_text_left"
+            android:gravity="left"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp">
+
+            <TextView android:id="@+id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top"
+                android:gravity="left"
+                android:textSize="18dp"
+                android:text="Unknown"/>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView android:id="@+id/description"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:gravity="left"
+                    android:maxLines="2"
+                    android:textSize="12dp"
+                    android:text="A. Rodgers pass to J. Watson complete, gain of 8, penalty on the play, holding for what it's worth here's more text here have some more text"/>
+
+            </FrameLayout>
+        </LinearLayout>
+    </RelativeLayout>
+
+    <FrameLayout android:id="@+id/special"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:padding="10dp">
+
+        <TextView android:id="@+id/special_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textSize="18dp"
+            android:text="END GAME"
+            android:visibility="visible"/>
+    </FrameLayout>
+</FrameLayout>

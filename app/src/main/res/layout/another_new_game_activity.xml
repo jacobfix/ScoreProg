@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <View
+        android:layout_width="wrap_content"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/light_gray"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@color/light_gray"
+        android:gravity="left"
+        android:paddingBottom="10dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_weight="10"
+            android:layout_gravity="left"
+            android:gravity="center">
+            <!-- android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:paddingLeft="16dp"> -->
+
+            <TextView android:id="@+id/away_team_abbr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAllCaps="true"
+                android:textSize="@dimen/team_abbr_text_size"
+                android:text="DEN"/>
+
+            <TextView android:id="@+id/away_team_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/abbr_name_gap"
+                android:textAllCaps="true"
+                android:textSize="@dimen/team_name_text_size"
+                android:text="Broncos"/>
+
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+            <LinearLayout android:id="@+id/game_time_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_centerInParent="true"
+                android:gravity="center">
+
+                <TextView android:id="@+id/clock"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAllCaps="true"
+                    android:textSize="18sp"
+                    android:text="12:32"/>
+
+                <TextView android:id="@+id/quarter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="-4dp"
+                    android:textSize="18sp"
+                    android:text="4th"/>
+            </LinearLayout>
+
+            <ImageView android:id="@+id/lock"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@id/game_time_container"
+                android:src="@drawable/ic_lock_outline_black_24dp"/>
+            <!-- Change this icon! -->
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_weight="10"
+            android:layout_gravity="right"
+            android:gravity="center">
+            <!-- android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:paddingRight="16dp"> -->
+
+            <TextView android:id="@+id/home_team_abbr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAllCaps="true"
+                android:textSize="@dimen/team_abbr_text_size"
+                android:text="CAR"/>
+
+            <TextView android:id="@+id/home_team_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/abbr_name_gap"
+                android:textAllCaps="true"
+                android:textSize="@dimen/team_name_text_size"
+                android:text="Panthers"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@android:color/white">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_weight="2">
+
+            <TextView android:id="@+id/away_team_score"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:textSize="72sp"
+                android:text="21"
+                android:layout_marginTop="@dimen/score_gap"
+                android:layout_marginBottom="@dimen/score_gap"/>
+
+            <TextView android:id="@+id/away_team_predicted_score"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/rounded_colored_shadow_rectangle"
+                android:textColor="@android:color/white"
+                android:textSize="66sp"
+                android:text="17"
+                android:padding="18dp"
+                android:layout_marginBottom="10dp"/>
+
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:background="@drawable/circle"
+                android:textColor="@android:color/white"
+                android:textSize="38sp"
+                android:text="23"
+                android:padding="14dp"/>
+
+            <!-- <ImageView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_centerInParent="true"
+                android:src="@drawable/circle"/> -->
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_weight="2">
+
+            <TextView android:id="@+id/home_team_score"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:textSize="72sp"
+                android:text="35"
+                android:layout_marginTop="@dimen/score_gap"
+                android:layout_marginBottom="@dimen/score_gap"/>
+
+            <TextView android:id="@+id/home_team_predicted_score"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/rounded_colored_shadow_rectangle"
+                android:textColor="@android:color/white"
+                android:textSize="66sp"
+                android:text="22"
+                android:padding="18dp"
+                android:layout_marginBottom="10dp"/>
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <android.support.design.widget.TabLayout android:id="@+id/tabs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <android.support.v4.view.ViewPager android:id="@+id/pager"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white"/>
+</LinearLayout>

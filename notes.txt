@@ -1,0 +1,172 @@
+Have a boolean that is set to true right before a reader of the NflGameOracle reads the data it needs, then set to false when it's done.
+
+Server returns JSON with guaranteed key that indicates whether or not the data has been modified since it was last pulled. Could also do the parsing of the detailed JSON on the server. Could do the parsing of all the JSON on the server.
+
+Problems:
+Appears that ScheduledExecutorServices of stopped activities are still running. Getting a bunch of dataset updated toasts in rapid succession. If I start the app, and go immediately into the GameActivity from the LobbyActivity, after a minute two threads finish syncing, so it seems the one for LobbyActivity is still running.
+
+Check for unintended text wrapping with TextView.lineCount()
+
+Color the name of the team the user predicted to win.
+
+Every time the app is loaded (shows a splash screen or something), retrieve the games from the network, and for every active game, check if it exists in the SQLite database. If so, update it with the current scores and get the predictions and set those in the NflTeam objects. If it does not exist, add the game to the database. Every time data is retrieved from the network after that initial time, you have to check for any new games and add them to the database if they exist.
+
+use the drawable top/bottom param of textview for the arrows above/below spread
+
+Pregame, not predicted -> score gone, predictions invisible
+Pregame, predicted -> score gone, predictions visible
+in progress, not predicted -> score visible, predictions gone
+in progress, predicted -> score visible, predictions visible
+final, not predicted -> score visible, predictions gone
+final, predicted -> score visible, predictions visible
+
+In the LobbyActivity, have tabs along the top for each week.
+
+package jacobfix.scorepredictor;
+
+import android.content.Context;
+import android.content.Intent;
+import android.provider.ContactsContract;
+import android.support.v4.content.LocalBroadcastManager;
+import android.util.JsonWriter;
+import android.util.Log;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+
+import jacobfix.scorepredictor.database.Database;
+
+public class NflGameSyncTask implements Runnable {
+
+    private static final String TAG = NflGameSyncTask.class.getSimpleName();
+
+    private Context mContext;
+    private DataRetriever mDataRetriever;
+    private Database mDatabase;
+    private boolean mFirstSync = true;
+
+    public NflGameSyncTask(Context context, DataRetriever dataRetriever) {
+        mContext = context;
+        mDataRetriever = dataRetriever;
+        mDatabase = new Database(context);
+    }
+
+    public void setDataRetriever(DataRetriever retriever) {
+        mDataRetriever = retriever;
+    }
+
+    public void setFirstSync(boolean first) {
+        mFirstSync = first;
+    }
+
+    @Override
+    public void run() {
+        // synchronized?
+        HashMap<String, NflGame> existingGames = NflGameOracle.getInstance().getActiveGames();
+        HashMap<String, NflGame> activeGames = syncWithServer(existingGames);
+        mDatabase.open();
+        if (mFirstSync) {
+            syncWithLocalDatabase(activeGames);
+        }
+        updateDatabase(activeGames);
+        mDatabase.close();
+        NflGameOracle.getInstance().setActiveGames(activeGames);
+        Intent intent = new Intent(NflGameSyncManager.ACTION_ANNOUNCE_SYNC_FINISHED);
+        // Should we use ApplicationContext? Or just this.context?
+        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+    }
+
+    private HashMap<String, NflGame> syncWithServer(HashMap<String, NflGame> existingGames) {
+        HashMap<String, NflGame> activeGames = new HashMap<String, NflGame>();
+        JSONObject allGamesJson = null;
+        try {
+            Log.d(TAG, "About to get from DataRetriever");
+            allGamesJson = mDataRetriever.getAllGamesJson();
+            Log.d(TAG, "Just got from DataRetriever");
+            // allGamesJson = NflGameJsonParser.getJsonFromUrl(ALL_GAMES_URL);
+        } catch (IOException e) {
+            Log.e(TAG, "There was an IO error " + e.toString());
+        } catch (JSONException e) {
+            Log.e(TAG, "There was a JSON error " + e.toString());
+        }
+
+        Iterator<String> iter = allGamesJson.keys();
+        while (iter.hasNext()) {
+            String gameId = iter.next();
+            JSONObject simpleJson = null;
+            try {
+                simpleJson = allGamesJson.getJSONObject(gameId);
+            } catch (JSONException e) {
+                Log.e(TAG, e.toString());
+            }
+
+            NflGame game = null;
+            if (activeGames.containsKey(gameId)) {
+                game = existingGames.get(gameId);
+            } else {
+                game = new NflGame(gameId);
+                game.setAwayTeam(new NflTeam(false));
+                game.setHomeTeam(new NflTeam(true));
+                // activeGames.put(gameId, game);
+            }
+            activeGames.put(gameId, game);
+
+            // Want to maintain the existing object?
+            /*
+            NflGame game = new NflGame(gameId);
+            try {
+                game.setAwayTeam(new NflTeam(NflGameJsonParser.getAwayTeamAbbr(simpleJson)));
+                game.setHomeTeam(new NflTeam(NflGameJsonParser.getHomeTeamAbbr(simpleJson)));
+            } catch (JSONException e) {
+                Log.e(TAG, e.toString());
+            }
+            */
+
+            try {
+                NflGameJsonParser.updateGameFromSimpleJson(game, simpleJson);
+            } catch (JSONException e) {
+                Log.e(TAG, e.toString());
+            }
+
+            if (game.isPregame()) { // or isFinal()?
+                continue;
+            }
+
+            // String url = String.format(SINGLE_GAME_BASE_URL, gameId, gameId);
+            JSONObject detailedJson = null;
+            try {
+                detailedJson = mDataRetriever.getIndividualGameJson(gameId).getJSONObject(gameId);
+                // detailedJson = NflGameJsonParser.getJsonFromUrl(url).getJSONObject(gameId);
+            } catch (IOException e) {
+                Log.e(TAG, e.toString());
+            } catch (JSONException e) {
+                Log.e(TAG, e.toString());
+            }
+
+            try {
+                NflGameJsonParser.updateGameFromDetailedJson(game, detailedJson);
+            } catch (JSONException e) {
+                Log.e(TAG, e.toString());
+            }
+            mFirstSync = false;
+        }
+    }
+
+    private void syncWithLocalDatabase(HashMap<String, NflGame> activeGames) {
+        for (String gameId : activeGames.keySet()) {
+            mDatabase.syncGameIfExists(activeGames.get(gameId));
+        }
+    }
+
+    private void updateDatabase(HashMap<String, NflGame> activeGames) {
+        for (String gameId : activeGames.keySet()) {
+            if (!mDatabase.gameExists(gameId)) {
+                mDatabase.createEntry(activeGames.get(gameId));
+            }
+        }
+    }
+}

@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">ScorePredictor</string>
+    <string name="first_quarter">1st</string>
+    <string name="second_quarter">2nd</string>
+    <string name="third_quarter">3rd</string>
+    <string name="fourth_quarter">4th</string>
+    <string name="ot">OT</string>
+    <string name="drawer_open">Open</string>
+    <string name="drawer_closed">Closed</string>
+    <string name="empty_string"></string>
+    <string name="final_">Final</string>
+    <string name="halftime">Halftime</string>
+    <string name="overtime">Overtime</string>
+    <string name="pregame">Pregame</string>
+    <string name="refresh">Refresh</string>
+    <string name="change_data_source">Change Data Source</string>
+
+    <!-- Tab titles -->
+    <string name="predict">Predict</string>
+    <string name="live">Live</string>
+    <string name="stats">Stats</string>
+    <string name="compare">Compare</string>
+
+    <string name="dash">--</string>
+    <string name="zero">0</string>
+    <string name="one">1</string>
+    <string name="two">2</string>
+    <string name="three">3</string>
+    <string name="four">4</string>
+    <string name="five">5</string>
+    <string name="six">6</string>
+    <string name="seven">7</string>
+    <string name="eight">8</string>
+    <string name="nine">9</string>
+</resources>
