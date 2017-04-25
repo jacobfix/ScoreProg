@@ -1,4 +1,4 @@
-package jacobfix.scorepredictor;
+package jacobfix.scorepredictor.util;
 
 import android.content.Context;
 import android.graphics.Typeface;

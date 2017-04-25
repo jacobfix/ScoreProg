@@ -1,4 +1,4 @@
-package jacobfix.scorepredictor;
+package jacobfix.scorepredictor.sync;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -33,7 +33,7 @@ public class NflGameSyncManager {
     private Future<?> mSyncHandle;
     private ScheduledFuture<?> mScheduledSyncHandle;
 
-    private NflGameSyncTask mSyncTask;
+    private OriginalNflGameSyncTask mSyncTask;
     private SyncFinishedListener mSyncFinishedListener;
     private BroadcastReceiver mSyncFinishedReceiver;
     private boolean mRunning;
@@ -67,7 +67,7 @@ public class NflGameSyncManager {
         mContext = context;
         // mDataRetriever = new LocalDataRetriever(context, LocalDataRetriever.SOURCE_20160922_PREGAME);
         mDataRetriever = new NflWebsiteDataRetriever(context);
-        mSyncTask = new NflGameSyncTask(context, mDataRetriever);
+        mSyncTask = new OriginalNflGameSyncTask(context, mDataRetriever);
         mSyncFinishedReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {

@@ -7,6 +7,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import jacobfix.scorepredictor.util.ViewUtil;
+
 public class SpreadView extends LinearLayout {
 
     int mValue;

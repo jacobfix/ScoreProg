@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jacobfix.scorepredictor.components.FlipCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:elevation="2dp">
+    <!-- elevation should be replaced with some other kind of shadow -->
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/card_top_half"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:src="@drawable/flip_card_top_half"
+            android:tint="#005596"/>
+            <!-- android:tint="@android:color/holo_blue_dark"/> -->
+
+        <ImageView
+            android:id="@+id/card_bottom_half"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:src="@drawable/flip_card_bottom_half"
+            android:tint="#005596"/>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:textColor="@android:color/white"
+        android:textSize="32sp"
+        android:text="22"/>
+
+</jacobfix.scorepredictor.components.FlipCardView>

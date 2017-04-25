@@ -3,26 +3,22 @@ package jacobfix.scorepredictor;
 import android.app.Application;
 import android.content.Context;
 
+import jacobfix.scorepredictor.sync.NflGameSyncManager;
+
 public class ApplicationContext extends Application {
 
-    private NflGameSyncManager mNflGameSyncManager;
-
-    public static ApplicationContext getInstance(Context context) {
-        return (ApplicationContext) context.getApplicationContext();
-    }
+    private static Context mContext;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        initializeSyncManager();
+        mContext = getApplicationContext();
     }
 
-    private void initializeSyncManager() {
-        mNflGameSyncManager = new NflGameSyncManager(getApplicationContext());
+    public static Context getContext() {
+        return mContext;
     }
 
-    public NflGameSyncManager getNflGameSyncManager() {
-        return mNflGameSyncManager;
-    }
+
 
 }

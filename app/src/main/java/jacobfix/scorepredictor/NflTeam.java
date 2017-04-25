@@ -2,6 +2,8 @@ package jacobfix.scorepredictor;
 
 import java.util.HashMap;
 
+import jacobfix.scorepredictor.util.Util;
+
 public class NflTeam extends PredictableScorer {
 
     private int mId;

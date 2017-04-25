@@ -1,4 +1,4 @@
-package jacobfix.scorepredictor;
+package jacobfix.scorepredictor.util;
 
 import android.app.Activity;
 import android.content.res.Resources;

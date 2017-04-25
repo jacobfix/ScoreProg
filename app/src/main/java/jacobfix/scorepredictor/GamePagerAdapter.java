@@ -17,16 +17,18 @@ public class GamePagerAdapter extends FragmentStatePagerAdapter {
 
     private ArrayList<Integer> dynamicPageList;
 
-    private static final String[] PAGE_TITLES = {"Live", "Stats", "Compare"};
+    private static final String[] PAGE_TITLES = {"Friends", "Live", "Stats", "Compare"};
 
-    public static final int LIVE_PAGE = 0;
-    public static final int STATS_PAGE = 1;
-    public static final int COMPARE_PAGE = 2;
+    public static final int FRIENDS_PAGE = 0;
+    public static final int LIVE_PAGE = 1;
+    public static final int STATS_PAGE = 2;
+    public static final int COMPARE_PAGE = 3;
 
     /* Can probably get rid of all this "dynamic" stuff. */
     public GamePagerAdapter(FragmentManager fm) {
         super(fm);
         dynamicPageList = new ArrayList<Integer>();
+        dynamicPageList.add(FRIENDS_PAGE);
         dynamicPageList.add(LIVE_PAGE);
         dynamicPageList.add(STATS_PAGE);
         dynamicPageList.add(COMPARE_PAGE);
@@ -42,6 +44,8 @@ public class GamePagerAdapter extends FragmentStatePagerAdapter {
         Log.d(TAG, "getItem() @ " + position);
         int pageId = dynamicPageList.get(position);
         switch (pageId) {
+            case FRIENDS_PAGE:
+                return FriendPredictionFragment.newInstance();
             case LIVE_PAGE:
                 return PlayFeedFragment.newInstance();
             case STATS_PAGE:

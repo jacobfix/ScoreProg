@@ -15,6 +15,9 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import jacobfix.scorepredictor.util.FontHelper;
+import jacobfix.scorepredictor.util.ViewUtil;
+
 public class NumberPadFragment extends Fragment {
 
     private LinearLayout teamNameContainer;

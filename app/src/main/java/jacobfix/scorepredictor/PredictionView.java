@@ -3,12 +3,13 @@ package jacobfix.scorepredictor;
 import android.content.Context;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
-import android.graphics.drawable.LayerDrawable;
 import android.support.annotation.DrawableRes;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import jacobfix.scorepredictor.util.ViewUtil;
 
 public class PredictionView extends FrameLayout {
 

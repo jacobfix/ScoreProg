@@ -1,15 +1,12 @@
 package jacobfix.scorepredictor;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -18,6 +15,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+
+import jacobfix.scorepredictor.util.FontHelper;
+import jacobfix.scorepredictor.util.Util;
+import jacobfix.scorepredictor.util.ViewUtil;
 
 public class PlayFeedFragment extends Fragment {
 
@@ -123,7 +124,7 @@ public class PlayFeedFragment extends Fragment {
                     sideText.setText(p[0] + "\n" + p[1]);
                 }
             } else {
-                sideText.setText(Util.toOrdinal(getResources(), play.getDown()) + "\n" + play.getYardsToGo());
+                sideText.setText(Util.formatQuarter(getResources(), play.getDown()) + "\n" + play.getYardsToGo());
             }
         }
     }

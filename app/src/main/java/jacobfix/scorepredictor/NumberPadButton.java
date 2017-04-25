@@ -3,7 +3,8 @@ package jacobfix.scorepredictor;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.Button;
-import android.widget.ImageButton;
+
+import jacobfix.scorepredictor.util.FontHelper;
 
 public class NumberPadButton extends Button {
 

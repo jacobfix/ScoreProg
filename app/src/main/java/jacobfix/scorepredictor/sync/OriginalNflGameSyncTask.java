@@ -1,4 +1,4 @@
-package jacobfix.scorepredictor;
+package jacobfix.scorepredictor.sync;
 
 import android.content.Context;
 import android.content.Intent;
@@ -12,19 +12,23 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import jacobfix.scorepredictor.NflGame;
+import jacobfix.scorepredictor.NflGameJsonParser;
+import jacobfix.scorepredictor.NflGameOracle;
+import jacobfix.scorepredictor.NflTeam;
 import jacobfix.scorepredictor.database.Database;
 import jacobfix.scorepredictor.server.DataRetriever;
 
-public class NflGameSyncTask implements Runnable {
+public class OriginalNflGameSyncTask implements Runnable {
 
-    private static final String TAG = NflGameSyncTask.class.getSimpleName();
+    private static final String TAG = OriginalNflGameSyncTask.class.getSimpleName();
 
     private Context mContext;
     private DataRetriever mDataRetriever;
     private Database mDatabase;
     private boolean mFirstSync = true;
 
-    public NflGameSyncTask(Context context, DataRetriever dataRetriever) {
+    public OriginalNflGameSyncTask(Context context, DataRetriever dataRetriever) {
         mContext = context;
         mDataRetriever = dataRetriever;
         mDatabase = new Database(context);

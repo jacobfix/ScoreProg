@@ -3,12 +3,10 @@ package jacobfix.scorepredictor;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,11 +19,16 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import jacobfix.scorepredictor.sync.NflGameSyncManager;
+import jacobfix.scorepredictor.sync.SyncFinishedListener;
+import jacobfix.scorepredictor.util.FontHelper;
+import jacobfix.scorepredictor.util.Util;
+import jacobfix.scorepredictor.util.ViewUtil;
 
 public class LobbyActivity extends AppCompatActivity implements SyncFinishedListener {
 
@@ -54,16 +57,19 @@ public class LobbyActivity extends AppCompatActivity implements SyncFinishedList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lobby);
 
-        mNflGameSyncManager = ApplicationContext.getInstance(this).getNflGameSyncManager();
+        Intent intent = getIntent();
+        if (intent.getBooleanExtra(StartupActivity.EXTRA_FIRST_LAUNCH, false)) {
+            /* Show first launch dialog. */
+        } else if (!intent.getBooleanExtra(StartupActivity.EXTRA_LOGGED_IN, false)) {
+            /* Show login dialog. */
+        } else {
+            /* Procedure for logged in user. */
+        }
+        // mNflGameSyncManager = ApplicationContext.getInstance(this).getNflGameSyncManager();
 
         this.sortedGameIds = new ArrayList<String>();
         mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        TextView tv = new TextView(this);
-        View v = new View(this);
-        mDefaultTextColor = tv.getCurrentTextColor();
-        Log.d(TAG, "DEFAULT TEXT COLOR: " + mDefaultTextColor);
-        // Log.d(TAG, "DEFAULT BACKGROUND COLOR: " + mDefaultBackgroundColor);
         initializeActionBar();
         initializeViews();
     }
@@ -154,7 +160,7 @@ public class LobbyActivity extends AppCompatActivity implements SyncFinishedList
     }
 
     private void switchToGameActivity(String gameId) {
-        Intent intent = new Intent(this, GameActivity.class);
+        Intent intent = new Intent(this, OriginalGameActivity.class);
         intent.putExtra(GAME_ID_EXTRA, gameId);
         startActivity(intent);
     }

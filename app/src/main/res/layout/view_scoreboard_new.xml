@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jacobfix.scorepredictor.OriginalScoreboardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#005596"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    android:paddingBottom="10dp">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/flip_card_top_half"
+        android:backgroundTint="#eeeeee"
+        android:elevation="4dp"
+        android:paddingTop="3dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingBottom="6dp">
+
+        <LinearLayout android:id="@+id/middle_container"
+            android:orientation="vertical"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="4th" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="12:34" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="BUF"
+                android:textSize="26sp"
+                android:textAllCaps="true"
+                android:textColor="#005596"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="-6dp"
+                android:text="Bills"
+                android:textSize="12sp"
+                android:textAllCaps="true"
+                android:textColor="#005596"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:text="ATL"
+                android:textSize="26sp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="-6dp"
+                android:layout_gravity="right"
+                android:text="Falcons"
+                android:textSize="12sp"
+                android:textAllCaps="true" />
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@id/middle_container"
+            android:layout_marginRight="10dp"
+            android:layout_centerVertical="true"
+            android:text="30"
+            android:textSize="28sp"
+            android:textColor="#005596"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/middle_container"
+            android:layout_marginLeft="10dp"
+            android:layout_centerVertical="true"
+            android:text="24"
+            android:textSize="28sp" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/flip_card_bottom_half"
+        android:backgroundTint="#fdfdfd"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp">
+
+        <RelativeLayout
+            android:id="@+id/lower_middle_container"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="middle"/>
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@id/lower_middle_container"
+            android:gravity="right">
+
+            <include
+                layout="@layout/view_flip_card"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/lower_middle_container">
+
+            <include
+                layout="@layout/view_flip_card"/>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</jacobfix.scorepredictor.OriginalScoreboardView>
