@@ -51,10 +51,12 @@ public class TaskManager {
             public void onReceive(Context context, Intent intent) {
                 int taskId = intent.getIntExtra(EXTRA_TASK_ID, 0);
                 BaseTask task = mRunningTasks.get(taskId);
+                Log.d(TAG, String.format("Task %d (%s) finished, notifying listener %s", task.getTaskId(), task.getClass().getSimpleName(), "null"));
+                // Log.d(TAG, String.format("Task %d (%s) finished, notifying listener %s", task.getTaskId(), task.getClass().getSimpleName(), task.getListener() == null ? "null" : task.getListener().getClass().getSimpleName()));
                 if (!task.isRunning()) {
                     mRunningTasks.remove(taskId);
+                    Log.d(TAG, "Running tasks after removal: " + mRunningTasks);
                 }
-                Log.d(TAG, String.format("Task %d finished, notifying listener %s", task.getTaskId(), task.getListener() == null ? "null" : task.getListener().getClass().getSimpleName()));
                 /* Task may or may not have a listener to notify when it completes. */
                 if (task.getListener() != null) {
                     task.getListener().onTaskFinished(task);
@@ -65,12 +67,20 @@ public class TaskManager {
     }
 
     public void runTask(BaseTask task) {
+        Log.d(TAG, String.format("runTask(%s)", task.getClass().getSimpleName()));
         mRunningTasks.put(task.getTaskId(), task);
         task.setHandle(mExecutor.submit(task));
+        Log.d(TAG, "Running tasks after one-time run: " + mRunningTasks);
     }
 
     public void scheduleTask(BaseTask task, long delay, long period) {
+        Log.d(TAG, String.format("scheduleTask(%s, %d, %d)", task.getClass().getSimpleName(), delay, period));
         mRunningTasks.put(task.getTaskId(), task);
         task.setHandle(mScheduledExecutor.scheduleAtFixedRate(task, delay, period, TimeUnit.SECONDS));
+        Log.d(TAG, "Running tasks after scheduled run: " + mRunningTasks);
+    }
+
+    public void stopTask(BaseTask task) {
+        mRunningTasks.remove(task.getTaskId());
     }
 }

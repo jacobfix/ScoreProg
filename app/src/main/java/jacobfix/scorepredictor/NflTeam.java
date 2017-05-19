@@ -1,10 +1,14 @@
 package jacobfix.scorepredictor;
 
+import android.util.Log;
+
 import java.util.HashMap;
 
 import jacobfix.scorepredictor.util.Util;
 
 public class NflTeam extends PredictableScorer {
+
+    private static final String TAG = NflTeam.class.getSimpleName();
 
     private int mId;
 

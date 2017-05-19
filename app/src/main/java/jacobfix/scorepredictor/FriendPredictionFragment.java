@@ -25,7 +25,7 @@ public class FriendPredictionFragment extends Fragment {
 
     /* This list will passed in by the activity in which this fragment resides, and it will already
        be sorted in the order that the friends are to appear in the ListView. */
-    private ArrayList<User> mFriends;
+    private ArrayList<User> mFriends = new ArrayList<>();
 
     private TextView mAwayAbbr;
     private TextView mHomeAbbr;

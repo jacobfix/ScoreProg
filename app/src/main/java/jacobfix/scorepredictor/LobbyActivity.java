@@ -21,6 +21,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -30,15 +31,15 @@ import jacobfix.scorepredictor.util.FontHelper;
 import jacobfix.scorepredictor.util.Util;
 import jacobfix.scorepredictor.util.ViewUtil;
 
-public class LobbyActivity extends AppCompatActivity implements SyncFinishedListener {
+public class LobbyActivity extends AppCompatActivity {
 
     private static final String TAG = LobbyActivity.class.getSimpleName();
 
-    private List<String> sortedGameIds;
-    private ListView gamesList;
-    private GamesAdapter gamesListAdapter;
+    private ArrayList<NflGame> mSortedGames;
+    private ListView mGamesList;
+    private GamesAdapter mGamesListAdapter;
 
-    private NflGameSyncManager mNflGameSyncManager;
+    private SyncFinishedListener mNflOracleSyncListener;
 
     private LayoutInflater mInflater;
 
@@ -60,18 +61,21 @@ public class LobbyActivity extends AppCompatActivity implements SyncFinishedList
         Intent intent = getIntent();
         if (intent.getBooleanExtra(StartupActivity.EXTRA_FIRST_LAUNCH, false)) {
             /* Show first launch dialog. */
+            Log.d(TAG, "FIRST LAUNCH/NEW VERSION DIALOG DISPLAYED");
         } else if (!intent.getBooleanExtra(StartupActivity.EXTRA_LOGGED_IN, false)) {
             /* Show login dialog. */
+            Log.d(TAG, "LOGIN DIALOG DISPLAYED");
         } else {
             /* Procedure for logged in user. */
+            Log.d(TAG, "USER IS LOGGED IN");
         }
-        // mNflGameSyncManager = ApplicationContext.getInstance(this).getNflGameSyncManager();
 
-        this.sortedGameIds = new ArrayList<String>();
+        mSortedGames = new ArrayList<NflGame>();
         mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         initializeActionBar();
         initializeViews();
+        initializeListeners();
     }
 
     @Override
@@ -84,7 +88,7 @@ public class LobbyActivity extends AppCompatActivity implements SyncFinishedList
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
+        /* switch (item.getItemId()) {
             case android.R.id.home:
                 onBackPressed();
                 return true;
@@ -107,35 +111,34 @@ public class LobbyActivity extends AppCompatActivity implements SyncFinishedList
                 mNflGameSyncManager.setSource(NflGameSyncManager.SOURCE_LOCAL_PREGAME);
                 mNflGameSyncManager.sync();
                 return true;
-        }
+        } */
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        Log.d(TAG, "Starting");
-        sort();
-        mNflGameSyncManager.startScheduledSync(this);
+        Log.d(TAG, "onStart()");
+        NflGameOracle.getInstance().registerSyncListener(mNflOracleSyncListener);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        this.gamesListAdapter.notifyDataSetChanged();
+        Log.d(TAG, "onResume()");
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        // if mNflGameSyncManager.isListener(this)
-        mNflGameSyncManager.stopScheduledSync(this);
+        Log.d(TAG, "onStop()");
+        NflGameOracle.getInstance().unregisterSyncListener(mNflOracleSyncListener);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mNflGameSyncManager.stopScheduledSync(this);
+        // TODO: Check if the sync listener was really unregistered
     }
 
     private void initializeActionBar() {
@@ -147,50 +150,56 @@ public class LobbyActivity extends AppCompatActivity implements SyncFinishedList
     }
 
     private void initializeViews() {
-        this.gamesList = ViewUtil.findById(this, R.id.games_list);
+        mGamesList = ViewUtil.findById(this, R.id.games_list);
 
-        this.gamesListAdapter = new GamesAdapter();
-        this.gamesList.setAdapter(this.gamesListAdapter);
-        this.gamesList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mGamesListAdapter = new GamesAdapter();
+        mGamesList.setAdapter(mGamesListAdapter);
+        mGamesList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                switchToGameActivity(LobbyActivity.this.gamesListAdapter.getItem(i));
+                switchToGameActivity(mGamesListAdapter.getItem(i).getGameId());
             }
         });
     }
 
+    private void initializeListeners() {
+        mNflOracleSyncListener = new SyncFinishedListener() {
+            @Override
+            public void onSyncFinished() {
+                // TODO: Maybe we should only sort it once, on the first sync, so that the list items aren't jumping around
+                sortGamesList();
+            }
+        };
+    }
+
     private void switchToGameActivity(String gameId) {
-        Intent intent = new Intent(this, OriginalGameActivity.class);
+        Intent intent = new Intent(this, GameActivity.class);
         intent.putExtra(GAME_ID_EXTRA, gameId);
         startActivity(intent);
     }
 
-    @Override
-    public void onSyncFinished() {
-        sort();
-        this.gamesListAdapter.notifyDataSetChanged();
-        // Toast.makeText(this, "Finished sync", Toast.LENGTH_SHORT).show();
-    }
-
-    private void sort() {
-        // RUN IN THE BACKGROUND?
-        this.sortedGameIds.clear();
-        HashMap<String, NflGame> games = NflGameOracle.getInstance().getActiveGames();
-        for (String gameId : games.keySet()) {
-            this.sortedGameIds.add(gameId);
-        }
+    private void sortGamesList() {
+        Collection<NflGame> gamesToSort = NflGameOracle.getInstance().getActiveGames().values();
+        new SortGamesTask(gamesToSort, new TaskFinishedListener() {
+            @Override
+            public void onTaskFinished(BaseTask task) {
+                mSortedGames = (ArrayList<NflGame>) task.mResult;
+                mGamesListAdapter.notifyDataSetChanged();
+                Log.d(TAG, "Updated list with newly sorted games");
+            }
+        }).start();
     }
 
     class GamesAdapter extends BaseAdapter {
 
         @Override
         public int getCount() {
-            return LobbyActivity.this.sortedGameIds.size();
+            return mSortedGames.size();
         }
 
         @Override
-        public String getItem(int position) {
-            return LobbyActivity.this.sortedGameIds.get(position);
+        public NflGame getItem(int position) {
+            return mSortedGames.get(position);
         }
 
         @Override
@@ -262,8 +271,7 @@ public class LobbyActivity extends AppCompatActivity implements SyncFinishedList
                 convertView.setTag(holder);
             }
 
-            String gameId = getItem(position);
-            NflGame game = NflGameOracle.getInstance().getActiveGame(gameId);
+            NflGame game = getItem(position);
             NflTeam awayTeam = game.getAwayTeam();
             NflTeam homeTeam = game.getHomeTeam();
 

@@ -8,15 +8,11 @@ import jacobfix.scorepredictor.friends.User;
 
 public class SyncUsersTask extends BaseTask<LinkedList<User>> {
 
-    private User[] mUsersToSync;
-
-    public SyncUsersTask(User[] users, TaskFinishedListener listener) {
-        super(listener);
-        mUsersToSync = users;
-    }
+    private Collection<User> mUsersToSync;
 
     public SyncUsersTask(Collection<User> users, TaskFinishedListener listener) {
-        this(users.toArray(new User[0]), listener);
+        super(listener);
+        mUsersToSync = users;
     }
 
     @Override

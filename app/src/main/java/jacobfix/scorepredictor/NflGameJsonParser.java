@@ -6,44 +6,40 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Collection;
 import java.util.LinkedList;
 
 public class NflGameJsonParser {
 
     private static final String TAG = NflGameJsonParser.class.getSimpleName();
 
-    public static String getAwayTeamAbbr(JSONObject simpleGameJson) throws JSONException {
-        return simpleGameJson.getJSONObject("away").getString("abbr");
+    public Collection<String> parseActiveGamesJson(JSONArray json) throws JSONException {
+        LinkedList<String> active = new LinkedList<>();
+        for (int i = 0; i < json.length(); i++) {
+            active.add(json.getString(i));
+        }
+        Log.d(TAG, "Active games: " + active.toString());
+        return active;
     }
 
-    public static String getHomeTeamAbbr(JSONObject simpleGameJson) throws JSONException {
-        return simpleGameJson.getJSONObject("home").getString("abbr");
-    }
+    public void updateGameFromJson(JSONObject json, NflGame game) throws JSONException {
+        json = json.getJSONObject(game.getGameId());
 
-    public static void updateGameFromSimpleJson(NflGame game, JSONObject simpleJson) throws JSONException {
-        updateTeamFromSimpleJson(game.getAwayTeam(), simpleJson.getJSONObject("away"));
-        updateTeamFromSimpleJson(game.getHomeTeam(), simpleJson.getJSONObject("home"));
+        updateTeamFromJson(json.getJSONObject("away"), game.getAwayTeam());
+        updateTeamFromJson(json.getJSONObject("home"), game.getHomeTeam());
 
-        Object quarterObject = simpleJson.get("qtr");
+        Object quarterObject = json.get("qtr");
         if (quarterObject == JSONObject.NULL) {
             game.setQuarter(NflGame.QTR_PREGAME);
             game.setPregame(true);
             game.setFinal(false);
         } else if (quarterObject instanceof String) {
             if (quarterObject.equals("Pregame")) {
-                game.setQuarter(0);
+                game.setQuarter(NflGame.QTR_PREGAME);
                 game.setPregame(true);
                 game.setFinal(false);
             } else if (quarterObject.equals("Final") || quarterObject.equals("final overtime")) {
-                game.setQuarter(NflGame.QTR_PREGAME);
+                game.setQuarter(NflGame.QTR_FINAL);
                 game.setPregame(false);
                 game.setFinal(true);
             } else if (quarterObject.equals("Halftime")) {
@@ -52,21 +48,21 @@ public class NflGameJsonParser {
                 game.setFinal(false);
             }
         } else {
-            game.setQuarter(simpleJson.getInt("qtr"));
+            game.setQuarter(json.getInt("qtr"));
             game.setPregame(false);
             game.setFinal(false);
         }
 
-        game.setDown((simpleJson.get("down") != JSONObject.NULL) ? simpleJson.getInt("down") : 0);
-        game.setToGo((simpleJson.get("togo") != JSONObject.NULL) ? simpleJson.getInt("togo") : 0);
-        game.setClock((simpleJson.get("clock") != JSONObject.NULL) ? simpleJson.getString("clock") : null);
-        game.setYardLine((simpleJson.get("yl") != JSONObject.NULL) ? simpleJson.getString("yl") : null);
+        game.setDown((json.get("down") != JSONObject.NULL) ? json.getInt("down") : 0);
+        game.setToGo((json.get("togo") != JSONObject.NULL) ? json.getInt("togo") : 0);
+        game.setClock((json.get("clock") != JSONObject.NULL) ? json.getString("clock") : null);
+        game.setYardLine((json.get("yl") != JSONObject.NULL) ? json.getString("yl") : null);
 
-        Object posTeamAbbrObject = simpleJson.get("posteam");
+        Object posTeamAbbrObject = json.get("posteam");
         if (posTeamAbbrObject == JSONObject.NULL) {
             game.setPosTeam(null);
         } else {
-            String posTeamAbbr = simpleJson.getString("posteam");
+            String posTeamAbbr = json.getString("posteam");
             if (posTeamAbbr.equals(game.getAwayTeam().getAbbr())) {
                 game.setPosTeam(game.getAwayTeam());
             } else {
@@ -74,137 +70,42 @@ public class NflGameJsonParser {
             }
         }
 
-        game.setRedZone((simpleJson.get("redzone") != JSONObject.NULL) ? simpleJson.getBoolean("redzone") : false);
-        game.setStadium((simpleJson.get("stadium") != JSONObject.NULL) ? simpleJson.getString("stadium") : null);
-        game.setTv((simpleJson.getJSONObject("media").get("tv") != JSONObject.NULL) ? simpleJson.getJSONObject("media").getString("tv") : null);
+        game.setRedZone((json.get("redzone") != JSONObject.NULL) ? json.getBoolean("redzone") : false);
+        game.setStadium((json.get("stadium") != JSONObject.NULL) ? json.getString("stadium") : null);
+        // game.setTv((json.getJSONObject("media").get("tv") != JSONObject.NULL) ? json.getJSONObject("media").getString("tv") : null);
+        // Weather?
     }
 
-    public static void updateGameFromDetailedJson(NflGame game, JSONObject detailedJson) throws JSONException {
-        updateTeamFromDetailedJson(game.getAwayTeam(), detailedJson.getJSONObject("away"));
-        updateTeamFromDetailedJson(game.getHomeTeam(), detailedJson.getJSONObject("home"));
-        updateGameDriveFeedFromJson(game.getDriveFeed(), detailedJson.getJSONObject("drives"));
-    }
+    private void updateTeamFromJson(JSONObject json, NflTeam team) throws JSONException {
+        team.setTeamName(json.getString("abbr"));
 
-    public static void updateTeamFromSimpleJson(NflTeam team, JSONObject simpleTeamJson) throws JSONException {
-        team.setTeamName(simpleTeamJson.getString("abbr"));
-
-        JSONObject teamScoreJSON = simpleTeamJson.getJSONObject("score");
-        int score = (teamScoreJSON.get("T") != JSONObject.NULL) ? teamScoreJSON.getInt("T") : 0;
+        JSONObject scoreJson = json.getJSONObject("score");
+        int score = (scoreJson.get("T") != JSONObject.NULL) ? scoreJson.getInt("T") : 0;
         team.setScore(score);
-
+        
         int[] scoresByQuarter = new int[6];
         scoresByQuarter[0] = score;
-        scoresByQuarter[1] = (teamScoreJSON.get("1") != JSONObject.NULL) ? teamScoreJSON.getInt("1") : 0;
-        scoresByQuarter[2] = (teamScoreJSON.get("2") != JSONObject.NULL) ? teamScoreJSON.getInt("2") : 0;
-        scoresByQuarter[3] = (teamScoreJSON.get("3") != JSONObject.NULL) ? teamScoreJSON.getInt("3") : 0;
-        scoresByQuarter[4] = (teamScoreJSON.get("4") != JSONObject.NULL) ? teamScoreJSON.getInt("4") : 0;
-        scoresByQuarter[5] = (teamScoreJSON.get("5") != JSONObject.NULL) ? teamScoreJSON.getInt("5") : 0;
+        scoresByQuarter[1] = (scoreJson.get("1") != JSONObject.NULL) ? scoreJson.getInt("1") : 0;
+        scoresByQuarter[2] = (scoreJson.get("2") != JSONObject.NULL) ? scoreJson.getInt("2") : 0;
+        scoresByQuarter[3] = (scoreJson.get("3") != JSONObject.NULL) ? scoreJson.getInt("3") : 0;
+        scoresByQuarter[4] = (scoreJson.get("4") != JSONObject.NULL) ? scoreJson.getInt("4") : 0;
+        scoresByQuarter[5] = (scoreJson.get("5") != JSONObject.NULL) ? scoreJson.getInt("5") : 0;
         team.setScoresByQuarter(scoresByQuarter);
 
-        team.setTimeouts((simpleTeamJson.get("to") != JSONObject.NULL) ? simpleTeamJson.getInt("to") : 0);
-    }
+        team.setTimeouts((json.get("to") != JSONObject.NULL) ? json.getInt("to") : 0);
 
-    public static void updateTeamFromDetailedJson(NflTeam team, JSONObject detailedTeamJson) throws JSONException {
-        JSONObject teamStatsJSON = detailedTeamJson.getJSONObject("stats").getJSONObject("team");
-        team.setStat(NflTeam.Stat.FIRST_DOWNS, teamStatsJSON.getInt("totfd"));
-        team.setStat(NflTeam.Stat.TOTAL_YARDS, teamStatsJSON.getInt("totyds"));
-        team.setStat(NflTeam.Stat.PASSING_YARDS, teamStatsJSON.getInt("pyds"));
-        team.setStat(NflTeam.Stat.RUSHING_YARDS, teamStatsJSON.getInt("ryds"));
-        team.setStat(NflTeam.Stat.PENALTIES, teamStatsJSON.getInt("pen"));
-        team.setStat(NflTeam.Stat.PENALTY_YARDS, teamStatsJSON.getInt("penyds"));
-        team.setStat(NflTeam.Stat.TURNOVERS, teamStatsJSON.getInt("trnovr"));
-        team.setStat(NflTeam.Stat.PUNTS, teamStatsJSON.getInt("pt"));
-        team.setStat(NflTeam.Stat.PUNT_YARDS, teamStatsJSON.getInt("ptyds"));
-        team.setStat(NflTeam.Stat.PUNT_AVERAGE, teamStatsJSON.getInt("ptavg"));
+        JSONObject teamStatsJson = json.getJSONObject("stats").getJSONObject("team");
+        team.setStat(NflTeam.Stat.FIRST_DOWNS, teamStatsJson.getInt("totfd"));
+        team.setStat(NflTeam.Stat.TOTAL_YARDS, teamStatsJson.getInt("totyds"));
+        team.setStat(NflTeam.Stat.PASSING_YARDS, teamStatsJson.getInt("pyds"));
+        team.setStat(NflTeam.Stat.RUSHING_YARDS, teamStatsJson.getInt("ryds"));
+        team.setStat(NflTeam.Stat.PENALTIES, teamStatsJson.getInt("pen"));
+        team.setStat(NflTeam.Stat.PENALTY_YARDS, teamStatsJson.getInt("penyds"));
+        team.setStat(NflTeam.Stat.TURNOVERS, teamStatsJson.getInt("trnovr"));
+        team.setStat(NflTeam.Stat.PUNTS, teamStatsJson.getInt("pt"));
+        team.setStat(NflTeam.Stat.PUNT_YARDS, teamStatsJson.getInt("ptyds"));
+        team.setStat(NflTeam.Stat.PUNT_AVERAGE, teamStatsJson.getInt("ptavg"));
 
-        team.setTimeOfPossession(teamStatsJSON.getString("top"));
-    }
-
-    public static void updateGameDriveFeedFromJson(DriveFeed driveFeed, JSONObject drivesJson) throws JSONException {
-        Iterator<String> iter = drivesJson.keys();
-        int driveCounter = 0;
-        while (iter.hasNext()) {
-            String driveNum = iter.next();
-            driveCounter++;
-
-            if (driveNum.equals("crntdrv")) {
-                continue;
-            }
-
-            if (driveCounter <= driveFeed.numDrives()) {
-                // if (driveFeed.getDrive(driveCounter - 1).getJsonHash() != drivesJson.getJSONObject(driveNum).hashCode()) {
-                    updateDriveFromJson(driveFeed.getDrive(driveCounter - 1), drivesJson.getJSONObject(driveNum));
-                // }
-            } else {
-                Drive drive = new Drive();
-                updateDriveFromJson(drive, drivesJson.getJSONObject(driveNum));
-                driveFeed.addDrive(drive);
-            }
-        }
-    }
-
-    public static void updateDriveFromJson(Drive drive, JSONObject driveJson) throws JSONException {
-        drive.setJsonHash(driveJson.hashCode());
-        drive.setQuarter(driveJson.getInt("qtr"));
-        drive.setRedZone(driveJson.getBoolean("redzone"));
-
-        JSONObject playsJson = driveJson.getJSONObject("plays");
-        Iterator<String> iter = playsJson.keys();
-        int playCounter = 0;
-        while (iter.hasNext()) {
-            String playId = iter.next();
-            playCounter++;
-
-            if (playCounter <= drive.numPlays()) {
-                // if (drive.getPlay(playCounter - 1).getJsonHash() != playsJson.getJSONObject(playId).hashCode()) {
-                    // Log.d(TAG, "Json hashes don't match");
-                    updatePlayFromJson(drive.getPlay(playCounter - 1), playsJson.getJSONObject(playId));
-                    // Log.d(TAG, "Json hashes match");
-                // }
-            } else {
-                Play play = new Play();
-                updatePlayFromJson(play, playsJson.getJSONObject(playId));
-                drive.addPlay(play);
-            }
-        }
-    }
-
-    public static void updatePlayFromJson(Play play, JSONObject playJson) throws JSONException {
-        play.setJsonHash(playJson.hashCode());
-        play.setQuarter(playJson.getInt("qtr"));
-        play.setDown(playJson.getInt("down"));
-        play.setTime(playJson.getString("time"));
-        play.setYardLine(playJson.getString("yrdln"));
-        play.setYardsToGo(playJson.getInt("ydstogo"));
-        play.setYardsNet(playJson.getInt("ydsnet"));
-        play.setPosTeamAbbr(playJson.getString("posteam"));
-        play.setDescription(playJson.getString("desc"));
-        play.setNote(playJson.getString("note"));
-
-        JSONObject playSequenceJson = playJson.getJSONObject("players");
-        LinkedList<Play.SequenceItem> unorderedPlaySequence = new LinkedList<Play.SequenceItem>();
-        Iterator<String> iter = playSequenceJson.keys();
-        while (iter.hasNext()) {
-            String playerId = iter.next();
-            JSONArray playerRoleJson = playSequenceJson.getJSONArray(playerId);
-            for (int i = 0; i < playerRoleJson.length(); i++) {
-                Play.SequenceItem item = new Play.SequenceItem();
-                updatePlaySequenceItemFromJson(item, playerRoleJson.getJSONObject(i));
-                unorderedPlaySequence.add(item);
-            }
-        }
-        Play.SequenceItem[] playSequence = new Play.SequenceItem[unorderedPlaySequence.size()];
-        for (Play.SequenceItem item : unorderedPlaySequence) {
-            playSequence[item.getSequenceNumber() - 1] = item;
-        }
-        play.setPlaySequence(playSequence);
-    }
-
-    public static void updatePlaySequenceItemFromJson(Play.SequenceItem item, JSONObject playSequenceJson) throws JSONException {
-        item.setSequenceNumber(playSequenceJson.getInt("sequence"));
-        item.setTeamAbbr(playSequenceJson.getString("clubcode"));
-        item.setPlayerName(playSequenceJson.getString("playerName"));
-        item.setStatId(playSequenceJson.getInt("statId"));
-        item.setYards(playSequenceJson.getInt("yards"));
+        team.setTimeOfPossession(teamStatsJson.getString("top"));
     }
 }

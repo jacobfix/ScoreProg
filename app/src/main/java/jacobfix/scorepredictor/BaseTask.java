@@ -3,11 +3,15 @@ package jacobfix.scorepredictor;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
 import java.util.concurrent.Future;
 
 public abstract class BaseTask<T> implements Runnable {
 
+    private static final String TAG = BaseTask.class.getSimpleName();
+
+    // TODO: Add some kind of error recording component?
     private final int mTaskId;
 
     protected T mResult;
@@ -18,6 +22,8 @@ public abstract class BaseTask<T> implements Runnable {
     private boolean mInitiated;
     private boolean mRunning;
     private boolean mScheduled;
+
+    // Error object
 
     private static int globalTaskId = 0;
 
@@ -50,6 +56,7 @@ public abstract class BaseTask<T> implements Runnable {
     public void stop() {
         if (mRunning) {
             mHandle.cancel(true);
+            TaskManager.getInstance().stopTask(this);
         }
         mRunning = false;
         mScheduled = false;
@@ -88,6 +95,11 @@ public abstract class BaseTask<T> implements Runnable {
         return mRunning;
     }
 
+    public void reportError(TaskError type, String errorString) {
+        Log.e(TAG, "Error reported!");
+        Log.e(TAG, type + ": " + errorString);
+    }
+
     public void run() {
         // Maybe put "mRunning = true" here
         execute();
@@ -104,4 +116,10 @@ public abstract class BaseTask<T> implements Runnable {
 
     /* This method is to overridden by inheritors with the task. */
     public abstract void execute();
+
+    public enum TaskError {
+        JSON_ERROR,
+        IO_ERROR,
+        UNKNOWN_ERROR,
+    }
 }

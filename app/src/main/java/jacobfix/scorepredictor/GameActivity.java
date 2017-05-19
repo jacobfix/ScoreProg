@@ -76,6 +76,7 @@ public class GameActivity extends AppCompatActivity implements GameProvider {
     }
 
     private void initializeViews() {
+        mScoreboard = ViewUtil.findById(this, R.id.scoreboard);
         View.OnClickListener onFlipCardClickedListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -150,12 +151,14 @@ public class GameActivity extends AppCompatActivity implements GameProvider {
     protected void onStart() {
         super.onStart();
         NflGameOracle.getInstance().registerSyncListener(mNflGameOracleSyncListener);
+        UserOracle.getInstance().registerSyncListener(mUserOracleSyncListener);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         NflGameOracle.getInstance().unregisterSyncListener(mNflGameOracleSyncListener);
+        UserOracle.getInstance().unregisterSyncListener(mUserOracleSyncListener);
     }
 
     private void confirmPrediction() {

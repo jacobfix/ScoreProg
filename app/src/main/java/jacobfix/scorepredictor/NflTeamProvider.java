@@ -21,7 +21,7 @@ public class NflTeamProvider {
             {"GB",  "Green Bay",     "Packers",    "Green Bay Packers",    "#29433a", "#ffb612"},
             {"HOU", "Houston",       "Texans",     "Houston Texans",       "#00123f", "#b31b34"},
             {"IND", "Indianapolis",  "Colts",      "Indianapolis Colts",   "#003d79", "#ffffff"},
-            {"JAC", "Jacksonville",  "Jaguars",    "Jacksonville Jaguars", "#d8a328", "#9f792c"},
+            {"JAX", "Jacksonville",  "Jaguars",    "Jacksonville Jaguars", "#d8a328", "#9f792c"},
             {"KC",  "Kansas City",   "Chiefs",     "Kansas City Chiefs",   "#e51937", "#f2c800"},
             {"MIA", "Miami",         "Dolphins",   "Miami Dolphins",       "#105878", "#f5811f"},
             {"MIN", "Minnesota",     "Vikings",    "Minnesota Vikings",    "#4f2e84", "#f0bf00"},

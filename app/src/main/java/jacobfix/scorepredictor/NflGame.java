@@ -36,6 +36,8 @@ public class NflGame {
 
     public NflGame(String gameId) {
         mGameId = gameId;
+        awayTeam = new NflTeam(false);
+        homeTeam = new NflTeam(true);
         mDriveFeed = new DriveFeed();
     }
 

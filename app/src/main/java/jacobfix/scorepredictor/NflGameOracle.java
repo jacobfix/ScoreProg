@@ -2,10 +2,16 @@ package jacobfix.scorepredictor;
 
 import android.util.Log;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 
-public class NflGameOracle extends Oracle implements TaskFinishedListener {
+import jacobfix.scorepredictor.server.LocalNflGameJsonRetriever;
+import jacobfix.scorepredictor.server.NflGameJsonRetriever;
+import jacobfix.scorepredictor.server.RemoteNflGameJsonRetriever;
+
+public class NflGameOracle extends BaseOracle {
 
     private static final String TAG = NflGameOracle.class.getSimpleName();
 
@@ -13,8 +19,10 @@ public class NflGameOracle extends Oracle implements TaskFinishedListener {
 
     private HashMap<String, NflGame> mActiveGames;
     private HashMap<String, NflGame> mArchivedGames;
+    private HashSet<NflGame> mGamesToSync = new HashSet<>();
 
     private TaskFinishedListener mPostSyncProcedure;
+    private NflGameJsonRetriever mJsonRetriever;
 
     public static int SYNC_INITIAL_DELAY = 0;
     public static int SYNC_PERIOD = 60;
@@ -32,14 +40,49 @@ public class NflGameOracle extends Oracle implements TaskFinishedListener {
     }
 
     @Override
-    public SyncNflGamesTask initScheduledSyncTask() {
+    public GetActiveGamesTask initScheduledSyncTask() {
+        Log.d(TAG, "initScheduledSyncTask");
+        mJsonRetriever = new RemoteNflGameJsonRetriever();
+        Log.d(TAG, String.valueOf(mJsonRetriever != null));
         mPostSyncProcedure = new TaskFinishedListener() {
             @Override
             public void onTaskFinished(BaseTask task) {
+                // TODO: Check for task errors here?
+                Collection<String> active = (Collection<String>) task.mResult;
+                Log.d(TAG, "Retrieved active games: " + active.toString());
+                /* First iterate through the oracle's set of active games, evicting and archiving
+                   any games not present in the new list of active games. */
+                for (String gameId : mActiveGames.keySet()) {
+                    if (!active.contains(gameId)) {
+                        mArchivedGames.put(gameId, mActiveGames.remove(gameId));
+                    }
+                }
 
+                /* Then iterate through the new list of active games and add any games not present
+                   in the oracle's set of active games. */
+                for (String gameId : active) {
+                    if (!mActiveGames.containsKey(gameId)) {
+                        // TODO: Do we have to worry about this new game being accessed before its attributes are filled?
+                        mActiveGames.put(gameId, new NflGame(gameId));
+                    }
+                }
+
+                /* Merge the set of active games and the set of other games to sync. */
+                Collection<NflGame> toSync = new HashSet<>();
+                toSync.addAll(mActiveGames.values());
+                toSync.addAll(mGamesToSync);
+
+                /* After refreshing the list of active games, update the games themselves (all the
+                   active games as well as any other games specified for sync). */
+                new SyncNflGamesTask(toSync, mJsonRetriever, new TaskFinishedListener() {
+                    @Override
+                    public void onTaskFinished(BaseTask task) {
+                        notifyAllSyncListeners();
+                    }
+                }).start();
             }
         };
-        return new SyncNflGamesTask(mPostSyncProcedure);
+        return new GetActiveGamesTask(mJsonRetriever, mPostSyncProcedure);
     }
 
     @Override
@@ -53,7 +96,8 @@ public class NflGameOracle extends Oracle implements TaskFinishedListener {
     }
 
     public void sync() {
-        new SyncNflGamesTask(this).start();
+        Log.d(TAG, "On-demand sync");
+        new GetActiveGamesTask(mJsonRetriever, mPostSyncProcedure).start();
     }
 
     public boolean isActiveGame(String gameId) {
@@ -74,26 +118,24 @@ public class NflGameOracle extends Oracle implements TaskFinishedListener {
         return null;
     }
 
+    public void addGameToSync(NflGame game) {
+        /* Scheduled sync already updates all active games each time, so only add a game to sync if
+           it is not one of the active games. */
+        if (!mActiveGames.containsKey(game.getGameId()))
+            mGamesToSync.add(game);
+        else
+            Log.d(TAG, "Attempted to add an active game to mGamesToSync");
+    }
+
+    public void clearGamesToSync() {
+        mGamesToSync.clear();
+    }
+
     public void setActiveGames(HashMap<String, NflGame> games) {
         this.mActiveGames = games;
     }
 
     public HashMap<String, NflGame> getActiveGames() {
         return this.mActiveGames;
-    }
-
-    public void onTaskFinished(BaseTask task) {
-        if (task instanceof SyncNflGamesTask) {
-            HashMap<String, NflGame> updated = (HashMap<String, NflGame>) task.mResult;
-            /* Compare this new collection of active games to the current collection of
-               active games and archive any games that are no longer active. */
-            for (String gameId : mActiveGames.keySet()) {
-                if (!updated.containsKey(gameId)) {
-                    mArchivedGames.put(gameId, mActiveGames.remove(gameId));
-                }
-            }
-            mActiveGames = updated;
-            notifyAllSyncListeners();
-        }
     }
 }

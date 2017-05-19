@@ -1,20 +1,18 @@
 package jacobfix.scorepredictor.friends;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 
 import jacobfix.scorepredictor.BaseTask;
-import jacobfix.scorepredictor.Oracle;
-import jacobfix.scorepredictor.UserOracleSyncListener;
+import jacobfix.scorepredictor.BaseOracle;
 import jacobfix.scorepredictor.SyncUsersTask;
 import jacobfix.scorepredictor.TaskFinishedListener;
+import jacobfix.scorepredictor.sync.SyncFinishedListener;
 
-public class UserOracle extends Oracle {
+public class UserOracle extends BaseOracle {
 
     private static UserOracle instance;
 
@@ -66,8 +64,8 @@ public class UserOracle extends Oracle {
         return SYNC_PERIOD;
     }
 
-    public void setMe(User user) {
-        mMe = user;
+    public void setMe(String userId) {
+        mMe = mUsers.get(userId);
     }
 
     public User me() {
@@ -79,20 +77,34 @@ public class UserOracle extends Oracle {
     }
 
     public void sync(String userId) {
-        syncAll(Arrays.asList(userId));
+        /* Do in background by default. */
+        sync(userId, false);
+    }
+
+    public void sync(String userId, boolean inForeground) {
+        syncAll(Arrays.asList(userId), inForeground);
     }
 
     public void syncAll(List<String> userIds) {
-        /* Translates the list of user IDs into a list of User objects, then passes this list into
-           the sync task. */
+        /* Do in background by default. */
+        syncAll(userIds, false);
+    }
+
+    public void syncAll(List<String> userIds, boolean inForeground) {
         HashSet<User> usersToSync = new HashSet<User>();
         for (String userId : userIds) {
             usersToSync.add(getUserCreateIfNew(userId));
         }
-        new SyncUsersTask(usersToSync, mPostSyncProcedure).start();
+        SyncUsersTask syncTask = new SyncUsersTask(usersToSync, mPostSyncProcedure);
+        if (inForeground) {
+            syncTask.startOnUiThread();
+        } else {
+            syncTask.start();
+        }
     }
 
     public Collection<User> getParticipatingFriends(String gameId) {
+        // TODO: Problem is that we are currently not setting a "me" when the app launches
         return getParticipatingUsers(gameId, mMe.getFriends());
     }
 
@@ -116,5 +128,9 @@ public class UserOracle extends Oracle {
             user = new User(userId);
         }
         return user;
+    }
+
+    public boolean userExists(String userId) {
+        return mUsers.containsKey(userId);
     }
 }

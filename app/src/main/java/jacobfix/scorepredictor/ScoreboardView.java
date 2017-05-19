@@ -2,6 +2,7 @@ package jacobfix.scorepredictor;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -11,6 +12,8 @@ import jacobfix.scorepredictor.util.Util;
 import jacobfix.scorepredictor.util.ViewUtil;
 
 public class ScoreboardView extends RelativeLayout {
+
+    private static final String TAG = ScoreboardView.class.getSimpleName();
 
     LinearLayout mMiddleContainer;
     LinearLayout mAwayNameContainer;
@@ -39,10 +42,12 @@ public class ScoreboardView extends RelativeLayout {
 
     public ScoreboardView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        initializeViews();
     }
 
-    private void initializeViews() {
+    @Override
+    public void onFinishInflate() {
+        super.onFinishInflate();
+
         mMiddleContainer = ViewUtil.findById(this, R.id.middle_container);
         mAwayNameContainer = ViewUtil.findById(this, R.id.away_name_container);
         mHomeNameContainer = ViewUtil.findById(this, R.id.home_name_container);

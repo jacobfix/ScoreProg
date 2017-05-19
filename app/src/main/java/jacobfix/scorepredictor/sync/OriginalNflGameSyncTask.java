@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import jacobfix.scorepredictor.NflGame;
-import jacobfix.scorepredictor.NflGameJsonParser;
+import jacobfix.scorepredictor.OriginalNflGameJsonParser;
 import jacobfix.scorepredictor.NflGameOracle;
 import jacobfix.scorepredictor.NflTeam;
 import jacobfix.scorepredictor.database.Database;
@@ -95,15 +95,15 @@ public class OriginalNflGameSyncTask implements Runnable {
             /*
             NflGame game = new NflGame(gameId);
             try {
-                game.setAwayTeam(new NflTeam(NflGameJsonParser.getAwayTeamAbbr(simpleJson)));
-                game.setHomeTeam(new NflTeam(NflGameJsonParser.getHomeTeamAbbr(simpleJson)));
+                game.setAwayTeam(new NflTeam(OriginalNflGameJsonParser.getAwayTeamAbbr(simpleJson)));
+                game.setHomeTeam(new NflTeam(OriginalNflGameJsonParser.getHomeTeamAbbr(simpleJson)));
             } catch (JSONException e) {
                 Log.e(TAG, e.toString());
             }
             */
 
             try {
-                NflGameJsonParser.updateGameFromSimpleJson(game, simpleJson);
+                OriginalNflGameJsonParser.updateGameFromSimpleJson(game, simpleJson);
             } catch (JSONException e) {
                 Log.e(TAG, e.toString());
             }
@@ -116,7 +116,7 @@ public class OriginalNflGameSyncTask implements Runnable {
             JSONObject detailedJson = null;
             try {
                 detailedJson = mDataRetriever.getIndividualGameJson(gameId).getJSONObject(gameId);
-                // detailedJson = NflGameJsonParser.getJsonFromUrl(url).getJSONObject(gameId);
+                // detailedJson = OriginalNflGameJsonParser.getJsonFromUrl(url).getJSONObject(gameId);
             } catch (IOException e) {
                 Log.e(TAG, e.toString());
             } catch (JSONException e) {
@@ -124,7 +124,7 @@ public class OriginalNflGameSyncTask implements Runnable {
             }
 
             try {
-                NflGameJsonParser.updateGameFromDetailedJson(game, detailedJson);
+                OriginalNflGameJsonParser.updateGameFromDetailedJson(game, detailedJson);
             } catch (JSONException e) {
                 Log.e(TAG, e.toString());
             }

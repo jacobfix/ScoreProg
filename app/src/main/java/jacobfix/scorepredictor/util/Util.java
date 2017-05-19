@@ -7,6 +7,7 @@ import android.support.annotation.ColorRes;
 import android.support.v4.content.res.ResourcesCompat;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 
 import jacobfix.scorepredictor.R;
