@@ -34,7 +34,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:textColor="@android:color/white"
-        android:textSize="32sp"
+        android:textSize="38sp"
         android:text="22"/>
 
 </jacobfix.scorepredictor.components.FlipCardView>

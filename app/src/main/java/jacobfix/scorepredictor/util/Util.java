@@ -6,9 +6,17 @@ import android.graphics.Color;
 import android.support.annotation.ColorRes;
 import android.support.v4.content.res.ResourcesCompat;
 
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Map;
 
 import jacobfix.scorepredictor.R;
 

@@ -13,15 +13,15 @@ public class Prediction implements Comparable<Prediction> {
 
     private int mSpread;
 
-    public void Prediction(int awayScore, int homeScore) {
+    public Prediction(int awayScore, int homeScore) {
         mAwayScore = awayScore;
         mHomeScore = homeScore;
-        updateSpread();
+        // updateSpread();
     }
 
     public void setAwayScore(int score) {
         mAwayScore = score;
-        updateSpread();
+        // updateSpread();
     }
 
     public int getAwayScore() {
@@ -30,15 +30,15 @@ public class Prediction implements Comparable<Prediction> {
 
     public void setHomeScore(int score) {
         mHomeScore = score;
-        updateSpread();
+        // updateSpread();
     }
 
     public int getHomeScore() {
         return mHomeScore;
     }
 
-    private void updateSpread() {
-        mSpread = Math.abs(mAwayScore - mGame.getAwayTeam().getScore()) + Math.abs(mHomeScore - mGame.getHomeTeam().getScore());
+    private void updateSpread(NflGame game) {
+        mSpread = Math.abs(mAwayScore - game.getAwayTeam().getScore()) + Math.abs(mHomeScore - game.getHomeTeam().getScore());
     }
 
     private int getSpread() {

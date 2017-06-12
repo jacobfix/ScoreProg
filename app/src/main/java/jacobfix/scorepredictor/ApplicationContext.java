@@ -3,8 +3,6 @@ package jacobfix.scorepredictor;
 import android.app.Application;
 import android.content.Context;
 
-import jacobfix.scorepredictor.sync.NflGameSyncManager;
-
 public class ApplicationContext extends Application {
 
     private static Context mContext;

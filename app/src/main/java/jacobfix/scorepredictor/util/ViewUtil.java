@@ -3,6 +3,7 @@ package jacobfix.scorepredictor.util;
 import android.app.Activity;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.EmbossMaskFilter;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
@@ -10,6 +11,7 @@ import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.util.TypedValue;
 import android.view.View;
+import android.widget.TextView;
 
 public class ViewUtil {
 
@@ -46,5 +48,15 @@ public class ViewUtil {
         int reduced = (color & 0x00FFFFFF)| 0x88000000;
         //rect.findDrawableByLayerId(R.id.foreground).setColorFilter(reduced, PorterDuff.Mode.SRC_IN);
         rect.setColorFilter(reduced, PorterDuff.Mode.SRC_IN);
+    }
+
+    public static void applyFilter(TextView textView, float[] direction, float ambient, float specular, float blurRadius) {
+        textView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        EmbossMaskFilter filter = new EmbossMaskFilter(direction, ambient, specular, blurRadius);
+        textView.getPaint().setMaskFilter(filter);
+    }
+
+    public static void applyDeboss(TextView textView) {
+        applyFilter(textView, new float[]{0f, -1f, 0.5f}, 0.8f, 15f, 1f);
     }
 }

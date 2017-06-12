@@ -2,7 +2,7 @@ package jacobfix.scorepredictor;
 
 import java.util.Comparator;
 
-import jacobfix.scorepredictor.friends.User;
+import jacobfix.scorepredictor.users.User;
 
 public class FriendPredictionComparator implements Comparator<User> {
 

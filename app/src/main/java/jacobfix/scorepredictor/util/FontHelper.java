@@ -17,6 +17,9 @@ public class FontHelper {
     private static Typeface mYantramanavLight;
     private static Typeface mHindVadodaraRegular;
     private static Typeface mHindVadodaraMedium;
+    private static Typeface mPermanentMarker;
+    private static Typeface mLobsterRegular;
+    private static Typeface mAntonRegular;
 
     private static Typeface getFont(Context context, String fontFile) {
         return Typeface.createFromAsset(context.getAssets(), "fonts/" + fontFile);
@@ -111,5 +114,26 @@ public class FontHelper {
             mHindVadodaraMedium = getFont(context, "HindVadodara-Medium.ttf");
         }
         return mHindVadodaraMedium;
+    }
+    
+    public static Typeface getPermanentMarker(Context context) {
+        if (mPermanentMarker == null) {
+            mPermanentMarker = getFont(context, "PermanentMarker.ttf");
+        }
+        return mPermanentMarker;
+    }
+
+    public static Typeface getLobsterRegular(Context context) {
+        if (mLobsterRegular == null) {
+            mLobsterRegular = getFont(context, "Lobster-Regular.ttf");
+        }
+        return mLobsterRegular;
+    }
+
+    public static Typeface getAntonRegular(Context context) {
+        if (mAntonRegular == null) {
+            mAntonRegular = getFont(context, "Anton-Regular.ttf");
+        }
+        return mAntonRegular;
     }
 }

@@ -15,8 +15,8 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 import jacobfix.scorepredictor.components.FlipCardView;
-import jacobfix.scorepredictor.friends.User;
-import jacobfix.scorepredictor.friends.UserOracle;
+import jacobfix.scorepredictor.users.User;
+import jacobfix.scorepredictor.sync.UserOracle;
 import jacobfix.scorepredictor.util.ViewUtil;
 
 public class FriendPredictionFragment extends Fragment {
@@ -104,7 +104,7 @@ public class FriendPredictionFragment extends Fragment {
             holder.ranking.setText(String.valueOf(position + 1));
 
             // holder.icon.setImageDrawable(friend.getIcon());
-            holder.username.setText(friend.getName());
+            holder.username.setText(friend.getUsername());
 
             return convertView;
         }

@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.TypedValue;
@@ -22,11 +24,12 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
 
-import jacobfix.scorepredictor.sync.NflGameSyncManager;
-import jacobfix.scorepredictor.sync.SyncFinishedListener;
+import jacobfix.scorepredictor.sync.NflGameOracle;
+import jacobfix.scorepredictor.sync.SyncListener;
+import jacobfix.scorepredictor.task.BaseTask;
+import jacobfix.scorepredictor.task.SortGamesTask;
+import jacobfix.scorepredictor.task.TaskFinishedListener;
 import jacobfix.scorepredictor.util.FontHelper;
 import jacobfix.scorepredictor.util.Util;
 import jacobfix.scorepredictor.util.ViewUtil;
@@ -39,9 +42,10 @@ public class LobbyActivity extends AppCompatActivity {
     private ListView mGamesList;
     private GamesAdapter mGamesListAdapter;
 
-    private SyncFinishedListener mNflOracleSyncListener;
+    private SyncListener mNflOracleSyncListener;
 
     private LayoutInflater mInflater;
+    private DialogFragment mLoginDialog;
 
     private static int mDefaultTextColor;
     private static int mDefaultBackgroundColor;
@@ -62,8 +66,10 @@ public class LobbyActivity extends AppCompatActivity {
         if (intent.getBooleanExtra(StartupActivity.EXTRA_FIRST_LAUNCH, false)) {
             /* Show first launch dialog. */
             Log.d(TAG, "FIRST LAUNCH/NEW VERSION DIALOG DISPLAYED");
+            showLoginDialog();
         } else if (!intent.getBooleanExtra(StartupActivity.EXTRA_LOGGED_IN, false)) {
             /* Show login dialog. */
+            showLoginDialog();
             Log.d(TAG, "LOGIN DIALOG DISPLAYED");
         } else {
             /* Procedure for logged in user. */
@@ -163,11 +169,17 @@ public class LobbyActivity extends AppCompatActivity {
     }
 
     private void initializeListeners() {
-        mNflOracleSyncListener = new SyncFinishedListener() {
+        mNflOracleSyncListener = new SyncListener() {
             @Override
             public void onSyncFinished() {
+                Log.d(TAG, "Sync Finished in Lobby");
                 // TODO: Maybe we should only sort it once, on the first sync, so that the list items aren't jumping around
                 sortGamesList();
+            }
+
+            @Override
+            public void onSyncError() {
+                // Show a dialog
             }
         };
     }
@@ -183,11 +195,24 @@ public class LobbyActivity extends AppCompatActivity {
         new SortGamesTask(gamesToSort, new TaskFinishedListener() {
             @Override
             public void onTaskFinished(BaseTask task) {
-                mSortedGames = (ArrayList<NflGame>) task.mResult;
+                mSortedGames = (ArrayList<NflGame>) task.getResult();
                 mGamesListAdapter.notifyDataSetChanged();
                 Log.d(TAG, "Updated list with newly sorted games");
             }
         }).start();
+    }
+
+    private void showLoginDialog() {
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        mLoginDialog = LoginDialogFragment.newInstance();
+        mLoginDialog.show(ft, "login_dialog");
+    }
+
+    private void hideLoginDialog() {
+        if (mLoginDialog != null) {
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            ft.remove(mLoginDialog);
+        }
     }
 
     class GamesAdapter extends BaseAdapter {
@@ -283,10 +308,10 @@ public class LobbyActivity extends AppCompatActivity {
 
                 } else if (predictedWinner.isHome()) {
                     setHomeSideColor(holder, homeTeam.getPrimaryColor(), Color.WHITE);
-                    setAwaySideColor(holder, mDefaultBackgroundColor, mDefaultTextColor);
+                    // setAwaySideColor(holder, mDefaultBackgroundColor, mDefaultTextColor);
                 } else {
                     setAwaySideColor(holder, awayTeam.getPrimaryColor(), Color.WHITE);
-                    setHomeSideColor(holder, mDefaultBackgroundColor, mDefaultTextColor);
+                    // setHomeSideColor(holder, mDefaultBackgroundColor, mDefaultTextColor);
                 }
                 holder.awayTeamPrediction.setColor(awayTeam.getPrimaryColor());
                 holder.homeTeamPrediction.setColor(homeTeam.getPrimaryColor());
@@ -294,8 +319,8 @@ public class LobbyActivity extends AppCompatActivity {
                 holder.homeTeamPrediction.getTextView().setText(String.valueOf(homeTeam.getPredictedScore()));
             } else {
                 holder.showPredictions(false);
-                setAwaySideColor(holder, mDefaultBackgroundColor, mDefaultTextColor);
-                setHomeSideColor(holder, mDefaultBackgroundColor, mDefaultTextColor);
+                // setAwaySideColor(holder, mDefaultBackgroundColor, mDefaultTextColor);
+                // setHomeSideColor(holder, mDefaultBackgroundColor, mDefaultTextColor);
             }
             if (game.isPregame()) {
                 holder.showScores(false);
