@@ -50,7 +50,7 @@ public class TaskManager {
             public void onReceive(Context context, Intent intent) {
                 int taskId = intent.getIntExtra(EXTRA_TASK_ID, 0);
                 BaseTask task = mRunningTasks.get(taskId);
-                Log.d(TAG, String.format("Task %d (%s) finished, notifying listener %s", task.getTaskId(), task.getClass().getSimpleName(), "null"));
+                Log.d(TAG, String.format("Task %d (%s) finished, notifying listener %s", task.getTaskId(), task.getClass().getSimpleName(), task.getListener()));
                 // Log.d(TAG, String.format("Task %d (%s) finished, notifying listener %s", task.getTaskId(), task.getClass().getSimpleName(), task.getListener() == null ? "null" : task.getListener().getClass().getSimpleName()));
                 if (!task.isRunning()) {
                     mRunningTasks.remove(taskId);

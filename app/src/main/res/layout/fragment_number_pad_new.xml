@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/buffer"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:orientation="horizontal">
+        </LinearLayout>
+        
+        <LinearLayout
+            android:id="@+id/header"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:orientation="horizontal"
+            android:background="@android:color/white"
+            android:elevation="2dp"
+            android:paddingLeft="16dp">
+
+            <TextView
+                android:id="@+id/header_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:textSize="20sp"
+                android:textAllCaps="true"
+                android:text="Denver Broncos"/>
+
+        </LinearLayout>
+
+        <!-- <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/black"/> -->
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#f5f5f7">
+
+            <GridLayout
+                android:id="@+id/number_grid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:columnCount="3">
+
+                <Button android:id="@+id/key_1"
+                    android:layout_column="0"
+                    style="@style/number_pad_button"
+                    android:text="1"/>
+
+                <Button android:id="@+id/key_2"
+                    android:layout_column="1"
+                    style="@style/number_pad_button"
+                    android:text="2" />
+
+                <Button android:id="@+id/key_3"
+                    android:layout_column="2"
+                    style="@style/number_pad_button"
+                    android:text="3"/>
+
+                <Button android:id="@+id/key_4"
+                    android:layout_column="0"
+                    style="@style/number_pad_button"
+                    android:text="4"/>
+
+                <Button android:id="@+id/key_5"
+                    android:layout_column="1"
+                    style="@style/number_pad_button"
+                    android:text="5"/>
+
+                <Button android:id="@+id/key_6"
+                    android:layout_column="2"
+                    style="@style/number_pad_button"
+                    android:text="6"/>
+
+                <Button android:id="@+id/key_7"
+                    android:layout_column="0"
+                    style="@style/number_pad_button"
+                    android:text="7"/>
+
+                <Button android:id="@+id/key_8"
+                    android:layout_column="1"
+                    style="@style/number_pad_button"
+                    android:text="8"/>
+
+                <Button android:id="@+id/key_9"
+                    android:layout_column="2"
+                    style="@style/number_pad_button"
+                    android:text="9"/>
+
+                <!-- <ImageButton android:id="@+id/key_cancel"
+                    android:layout_column="0"
+                    style="@style/number_pad_button"
+                    android:src="@drawable/ic_delete_forever_black_36dp"/> -->
+
+                <Button android:id="@+id/key_0"
+                    android:layout_column="1"
+                    style="@style/number_pad_button"
+                    android:text="0" />
+
+                <!-- <ImageButton android:id="@+id/key_enter"
+                    android:layout_column="2"
+                    style="@style/number_pad_button"
+                    android:src="@drawable/ic_check_circle_black_36dp"/> -->
+
+            </GridLayout>
+        </FrameLayout>
+        
+    </LinearLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:clickable="true"
+        android:src="@drawable/ic_check_black_24dp"
+        android:tint="@android:color/white"
+        app:layout_anchor="@id/header"
+        app:layout_anchorGravity="bottom|right|end"/>
+
+</android.support.design.widget.CoordinatorLayout>

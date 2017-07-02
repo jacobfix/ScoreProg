@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#858585"
+        android:paddingTop="3dp"
+        android:paddingBottom="3dp"
+        android:elevation="2dp">
+
+        <FrameLayout
+            android:id="@+id/spread_container"
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true">
+
+            <TextView
+                android:id="@+id/spread_abbr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textColor="@android:color/white"
+                android:textSize="18sp"
+                android:text="Spr."/>
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/home_container"
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@id/spread_container">
+
+            <TextView
+                android:id="@+id/home_abbr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textColor="@android:color/white"
+                android:textSize="18sp"
+                android:text="ATL"/>
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/away_container"
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@id/home_container">
+
+            <TextView
+                android:id="@+id/away_abbr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textColor="@android:color/white"
+                android:textSize="18sp"
+                android:text="DEN"/>
+        </FrameLayout>
+
+    </RelativeLayout>
+
+    <ListView
+        android:id="@+id/list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:dividerHeight="1dp"
+        android:divider="@color/darker_light_gray"
+        android:animateLayoutChanges="true">
+
+    </ListView>
+
+</LinearLayout>

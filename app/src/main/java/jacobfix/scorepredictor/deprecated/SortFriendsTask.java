@@ -1,10 +1,12 @@
-package jacobfix.scorepredictor.task;
+package jacobfix.scorepredictor.deprecated;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
 
 import jacobfix.scorepredictor.FriendPredictionComparator;
+import jacobfix.scorepredictor.task.BaseTask;
+import jacobfix.scorepredictor.task.TaskFinishedListener;
 import jacobfix.scorepredictor.users.User;
 
 public class SortFriendsTask extends BaseTask<ArrayList<User>> {
@@ -18,6 +20,8 @@ public class SortFriendsTask extends BaseTask<ArrayList<User>> {
         mGameId = gameId;
     }
 
+    public void execute() {}
+/*
     public void execute() {
         ArrayList<User> sortedFriends = new ArrayList<User>();
         FriendPredictionComparator comparator = new FriendPredictionComparator(mGameId);
@@ -37,5 +41,5 @@ public class SortFriendsTask extends BaseTask<ArrayList<User>> {
             }
         }
         sortedList.add(friend);
-    }
+    }*/
 }

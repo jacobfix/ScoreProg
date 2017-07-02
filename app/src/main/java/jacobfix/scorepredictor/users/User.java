@@ -1,12 +1,16 @@
 package jacobfix.scorepredictor.users;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
 import jacobfix.scorepredictor.Prediction;
+import jacobfix.scorepredictor.sync.Syncable;
 
-public class User {
+public class User implements Syncable {
 
     private static final String TAG = User.class.getSimpleName();
 
@@ -21,6 +25,7 @@ public class User {
     public User(String id) {
         mId = id;
         mFriends = new HashSet<>();
+        mPredictions = new HashMap<>();
     }
 
     public String getId() {
@@ -61,5 +66,11 @@ public class User {
 
     public boolean isPlaying(String gameId) {
         return mPredictions.containsKey(gameId);
+    }
+
+    public void sync(JSONObject json) throws JSONException {
+        mId = json.getString("uid");
+        mUsername = json.getString("username");
+        mEmail = json.getString("email");
     }
 }

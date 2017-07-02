@@ -2,113 +2,110 @@ package jacobfix.scorepredictor.task;
 
 import android.util.Log;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
 
-import jacobfix.scorepredictor.Play;
-import jacobfix.scorepredictor.Prediction;
-import jacobfix.scorepredictor.server.JsonParser;
+import jacobfix.scorepredictor.UserJsonParser;
 import jacobfix.scorepredictor.server.UserJsonRetriever;
 import jacobfix.scorepredictor.users.User;
 
-public class SyncUsersTask extends BaseTask<LinkedList<User>> {
+public class SyncUsersTask extends BaseTask {
 
     private static final String TAG = SyncUsersTask.class.getSimpleName();
 
+    // private User[] mUsersToSync;
+    // private String[] mGameIds;
     private Collection<User> mUsersToSync;
     private Collection<String> mGameIds;
-    private boolean mGetFriends;
 
     private UserJsonRetriever mJsonRetriever;
 
-    public SyncUsersTask(Collection<User> users, UserJsonRetriever jsonRetriever, TaskFinishedListener listener) {
+/*    public SyncUsersTask(User[] users, UserJsonRetriever jsonRetriever, TaskFinishedListener listener) {
         super(listener);
         mUsersToSync = users;
         mJsonRetriever = jsonRetriever;
     }
-
-    public SyncUsersTask(Collection<User> users, Collection<String> gameIds, UserJsonRetriever jsonRetriever, TaskFinishedListener listener) {
+    */
+/*
+    public SyncUsersTask(User[] users, String[] gameIds, UserJsonRetriever jsonRetriever, TaskFinishedListener listener) {
         this(users, jsonRetriever, listener);
+        // mGameIds = gameIds;
+    }
+*/
+    public SyncUsersTask(Collection<User> users, Collection<String> gameIds, UserJsonRetriever jsonRetriever, TaskFinishedListener listener) {
+        // this(users.toArray(new User[users.size()]), gameIds.toArray(new String[gameIds.size()]), jsonRetriever, listener);
+        // Log.d(TAG, "In constructor: " + gameIds.toString());
+        super(listener);
+        mUsersToSync = users;
         mGameIds = gameIds;
+        mJsonRetriever = jsonRetriever;
     }
 
     @Override
     public void execute() {
-        Log.d(TAG, "Executing SyncUsersTask");
+        Log.d(TAG, "Executing SyncUsersTask with...");
+        Log.d(TAG, "Users: " + mUsersToSync.toString());
+        if (mGameIds != null)
+            Log.d(TAG, "Games: " + mGameIds.toString());
+        else
+            Log.d(TAG, "They're null");
         String[] userIds = new String[mUsersToSync.size()];
         int i = 0;
+        // for (int i = 0; i < mUsersToSync.size(); i++)
+        //    userIds[i] = mUsersToSync..getId();
         for (User user : mUsersToSync)
             userIds[i++] = user.getId();
 
+        ArrayList<String> updatedInfo;
+        ArrayList<String> updatedPredictions;
+        /* Might get a network error. */
         try {
-            JSONObject detailsJson = mJsonRetriever.getUserDetailsJson(userIds);
+            JSONObject infoJson = mJsonRetriever.getUserInfoJson(userIds);
+            if (!infoJson.getBoolean("success")) {
+                Log.d(TAG, "Unsuccessful user sync!");
+                return;
+            }
+            infoJson = infoJson.getJSONObject("users");
 
-            JSONObject predictionsJson = null;
-            String[] gameIds = null;
-            if (mGameIds != null && !mGameIds.isEmpty()) {
-                gameIds = new String[mGameIds.size()];
-                i = 0;
-                for (String gameId : mGameIds)
-                    gameIds[i++] = gameId;
-                predictionsJson = mJsonRetriever.getUserPredictionsJson(userIds, gameIds);
+            User usersToSync[] = mUsersToSync.toArray(new User[mUsersToSync.size()]);
+
+            updatedInfo = UserJsonParser.getInstance().updateUserInfo(usersToSync, infoJson);
+            if (updatedInfo.size() != userIds.length) {
+                /* Not all of the users had their information successfully updated. */
             }
 
-            /* Should we iterate over the given list of users or over the users in the JSON result? */
-            JSONObject userDetailsJson;
-            for (User user : mUsersToSync) {
-                userDetailsJson = detailsJson.optJSONObject(user.getId());
-                if (userDetailsJson != null) {
-                    synchronized (user) {
-                        JsonParser.updateUserDetailsFromJson(userDetailsJson, user);
-                    }
-                }
+            if (mGameIds == null || mGameIds.size() == 0)
+                return;
+
+            String gamesToSync[] = mGameIds.toArray(new String[mGameIds.size()]);
+
+            Log.d(TAG, "Doing the predictions");
+            // TODO: Maybe predictions should be retrieved one game at a time!
+            JSONObject predictionsJson = mJsonRetriever.getUserPredictionsJson(userIds, gamesToSync);
+            if (!predictionsJson.getBoolean("success")) {
+                Log.d(TAG, "Unsuccessful prediction sync!");
+                return;
+            }
+            predictionsJson = predictionsJson.getJSONObject("predictions");
+
+            updatedPredictions = UserJsonParser.getInstance().updateUserPredictions(usersToSync, predictionsJson);
+            if (updatedPredictions.size() != userIds.length) {
+                /* Not all of the users had their predictions successfully updated. */
             }
 
-            if (predictionsJson != null) {
-                /* Game IDs mapped to user IDs mapped to predictions. */
-                /* {
-                     game_id1 => {
-                                   uid1 => {
-                                            "away" => 17,
-                                            "home" => 21
-                                           },
-                                   uid2 => {
-                                            "away" => 0,
-                                            "home" => 10,
-                                           }
-                                 }
-                    }
-                */
-                JSONObject userPredictionsJson, individualUserPredictionJson;
-                for (String gameId : gameIds) {
-                    userPredictionsJson = predictionsJson.getJSONObject(gameId);
-
-                    for (User user : mUsersToSync) {
-                        individualUserPredictionJson = userPredictionsJson.optJSONObject(user.getId());
-
-                        if (individualUserPredictionJson != null) {
-                            synchronized (user) {
-                                // JsonParser.updateUserPredictionsFromJson(individualUserPredictionJson, user);
-                                user.getPredictions().put(gameId, new Prediction(individualUserPredictionJson.getInt("away"), individualUserPredictionJson.getInt("home")));
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (IOException e) {
-            reportError(e, TAG, TaskError.IO_ERROR, e.toString());
         } catch (JSONException e) {
             reportError(e, TAG, TaskError.JSON_ERROR, e.toString());
+        } catch (IOException e) {
+            reportError(e, TAG, TaskError.IO_ERROR, e.toString());
         } catch (Exception e) {
             reportError(e, TAG, TaskError.UNKNOWN_ERROR, e.toString());
+        } finally {
+            /* We can tell if the info sync or the prediction sync completely failed by
+               checking if updatedInfo/updatedPredictions is null. */
         }
     }
 }

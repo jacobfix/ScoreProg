@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center">
+
+    <ImageView
+        android:id="@+id/gold_star"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_fiber_manual_record_black_18dp"
+        android:tint="@color/gold"/>
+
+    <TextView
+        android:id="@+id/gold_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/standard_text"
+        android:textSize="12sp"
+        android:text="2"/>
+
+    <ImageView
+        android:id="@+id/silver_star"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="6dp"
+        android:src="@drawable/ic_fiber_manual_record_black_18dp"
+        android:tint="@color/silver"/>
+
+    <TextView
+        android:id="@+id/silver_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/standard_text"
+        android:textSize="12sp"
+        android:text="5"/>
+
+    <ImageView
+        android:id="@+id/bronze_star"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="6dp"
+        android:src="@drawable/ic_fiber_manual_record_black_18dp"
+        android:tint="@color/bronze"/>
+
+    <TextView
+        android:id="@+id/bronze_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/standard_text"
+        android:textSize="12sp"
+        android:text="13"/>
+
+</LinearLayout>

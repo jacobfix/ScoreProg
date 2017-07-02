@@ -1,13 +1,14 @@
 package jacobfix.scorepredictor.task;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 
-/**
- * Returns an ArrayList of NflGames, sorted via insertion sort.
- */
 public abstract class SortTask<T> extends BaseTask {
+
+    private static final String TAG = SortTask.class.getSimpleName();
 
     private Collection<T> mItemsToSort;
     private Comparator mComparator;
@@ -21,9 +22,12 @@ public abstract class SortTask<T> extends BaseTask {
     @Override
     public void execute() {
         ArrayList<T> sorted = new ArrayList<>();
+        Log.d(TAG, "Before sorting: " + mItemsToSort.toString());
         for (T item : mItemsToSort) {
             insertOrdered(sorted, item, mComparator);
         }
+        Log.d(TAG, "Finished sorting");
+        Log.d(TAG, sorted.toString());
         mResult = sorted;
     }
 

@@ -35,7 +35,7 @@
     </style>
 
     <style name="number_pad_button" parent="Base.Widget.AppCompat.Button.Borderless">
-        <item name="android:textSize">34sp</item>
+        <item name="android:textSize">38sp</item>
     </style>
 
 </resources>

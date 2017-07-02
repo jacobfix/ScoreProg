@@ -52,6 +52,14 @@ public class Util {
         return Integer.toHexString(color) + ", " + floatArrayToString(hsv);
     }
 
+    public static float pxToDp(Context context, float px) {
+        return px / context.getResources().getDisplayMetrics().density;
+    }
+
+    public static float dpToPx(Context context, float dp) {
+        return dp * context.getResources().getDisplayMetrics().density;
+    }
+
     private static String floatArrayToString(float[] array) {
         String s = new String();
         for (int i = 0; i < array.length - 1; i++) {

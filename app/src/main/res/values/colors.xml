@@ -3,6 +3,7 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="standard_text">#555555</color>
     <color name="default_text_color">#7b7b7b</color>
     <color name="default_text">#8A000000</color>
     <color name="default_gray">#808080</color>
@@ -17,4 +18,8 @@
     <color name="friend_prediction_list_header_background">@android:color/darker_gray</color>
     <color name="friend_prediction_list_item_background">#fdfdfd</color>
     <color name="me_in_ranking">#fff38b</color>
+
+    <color name="gold">#FFDF00</color>
+    <color name="silver">#C0C0C0</color>
+    <color name="bronze">#CD7F32</color>
 </resources>

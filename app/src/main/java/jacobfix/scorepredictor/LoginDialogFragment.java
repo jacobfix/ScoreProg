@@ -11,6 +11,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.util.Collections;
+
+import jacobfix.scorepredictor.sync.SyncListener;
+import jacobfix.scorepredictor.sync.UserOracle;
 import jacobfix.scorepredictor.task.BaseTask;
 import jacobfix.scorepredictor.task.LoginTask;
 import jacobfix.scorepredictor.task.TaskFinishedListener;
@@ -39,6 +43,7 @@ public class LoginDialogFragment extends DialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setStyle(DialogFragment.STYLE_NO_TITLE, 0);
+        setCancelable(false);
     }
 
     @Override
@@ -114,16 +119,40 @@ public class LoginDialogFragment extends DialogFragment {
             }
         });
 
-        return v;
-    }
+        mSkipLoginButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // TODO: Dummy "me" user? How do we deal with friend retrieval if the user is not logged in?
+                Log.d(TAG, "Skip login button clicked");
+                /* Ad hoc LoginTask. */
+                new BaseTask() {
+                    @Override
+                    public void execute() {
+                        final String userId = "1";
+                        UserSyncManager.getInstance().syncInForeground(userId, null, new SyncListener() {
+                            @Override
+                            public void onSyncFinished() {
+                                Log.d(TAG, "Sync done");
+                                UserSyncManager.getInstance().setMe(userId);
+                                UserSyncManager.getInstance().setUsersOfBackgroundSync(Collections.singletonList(userId));
+                                Log.d(TAG, UserSyncManager.getInstance().me().getFriends().toString());
+                                for (String friendId : UserSyncManager.getInstance().me().getFriends())
+                                    UserSyncManager.getInstance().addUserToBackgroundSync(friendId);
+                                dismiss();
+                            }
 
-    // TODO: Put this in a static class so that we can call the methods from StartupActivity too
-    private void checkLogin(String usernameEmail, String password) {
-        // TODO: Make post request to server
-        if (Patterns.EMAIL_ADDRESS.matcher(usernameEmail).matches()) {
-            /* We'll consider it an email address. */
-        } else {
-            /* We'll consider it a username. */
-        }
+                            @Override
+                            public void onSyncError() {
+                                Log.d(TAG, "There was a sync error!");
+                            }
+                        });
+                    }
+                }.start();
+//                UserOracle.getInstance().sync("1");
+//                UserOracle.getInstance().setMe("1");
+//                dismiss();
+            }
+        });
+        return v;
     }
 }

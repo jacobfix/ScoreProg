@@ -6,27 +6,29 @@
 
     <include
         android:id="@+id/toolbar"
-        layout="@layout/toolbar"/>
+        layout="@layout/toolbar"
+        android:elevation="0dp"/>
         <!-- #009ada -->
 
     <RelativeLayout
+        android:id="@+id/upper_scoreboard_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingLeft="18dp"
-        android:paddingRight="18dp"
-        android:paddingTop="18dp"
-        android:paddingBottom="22dp"
+        android:paddingLeft="@dimen/scoreboard_padding_left"
+        android:paddingRight="@dimen/scoreboard_padding_right"
+        android:paddingTop="4dp"
+        android:paddingBottom="0dp"
         android:elevation="0dp"
-        android:background="@android:color/holo_red_light">
+        android:background="#009ada">
         <!--android:backgroundTint="#fdfdfd"-->
         <!-- android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp" -->
 
         <LinearLayout
-            android:id="@+id/middle_container"
+            android:id="@+id/upper_middle_container"
             android:orientation="vertical"
-            android:layout_width="wrap_content"
+            android:layout_width="46dp"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:gravity="center">
@@ -36,7 +38,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@android:color/white"
-                android:textSize="18sp"
+                android:textSize="14sp"
                 android:text="4th"/>
 
             <TextView
@@ -44,7 +46,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@android:color/white"
-                android:textSize="18sp"
+                android:textSize="14sp"
                 android:text="12:34"/>
         </LinearLayout>
 
@@ -52,7 +54,7 @@
             android:id="@+id/away_block"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_toLeftOf="@id/middle_container">
+            android:layout_toLeftOf="@id/upper_middle_container">
 
             <LinearLayout
                 android:id="@+id/away_name_container"
@@ -98,7 +100,7 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:textColor="@android:color/white"
-                    android:textSize="34sp"
+                    android:textSize="30sp"
                     android:text="21"/>
             </FrameLayout>
         </RelativeLayout>
@@ -107,7 +109,7 @@
             android:id="@+id/home_block"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/middle_container">
+            android:layout_toRightOf="@id/upper_middle_container">
 
             <LinearLayout
                 android:id="@+id/home_name_container"
@@ -152,7 +154,7 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:textColor="@android:color/white"
-                    android:textSize="34sp"
+                    android:textSize="30sp"
                     android:text="14"/>
             </FrameLayout>
 
@@ -165,6 +167,92 @@
                 android:text="22"/> -->
 
         </RelativeLayout>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/lower_scoreboard_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#009ada"
+        android:paddingTop="14dp"
+        android:paddingBottom="14dp"
+        android:elevation="0dp">
+
+        <LinearLayout
+            android:id="@+id/lower_middle_container"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:textAllCaps="true"
+                android:textColor="@android:color/white"
+                android:textSize="14sp"
+                android:text="PREDICTION"/>
+
+            <!-- <ProgressBar
+                android:id="@+id/spread_progress_bar"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:layout_gravity="center"
+                android:indeterminate="false"
+                android:progressDrawable="@drawable/circular_progress_bar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:max="100"
+                android:progress="65"/> -->
+
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/away_prediction_block"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@id/lower_middle_container">
+
+            <!-- <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textSize="44sp"
+                android:background="@drawable/prediction_square"
+                android:textColor="#009ada"
+                android:text="22"
+                android:padding="6dp"/> -->
+            <include
+                android:id="@+id/away_flip_card"
+                layout="@layout/view_prediction"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"/>
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/home_prediction_block"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/lower_middle_container">
+
+            <!-- <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textSize="44sp"
+                android:textColor="@android:color/white"
+                android:text="17"
+                android:padding="6dp"/> -->
+
+            <include
+                android:id="@+id/home_flip_card"
+                layout="@layout/view_prediction"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"/>
+
+        </FrameLayout>
     </RelativeLayout>
 
     <FrameLayout
@@ -180,7 +268,8 @@
                 android:id="@+id/tabs"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="#009ada"/>
+                android:background="#009ada"
+                android:elevation="0dp"/>
 
             <android.support.v4.view.ViewPager
                 android:id="@+id/pager"

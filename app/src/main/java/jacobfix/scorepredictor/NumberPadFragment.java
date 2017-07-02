@@ -1,15 +1,21 @@
 package jacobfix.scorepredictor;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
+import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -20,10 +26,15 @@ import jacobfix.scorepredictor.util.ViewUtil;
 
 public class NumberPadFragment extends Fragment {
 
-    private LinearLayout teamNameContainer;
-    private TextView teamName;
+    private static final String TAG = NumberPadFragment.class.getSimpleName();
+
+    private LinearLayout mBuffer;
+    private LinearLayout mTeamNameContainer;
+    private TextView mTeamName;
     private GridLayout numberGrid;
     private NumberPadFragmentListener listener;
+
+    private FloatingActionButton mConfirmButton;
 
     private static final @IdRes int[] KEY_IDS = {
             R.id.key_1, R.id.key_2, R.id.key_3,
@@ -36,11 +47,12 @@ public class NumberPadFragment extends Fragment {
         return new NumberPadFragment();
     }
 
-    public static NumberPadFragment newInstance(String headerText, int headerColor) {
+    public static NumberPadFragment newInstance(String text, int teamColor, int bufferColor) {
         NumberPadFragment fragment = new NumberPadFragment();
         Bundle args = new Bundle();
-        args.putString("header", headerText);
-        args.putInt("color", headerColor);
+        args.putString("header", text);
+        args.putInt("teamColor", teamColor);
+        args.putInt("bufferColor", bufferColor);
         fragment.setArguments(args);
         return fragment;
     }
@@ -53,16 +65,20 @@ public class NumberPadFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_number_pad, container, false);
+        Log.d(TAG, "onCreateView()");
+        View view = inflater.inflate(R.layout.fragment_number_pad_new, container, false);
 
-        this.teamNameContainer = ViewUtil.findById(view, R.id.team_name_container);
-        this.teamNameContainer.getBackground().setColorFilter(getArguments().getInt("color"), PorterDuff.Mode.SRC_IN);
+        mBuffer = ViewUtil.findById(view, R.id.buffer);
+        mBuffer.setBackgroundColor(getArguments().getInt("bufferColor"));
+        mBuffer.setAlpha(1.0f);
 
-        this.teamName = ViewUtil.findById(view, R.id.team_name);
-        this.teamName.setTypeface(FontHelper.getArimoRegular(getContext()));
-        this.teamName.setText(getArguments().getString("header"));
+        mTeamNameContainer = ViewUtil.findById(view, R.id.header);
 
-        // ((TextView) ViewUtil.findById(view, R.id.prediction_text)).setTypeface(FontHelper.getWorkSansRegular(getContext()));
+        mTeamName = ViewUtil.findById(view, R.id.header_text);
+        mTeamName.setTypeface(FontHelper.getYantramanavBold(getContext()));
+        // mTeamName.setTextColor(ContextCompat.getColor(getContext(), R.color.standard_text));
+        mTeamName.setTextColor(getArguments().getInt("teamColor"));
+        mTeamName.setText(getArguments().getString("header"));
 
         this.numberGrid = ViewUtil.findById(view, R.id.number_grid);
 
@@ -80,29 +96,24 @@ public class NumberPadFragment extends Fragment {
         Button button;
         for (int i = 0; i < numberedKeyIds.length; i++) {
             button = ViewUtil.findById(view, numberedKeyIds[i]);
-            button.setTypeface(FontHelper.getArimoRegular(getContext()));
+            button.setTypeface(FontHelper.getYantramanavRegular(getContext()));
+            button.setTextColor(ContextCompat.getColor(getContext(), R.color.standard_text));
+            // button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 45);
             button.setOnClickListener(onClickListener);
             button.setTag(keyValues[i]);
         }
 
-        ImageButton imageButton;
-        imageButton = ViewUtil.findById(view, R.id.key_cancel);
-        imageButton.setOnClickListener(onClickListener);
-        imageButton.setTag(Key.KEY_DELETE);
-
-        imageButton = ViewUtil.findById(view, R.id.key_enter);
-        imageButton.setOnClickListener(onClickListener);
-        imageButton.setTag(Key.KEY_ENTER);
+        mConfirmButton = ViewUtil.findById(view, R.id.fab);
+        mConfirmButton.setOnClickListener(onClickListener);
+        mConfirmButton.setTag(Key.KEY_ENTER);
+        mConfirmButton.setBackgroundTintList(ColorStateList.valueOf(getArguments().getInt("teamColor")));
+        // mConfirmButton.setAlpha(1.0f);
 
         return view;
     }
 
-    public void setHeaderText(String headerText) {
-        this.teamName.setText(headerText);
-    }
-
-    public void setHeaderColor(int headerColor) {
-        ViewUtil.setTwoLayerRectangleColor((LayerDrawable) this.teamName.getBackground(), headerColor);
+    public void setBufferColor(int color) {
+        mBuffer.setBackgroundColor(color);
     }
 
     public interface NumberPadFragmentListener {

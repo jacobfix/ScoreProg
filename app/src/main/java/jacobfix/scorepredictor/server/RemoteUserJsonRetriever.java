@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import jacobfix.scorepredictor.ApplicationContext;
 import jacobfix.scorepredictor.util.NetUtil;
 
 public class RemoteUserJsonRetriever extends UserJsonRetriever {
@@ -22,9 +23,13 @@ public class RemoteUserJsonRetriever extends UserJsonRetriever {
     // private static final String GET_USER_FRIENDS_BASE_URL = "http://192.168.1.15/get_friends.php";
     // private static final String GET_USER_PREDICTIONS_URL = "http://192.168.1.15/get_predictions.php";
 
-    private static final String GET_USERS_URL = "http://172.20.8.156/get_users.php";
+    // private static final String GET_USERS_URL = "http://172.20.8.156/get_users.php";
     // private static final String GET_USER_FRIENDS_BASE_URL = "http://192.168.1.15/get_friends.php";
-    private static final String GET_USER_PREDICTIONS_URL = "http://172.20.8.156/get_predictions.php";
+    // private static final String GET_USER_PREDICTIONS_URL = "http://172.20.8.156/get_predictions.php";
+
+    private static final String GET_USERS_URL = "http://" + ApplicationContext.HOST + "/get_users.php";
+    // private static final String GET_USER_FRIENDS_BASE_URL = "http://192.168.1.15/get_friends.php";
+    private static final String GET_USER_PREDICTIONS_URL = "http://" + ApplicationContext.HOST + "/get_predictions.php";
 
     /* @Override
     public JSONObject getUserDetailsJson(String[] userIds) throws IOException, JSONException {
@@ -39,7 +44,7 @@ public class RemoteUserJsonRetriever extends UserJsonRetriever {
     }*/
 
     @Override
-    public JSONObject getUserDetailsJson(String[] userIds) throws IOException, JSONException {
+    public JSONObject getUserInfoJson(String[] userIds) throws IOException, JSONException {
         HashMap<String, String[]> params = new HashMap<>();
         params.put("uid", userIds);
         // TODO: Change this to makeGetRequest, the result of which is cast to a JSONObject

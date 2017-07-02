@@ -7,22 +7,23 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import jacobfix.scorepredictor.server.JsonParser;
-import jacobfix.scorepredictor.sync.UserOracle;
+import jacobfix.scorepredictor.ApplicationContext;
+import jacobfix.scorepredictor.UserSyncManager;
+import jacobfix.scorepredictor.sync.SyncListener;
 import jacobfix.scorepredictor.util.NetUtil;
 
-public class LoginTask extends BaseTask {
+public class LoginTask extends BaseTask<Integer> {
 
     private static final String TAG = LoginTask.class.getSimpleName();
 
     private String mUsernameEmail;
     private String mPassword;
 
-    // private static final String LOGIN_URL = "http://192.168.1.15/login.php";
-    private static final String LOGIN_URL = "http://172.20.8.156/login.php";
+    private static final String LOGIN_URL = "http://" + ApplicationContext.HOST + "/login.php";
 
     private static final String PARAM_USERNAME_EMAIL = "username_email";
     private static final String PARAM_PASSWORD = "password";
@@ -37,6 +38,7 @@ public class LoginTask extends BaseTask {
     public static final int LOGIN_ERROR_UNKNOWN_NETWORK = 6;
     public static final int LOGIN_ERROR_UNKNOWN_JSON = 7;
     public static final int LOGIN_ERROR_SYNC_FAILURE = 8;
+    public static final int LOGIN_ERROR_UNKNOWN = 9;
 
     public LoginTask(String usernameEmail, String password, TaskFinishedListener listener) {
         super(listener);
@@ -46,7 +48,6 @@ public class LoginTask extends BaseTask {
 
     @Override
     public void execute() {
-        Log.d(TAG, "Executing LoginTask");
         Map<String, String> params = new HashMap<String, String>();
         params.put(PARAM_USERNAME_EMAIL, mUsernameEmail);
         params.put(PARAM_PASSWORD, mPassword);
@@ -55,40 +56,40 @@ public class LoginTask extends BaseTask {
         try {
             String r = NetUtil.makePostRequest(LOGIN_URL, params);
             JSONObject response = new JSONObject(r);
-            Log.d(TAG, "GOT RESPONSE: " + response.toString());
+
             if (response.getBoolean("success")) {
-                /* User ID is given in response. We then call sync() on that. */
-                String myId = JsonParser.parseLoginSuccess(response);
+                final String myId = response.getString("uid");
+                UserSyncManager.getInstance().syncInForeground(myId, null, new SyncListener() {
+                    @Override
+                    public void onSyncFinished() {
+                        Log.d(TAG, "Login user sync success");
+                        UserSyncManager.getInstance().setMe(myId);
+                        UserSyncManager.getInstance().setUsersOfBackgroundSync(Collections.singletonList(myId));
+                        Log.d(TAG, UserSyncManager.getInstance().me().getFriends().toString());
+                        for (String friendId : UserSyncManager.getInstance().me().getFriends())
+                            UserSyncManager.getInstance().addUserToBackgroundSync(friendId);
+                        mResult = LOGIN_ERROR_NONE;
+                    }
 
-                Log.d(TAG, "About to sync user");
-                /* Sync on this thread. */
-                UserOracle.getInstance().sync(myId, true); // TODO: Consider where else this can be used
-                Log.d(TAG, "Just sync'd user");
-
-                if (UserOracle.getInstance().syncErrorOccurred()) {
-                    mResult = LOGIN_ERROR_SYNC_FAILURE;
-                    return;
-                }
-                Log.d(TAG, "All users: " + UserOracle.getInstance().mUsers);
-                if (UserOracle.getInstance().mUsers.isEmpty()) {
-                    Log.e(TAG, "mUsers is empty when it should contain \"me\"!");
-                }
-                UserOracle.getInstance().setMe(myId);
-                Log.d(TAG, "Set me: " + UserOracle.getInstance().me());
-
-                mResult = LOGIN_ERROR_NONE;
+                    @Override
+                    public void onSyncError() {
+                        /* Problem sync'ing me. Login not completed. */
+                        Log.d(TAG, "Login user sync failed!");
+                        mResult = LOGIN_ERROR_SYNC_FAILURE;
+                    }
+                });
             } else {
-                int errno = JsonParser.parseLoginFailure(response);
-                mResult = errno;
+                mResult = Integer.valueOf(response.getString("errno"));
             }
-        } catch (IOException e) {
-            reportError(e, TAG, TaskError.IO_ERROR, e.toString());
-            mResult = LOGIN_ERROR_UNKNOWN_NETWORK;
         } catch (JSONException e) {
             reportError(e, TAG, TaskError.JSON_ERROR, e.toString());
             mResult = LOGIN_ERROR_UNKNOWN_JSON;
+        } catch (IOException e) {
+            reportError(e, TAG, TaskError.IO_ERROR, e.toString());
+            mResult = LOGIN_ERROR_UNKNOWN_NETWORK;
         } catch (Exception e) {
             reportError(e, TAG, TaskError.UNKNOWN_ERROR, e.toString());
+            mResult = LOGIN_ERROR_UNKNOWN;
         }
     }
 }

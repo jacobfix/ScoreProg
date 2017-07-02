@@ -2,17 +2,16 @@ package jacobfix.scorepredictor.sync;
 
 import android.util.Log;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-import jacobfix.scorepredictor.server.RemoteUserJsonRetriever;
+import jacobfix.scorepredictor.server.LocalUserJsonRetriever;
 import jacobfix.scorepredictor.server.UserJsonRetriever;
 import jacobfix.scorepredictor.task.BaseTask;
-import jacobfix.scorepredictor.task.SyncUsersTask;
+import jacobfix.scorepredictor.deprecated.OriginalSyncUsersTask;
 import jacobfix.scorepredictor.task.TaskFinishedListener;
 import jacobfix.scorepredictor.users.User;
 
@@ -45,7 +44,7 @@ public class UserOracle extends BaseOracle {
     }
 
     @Override
-    public SyncUsersTask initScheduledSyncTask() {
+    public OriginalSyncUsersTask initScheduledSyncTask() {
         mUsersToSync = new HashSet<User>();
         mPostSyncProcedure = new TaskFinishedListener() {
             @Override
@@ -58,9 +57,10 @@ public class UserOracle extends BaseOracle {
                 notifyOfSyncFinished();
             }
         };
-        mJsonRetriever = new RemoteUserJsonRetriever();
+        // mJsonRetriever = new RemoteUserJsonRetriever();
+        mJsonRetriever = new LocalUserJsonRetriever();
         mPredictionsToSync = new HashSet<>();
-        return new SyncUsersTask(mUsersToSync, mPredictionsToSync, mJsonRetriever, mPostSyncProcedure);
+        return new OriginalSyncUsersTask(mUsersToSync, mPredictionsToSync, mJsonRetriever, mPostSyncProcedure);
     }
 
     @Override
@@ -105,7 +105,7 @@ public class UserOracle extends BaseOracle {
         for (String userId : userIds)
             usersToSync.add(getUserCreateIfNew(userId));
 
-        SyncUsersTask syncTask = new SyncUsersTask(usersToSync, mJsonRetriever, new TaskFinishedListener() {
+        OriginalSyncUsersTask syncTask = new OriginalSyncUsersTask(usersToSync, mJsonRetriever, new TaskFinishedListener() {
             @Override
             public void onTaskFinished(BaseTask task) {
                 Log.d(TAG, "In the finished listener of the sync task");
@@ -135,6 +135,7 @@ public class UserOracle extends BaseOracle {
 
     public Collection<User> getParticipatingFriends(String gameId) {
         // TODO: Problem is that we are currently not setting a "me" when the app launches
+        Log.d(TAG, "getParticipatingFriends() " + mMe.getFriends());
         return getParticipatingUsers(gameId, mMe.getFriends());
     }
 
@@ -149,7 +150,7 @@ public class UserOracle extends BaseOracle {
     }
 
     public void addUserToScheduledSync(String userId) {
-        if (!mUsers.containsKey(userId))
+        if (!mUsersToSync.contains(userId))
             mUsersToSync.add(getUserCreateIfNew(userId));
         else
             Log.d(TAG, "Attempted to add an already present user to the scheduled sync");
@@ -163,7 +164,7 @@ public class UserOracle extends BaseOracle {
         if (!mPredictionsToSync.contains(gameId))
             mPredictionsToSync.add(gameId);
         else
-            Log.d(TAG, "Attempted add an already present game to the prediction sync set");
+            Log.d(TAG, "Attempted to add an already present game to the prediction sync set");
     }
 
     public void clearPredictionsInScheduledSync() {
@@ -180,5 +181,9 @@ public class UserOracle extends BaseOracle {
 
     public boolean userExists(String userId) {
         return mUsers.containsKey(userId);
+    }
+
+    public UserJsonRetriever getUserJsonRetriever() {
+        return mJsonRetriever;
     }
 }

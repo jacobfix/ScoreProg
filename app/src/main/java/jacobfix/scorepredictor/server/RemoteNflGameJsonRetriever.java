@@ -8,6 +8,8 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 
+import jacobfix.scorepredictor.ApplicationContext;
+
 public class RemoteNflGameJsonRetriever extends NflGameJsonRetriever {
 
     private static final String TAG = RemoteNflGameJsonRetriever.class.getSimpleName();
@@ -15,8 +17,11 @@ public class RemoteNflGameJsonRetriever extends NflGameJsonRetriever {
     // private static final String ACTIVE_GAMES_URL = "http://192.168.1.15/active";
     // private static final String GAME_BASE_URL = "http://192.168.1.15/games/%s.json";
 
-    private static final String ACTIVE_GAMES_URL = "http://172.20.8.156/active";
-    private static final String GAME_BASE_URL = "http://172.20.8.156/games/%s.json";
+    // private static final String ACTIVE_GAMES_URL = "http://172.20.8.156/active";
+    // private static final String GAME_BASE_URL = "http://172.20.8.156/games/%s.json";
+
+    private static final String ACTIVE_GAMES_URL = "http://" + ApplicationContext.HOST + "/active";
+    private static final String GAME_BASE_URL = "http://" + ApplicationContext.HOST + "/games/%s.json";
 
     /*
     private static final String ALL_GAMES_URL = "http://www.nfl.com/liveupdate/scores/scores.json";

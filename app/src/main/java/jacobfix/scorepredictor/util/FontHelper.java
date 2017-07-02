@@ -15,6 +15,7 @@ public class FontHelper {
     private static Typeface mYantramanavMedium;
     private static Typeface mYantramanavBold;
     private static Typeface mYantramanavLight;
+    private static Typeface mYantramanavThin;
     private static Typeface mHindVadodaraRegular;
     private static Typeface mHindVadodaraMedium;
     private static Typeface mPermanentMarker;
@@ -86,6 +87,13 @@ public class FontHelper {
             mYantramanavLight = getFont(context, "Yantramanav-Light.ttf");
         }
         return mYantramanavLight;
+    }
+
+    public static Typeface getYantramanavThin(Context context) {
+        if (mYantramanavThin == null) {
+            mYantramanavThin = getFont(context, "Yantramanav-Thin.ttf");
+        }
+        return mYantramanavThin;
     }
 
     public static Typeface getArimoRegular(Context context) {

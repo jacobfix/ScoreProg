@@ -44,8 +44,10 @@ public class NflTeam extends PredictableScorer {
         mId = abbr.hashCode();
         mLocale = NflTeamProvider.getTeamLocale(abbr);
         mName = NflTeamProvider.getTeamName(abbr);
-        mPrimaryColor = Util.softenColor(NflTeamProvider.getTeamPrimaryColor(mAbbr));
-        mSecondaryColor = Util.softenColor(NflTeamProvider.getTeamSecondaryColor(mAbbr));
+        // mPrimaryColor = Util.softenColor(NflTeamProvider.getTeamPrimaryColor(mAbbr));
+        mPrimaryColor = NflTeamProvider.getTeamPrimaryColor(mAbbr);
+        // mSecondaryColor = Util.softenColor(NflTeamProvider.getTeamSecondaryColor(mAbbr));
+        mSecondaryColor = NflTeamProvider.getTeamSecondaryColor(mAbbr);
     }
 
     public boolean isHome() {

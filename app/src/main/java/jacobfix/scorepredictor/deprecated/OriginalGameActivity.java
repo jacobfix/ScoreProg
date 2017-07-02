@@ -23,7 +23,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import jacobfix.scorepredictor.CompareFragment;
-import jacobfix.scorepredictor.GamePagerAdapter;
+import jacobfix.scorepredictor.OriginalGamePagerAdapter;
 import jacobfix.scorepredictor.GameProvider;
 import jacobfix.scorepredictor.NflGame;
 import jacobfix.scorepredictor.NflTeam;
@@ -42,8 +42,7 @@ import jacobfix.scorepredictor.util.Util;
 import jacobfix.scorepredictor.util.ViewUtil;
 
 public class OriginalGameActivity extends AppCompatActivity implements SyncListener,
-        NumberPadFragment.NumberPadFragmentListener,
-        GameProvider {
+        NumberPadFragment.NumberPadFragmentListener {
 
     private static final String TAG = OriginalGameActivity.class.getSimpleName();
 
@@ -98,7 +97,7 @@ public class OriginalGameActivity extends AppCompatActivity implements SyncListe
 
     private TabLayout mTabs;
     private ViewPager mPager;
-    private GamePagerAdapter mPagerAdapter;
+    private OriginalGamePagerAdapter mPagerAdapter;
 
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
@@ -265,7 +264,7 @@ public class OriginalGameActivity extends AppCompatActivity implements SyncListe
                     if (mSelectedFlipCard == view) {
                         return;
                     }
-                    confirmPrediction();
+                    // confirmPrediction();
                 }
                 mSelectedFlipCard = (FlipCardView) view;
             }
@@ -330,7 +329,7 @@ public class OriginalGameActivity extends AppCompatActivity implements SyncListe
 
     private void initializeTabsAndPager() {
         mPager = ViewUtil.findById(this, R.id.pager);
-        mPagerAdapter = new GamePagerAdapter(getSupportFragmentManager());
+        mPagerAdapter = new OriginalGamePagerAdapter(getSupportFragmentManager());
         mPager.setAdapter(mPagerAdapter);
         mTabs = ViewUtil.findById(this, R.id.tabs);
         mTabs.setupWithViewPager(mPager);
@@ -341,7 +340,7 @@ public class OriginalGameActivity extends AppCompatActivity implements SyncListe
     }
 
     private void showNumberPadFragment(String headerText, int headerColor, boolean fromLeft) {
-        mNumberPadFragment = NumberPadFragment.newInstance(headerText, headerColor);
+        mNumberPadFragment = NumberPadFragment.newInstance(headerText, headerColor, headerColor);
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         if (fromLeft) {
             fragmentTransaction.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_left);
@@ -533,7 +532,7 @@ public class OriginalGameActivity extends AppCompatActivity implements SyncListe
         
         switch (k) {
             case KEY_ENTER:
-                confirmPrediction();
+                // confirmPrediction();
                 break;
             case KEY_DELETE:
                 clearPrediction();
@@ -571,7 +570,7 @@ public class OriginalGameActivity extends AppCompatActivity implements SyncListe
         }
     }
 
-    @Override
+    // @Override
     public NflGame getGame() {
         return mGame;
     }
@@ -616,7 +615,7 @@ public class OriginalGameActivity extends AppCompatActivity implements SyncListe
         }
     }
 
-    private void confirmPrediction() {
+    /* private void confirmPrediction() {
         new AsyncTask<Void, Void, Boolean>() {
 
             String gameId;
@@ -642,7 +641,7 @@ public class OriginalGameActivity extends AppCompatActivity implements SyncListe
         if (mGame.isPredicted()) {
             colorPredictedWinner();
         }
-    }
+    } */
 
     private void showScores(boolean show) {
         if (show) {

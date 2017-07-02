@@ -14,6 +14,7 @@ import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.util.Collection;
 import java.util.Map;
 
 import jacobfix.scorepredictor.ApplicationContext;
@@ -49,19 +50,6 @@ public class NetUtil {
 
         // return new JSONObject(jsonString);
         return response;
-    }
-
-    // TODO: Maybe makeGetRequest(), which returns a string that can then be converted to JSONObject by caller
-    public static String makeGetString(Map<String, String[]> params) throws IOException {
-        StringBuilder query = new StringBuilder("?");
-        for (String key : params.keySet()) {
-            query.append(String.format("%s=", URLEncoder.encode(key, "UTF-8")));
-            for (String value : params.get(key)) {
-                query.append(String.format("%s_", URLEncoder.encode(value, "UTF-8")));
-            }
-            query.deleteCharAt(query.length() - 1);
-        }
-        return query.toString();
     }
 
     public static String makeGetRequest(String url, Map<String, String[]> params) throws IOException {

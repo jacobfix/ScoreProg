@@ -11,4 +11,12 @@
 
     <dimen name="scoreboard_center_container_width">75dp</dimen>
     <dimen name="score_text_size">54sp</dimen>
+
+    <dimen name="scoreboard_padding_top">18dp</dimen>
+    <dimen name="scoreboard_padding_bottom">22dp</dimen>
+    <dimen name="scoreboard_padding_left">18dp</dimen>
+    <dimen name="scoreboard_padding_right">18dp</dimen>
+
+    <dimen name="actual_score_text_size">34sp</dimen>
+    <dimen name="predicted_score_text_size">38sp</dimen>
 </resources>
