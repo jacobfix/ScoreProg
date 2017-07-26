@@ -28,8 +28,7 @@ public class SyncPredictionsTask extends BaseTask<Predictions[]> {
         for (Predictions p : predictions)
             uids.add(p.getId());
 
-        Predictions[] result = new Predictions[predictions.size()];
-        int i = 0;
+        LinkedList<Predictions> result = new LinkedList<>();
 
         try {
             JSONObject json = JsonProvider.get().getPredictionsJson(gameId, uids);
@@ -38,7 +37,7 @@ public class SyncPredictionsTask extends BaseTask<Predictions[]> {
                 JSONObject predictionsJson = json.optJSONObject(p.getId());
                 if (predictionsJson != null) {
                     p.sync(predictionsJson);
-                    result[i++] = p;
+                    result.add(p);
                 }
             }
         } catch (IOException e) {
@@ -46,7 +45,7 @@ public class SyncPredictionsTask extends BaseTask<Predictions[]> {
         } catch (JSONException e) {
 
         } finally {
-            setResult(result);
+            setResult(result.toArray(new Predictions[result.size()]));
         }
     }
 }

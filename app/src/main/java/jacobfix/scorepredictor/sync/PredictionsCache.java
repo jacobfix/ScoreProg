@@ -1,5 +1,7 @@
 package jacobfix.scorepredictor.sync;
 
+import android.util.Log;
+
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -8,6 +10,7 @@ import jacobfix.scorepredictor.AsyncCallback;
 import jacobfix.scorepredictor.task.BaseTask;
 import jacobfix.scorepredictor.task.SyncPredictionsTask;
 import jacobfix.scorepredictor.task.TaskFinishedListener;
+import jacobfix.scorepredictor.util.Util;
 
 public class PredictionsCache extends SyncableCache<String, Predictions> {
 

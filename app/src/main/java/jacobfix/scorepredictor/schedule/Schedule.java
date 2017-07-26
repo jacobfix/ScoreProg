@@ -88,8 +88,8 @@ public class Schedule {
                 break;
         }
 
-        // loadSeason(currentSeason);
-        loadSeason(2016);
+        loadSeason(currentSeason);
+        // loadSeason(2016);
 
         return initialized;
     }
@@ -105,8 +105,8 @@ public class Schedule {
         Log.d(TAG, "loadSeason()");
         Season season = new Season(year);
 
-        // for (int week = MIN_PRESEASON_WEEK; week < MAX_PRESEASON_WEEK; week++)
-        for (int week = MIN_PRESEASON_WEEK; week < 1; week++)
+        for (int week = MIN_PRESEASON_WEEK; week < MAX_PRESEASON_WEEK; week++)
+        // for (int week = MIN_PRESEASON_WEEK; week < 2; week++)
             loadWeek(season, week, Schedule.PRE);
 
         /*

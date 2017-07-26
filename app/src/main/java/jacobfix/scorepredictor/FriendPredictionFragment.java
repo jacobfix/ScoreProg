@@ -149,11 +149,20 @@ public class FriendPredictionFragment extends Fragment implements GameStateChang
         homeAbbr.setText(mGame.getHomeTeam().getAbbr());
 
         list = ViewUtil.findById(view, R.id.list);
+
+        View emptyView = createEmptyView(inflater, container);
+        list.setEmptyView(emptyView);
+
         adapter = new FriendPredictionAdapter();
         list.setAdapter(adapter);
 
         mInflater = inflater;
 
+        return view;
+    }
+
+    private View createEmptyView(LayoutInflater inflater, ViewGroup container) {
+        View view = inflater.inflate(R.layout.fragment_friend_prediction_list_empty, container, false);
         return view;
     }
 

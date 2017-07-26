@@ -24,4 +24,5 @@
     <color name="bronze">#CD7F32</color>
 
     <color name="lobby_list_background">#efefef</color>
+    <color name="standard_color">#213642</color>
 </resources>

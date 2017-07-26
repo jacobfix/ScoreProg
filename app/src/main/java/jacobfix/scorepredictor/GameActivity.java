@@ -1,10 +1,15 @@
 package jacobfix.scorepredictor;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -15,6 +20,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -48,6 +54,7 @@ public class GameActivity extends AppCompatActivity implements NumberPadFragment
     private ProgressBar loadingSymbol;
     private Toolbar mToolbar;
 
+    private LinearLayout scoreboard;
     private RelativeLayout mUpperScoreboard;
     private RelativeLayout mLowerScoreboard;
 
@@ -56,6 +63,8 @@ public class GameActivity extends AppCompatActivity implements NumberPadFragment
 
     private LinearLayout upperMiddleContainer;
     private LowerMiddleContainer lowerMiddleContainer;
+
+    private ImageView lock;
 
     private RelativeLayout mAwayScoreBlock;
     private RelativeLayout mHomeScoreBlock;
@@ -88,6 +97,8 @@ public class GameActivity extends AppCompatActivity implements NumberPadFragment
 
     private int scoreboardColor;
 
+    private BroadcastReceiver lockBroadcastReceiver;
+
     private SyncListener mNflGameOracleSyncListener;
     // private SyncListener mUserOracleSyncListener;
     // private SyncListener mUserSyncListener;
@@ -105,6 +116,7 @@ public class GameActivity extends AppCompatActivity implements NumberPadFragment
     private ActionBarDrawerToggle mDrawerToggle;
 
     private static final String GAME_ID_EXTRA = "game_id";
+    public static final String ACTION_ANNOUNCE_GAME_LOCKED = "lock";
 
     private static final int NEITHER_TAG = 0;
     private static final int AWAY_TAG = 1;
@@ -126,10 +138,26 @@ public class GameActivity extends AppCompatActivity implements NumberPadFragment
         if (game == null)
             Log.wtf(TAG, "Game did not exist in Schedule's collections of games");
 
+        lockBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String gameId = intent.getStringExtra("game_id");
+                if (gameId.equals(game.getGameId())) {
+                    if (mNumberPadFragment != null)
+                        hideNumberPadFragment(!mSelectedTeam.isHome());
+
+                    updateDisplayedGameState();
+                    updateDisplayedPredictions();
+                }
+            }
+        };
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(lockBroadcastReceiver, new IntentFilter(ACTION_ANNOUNCE_GAME_LOCKED));
+
         initializeActionBar();
         initializeViews();
         initializeTabsAndPager();
         initializeListeners();
+
         updateDisplayedGameState();
 
         changeScoreboardColor(ContextCompat.getColor(GameActivity.this, R.color.standard_text));
@@ -147,11 +175,14 @@ public class GameActivity extends AppCompatActivity implements NumberPadFragment
         loadingSymbol = ViewUtil.findById(this, R.id.loading_circle);
 
         // mScoreboard = ViewUtil.findById(this, R.id.scoreboard);
+        scoreboard = ViewUtil.findById(this, R.id.scoreboard);
         mUpperScoreboard = ViewUtil.findById(this, R.id.upper_scoreboard_container);
         mLowerScoreboard = ViewUtil.findById(this, R.id.lower_scoreboard_container);
 
         mUpperMiddleContainer = ViewUtil.findById(this, R.id.upper_middle_container);
         // spread = ViewUtil.findById(this, R.id.lower_middle_container);
+
+        lock = ViewUtil.findById(this, R.id.lock);
 
         // upperMiddleContainer = ViewUtil.findById(this, R.id.upper_middle_container);
         lowerMiddleContainer = ViewUtil.findById(this, R.id.lower_middle_container);
@@ -216,9 +247,8 @@ public class GameActivity extends AppCompatActivity implements NumberPadFragment
         View.OnClickListener onTeamClickedListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                /* if (!game.isPregame()) {
+                if (game.isLocked())
                     return;
-                } */
 
                 Log.d(TAG, "AWAY SCORE: " + prediction.getAwayScore());
                 Log.d(TAG, "HOME SCORE: " + prediction.getHomeScore());
@@ -284,8 +314,6 @@ public class GameActivity extends AppCompatActivity implements NumberPadFragment
         mTabs.setSelectedTabIndicatorColor(Color.WHITE);
 
         // mFriendPredictionFragment = (FriendPredictionFragment) mPagerAdapter.getItem(mPagerAdapter.FRIENDS_PAGE);
-
-
     }
 
     private void initializeListeners() {
@@ -379,8 +407,26 @@ public class GameActivity extends AppCompatActivity implements NumberPadFragment
     protected void onStart() {
         super.onStart();
 
-        // loadingSymbol.setVisibility(View.GONE);
         /* Pull existing prediction for this game from the server. */
+        UserProvider.getUserPredictions(game.getGameId(), Collections.singletonList(LocalAccountManager.getId()), new AsyncCallback<Map<String, Predictions>>() {
+            @Override
+            public void onSuccess(Map<String, Predictions> result) {
+                Predictions predictions = result.get(LocalAccountManager.getId());
+                if (predictions != null) prediction = predictions.get(game.getGameId());
+                else                     prediction = new Prediction(game.getGameId());
+
+                updateDisplayedPredictions();
+
+                loadingSymbol.setVisibility(View.GONE);
+                scoreboard.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+
+            }
+
+        });
 
         /*
         UserProvider.getUserPredictions(game.getGameId(), Arrays.asList(LocalAccountManager.getId()), new AsyncCallback<Map<String, Predictions>>() {
@@ -416,7 +462,16 @@ public class GameActivity extends AppCompatActivity implements NumberPadFragment
         // UserSyncManager.getInstance().unregisterSyncListener(mUserSyncListener);
     }
 
+    public void updateScoreboard() {
+        updateDisplayedGameState();
+        updateDisplayedPredictions();
+    }
+
     public void updateDisplayedGameState() {
+        if (game.isLocked()) {
+            lock.setVisibility(View.VISIBLE);
+        }
+
         Log.d(TAG, "updateDisplayedGameState()");
         Log.d(TAG, String.valueOf(game.getQuarter()));
         Log.d(TAG, Util.formatQuarter(getResources(), game.getQuarter()));
@@ -482,6 +537,11 @@ public class GameActivity extends AppCompatActivity implements NumberPadFragment
     }
 
     private void updateDisplayedPredictions() {
+        if (game.isLocked() && !prediction.isComplete()) {
+            mLowerScoreboard.setVisibility(View.GONE);
+            return;
+        }
+
         mAwayFlipCard.setScore(prediction.getAwayScore());
         mHomeFlipCard.setScore(prediction.getHomeScore());
         lowerMiddleContainer.getSpreadView().setSpread(prediction.getSpread(game));
@@ -497,18 +557,10 @@ public class GameActivity extends AppCompatActivity implements NumberPadFragment
                 prediction.setHomeScore(mHomeFlipCard.getScore());
 
             // Database.putPrediction(prediction);
+            // TODO: Send prediction to server
         }
 
         markPredictedWinner();
-        /* int bufferColor;
-        if (prediction.isComplete()) {
-            markPredictedWinner();
-            bufferColor = getPredictedWinner().getPrimaryColor();
-        } else {
-            bufferColor = ContextCompat.getColor(this, R.color.standard_text);
-        }
-        mNumberPadFragment.setBufferColor(bufferColor);
-        */
         hideNumberPadFragment(!mSelectedTeam.isHome());
         mSelectedFlipCard = null;
         mSelectedTeam = null;
@@ -555,7 +607,6 @@ public class GameActivity extends AppCompatActivity implements NumberPadFragment
                 mAwayFlipCard.strokedBackground(white, white);
                 mHomeFlipCard.strokedBackground(white, white);
                 changeScoreboardColor(standardText);
-
         }
     }
 

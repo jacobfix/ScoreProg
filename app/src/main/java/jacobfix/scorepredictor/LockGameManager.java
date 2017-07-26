@@ -1,6 +1,8 @@
 package jacobfix.scorepredictor;
 
+import android.content.Intent;
 import android.os.SystemClock;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import java.util.Comparator;
@@ -41,6 +43,10 @@ public class LockGameManager {
         if (locksAtMillis < loadTimeMillis + (SystemClock.elapsedRealtime() - loadTimeReferenceMillis)) {
             Log.d(TAG, "Lock time has already passed. Don't have to queue the game for locking.");
             Schedule.lock(gid);
+
+            Intent intent = new Intent(GameActivity.ACTION_ANNOUNCE_GAME_LOCKED);
+            intent.putExtra("game_id", gid);
+            LocalBroadcastManager.getInstance(ApplicationContext.getContext()).sendBroadcast(intent);
             return;
         }
 

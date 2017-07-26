@@ -10,259 +10,286 @@
         android:elevation="0dp"/>
         <!-- #009ada -->
 
-    <RelativeLayout
-        android:id="@+id/upper_scoreboard_container"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/scoreboard_padding_left"
-        android:paddingRight="@dimen/scoreboard_padding_right"
-        android:paddingTop="4dp"
-        android:paddingBottom="0dp"
-        android:elevation="0dp"
-        android:background="@android:color/holo_red_dark">
-        <!--android:backgroundTint="#fdfdfd"-->
-        <!-- android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginBottom="8dp" -->
+        android:background="@color/standard_text">
+
+        <!--include scoreboard -->
 
         <LinearLayout
-            android:id="@+id/upper_middle_container"
-            android:orientation="vertical"
-            android:layout_width="46dp"
+            android:id="@+id/scoreboard"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:gravity="center">
+            android:orientation="vertical"
+            android:visibility="invisible">
 
-            <TextView
-                android:id="@+id/quarter"
-                android:layout_width="wrap_content"
+            <RelativeLayout
+                android:id="@+id/upper_scoreboard_container"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@android:color/white"
-                android:textSize="14sp"
-                android:text="4th"/>
+                android:paddingLeft="@dimen/scoreboard_padding_left"
+                android:paddingRight="@dimen/scoreboard_padding_right"
+                android:paddingTop="4dp"
+                android:paddingBottom="0dp"
+                android:elevation="0dp"
+                android:background="@android:color/holo_red_dark">
+                <!--android:backgroundTint="#fdfdfd"-->
+                <!-- android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginBottom="8dp" -->
 
-            <TextView
-                android:id="@+id/clock"
-                android:layout_width="wrap_content"
+                <LinearLayout
+                    android:id="@+id/upper_middle_container"
+                    android:orientation="vertical"
+                    android:layout_width="46dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:gravity="center">
+
+                    <TextView
+                        android:id="@+id/quarter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@android:color/white"
+                        android:textSize="14sp"
+                        android:text="4th"/>
+
+                    <TextView
+                        android:id="@+id/clock"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@android:color/white"
+                        android:textSize="14sp"
+                        android:text="12:34"/>
+
+                    <ImageView
+                        android:id="@+id/lock"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:src="@drawable/ic_lock_outline_black_48dp"
+                        android:tint="@android:color/white"
+                        android:visibility="gone"/>
+
+                </LinearLayout>
+
+                <RelativeLayout
+                    android:id="@+id/away_block"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_toLeftOf="@id/upper_middle_container">
+
+                    <LinearLayout
+                        android:id="@+id/away_name_container"
+                        android:orientation="vertical"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+                        android:layout_centerVertical="true"
+                        android:gravity="left">
+
+                        <TextView
+                            android:id="@+id/away_abbr"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@android:color/white"
+                            android:textAllCaps="true"
+                            android:textSize="38sp"
+                            android:text="DEN"/>
+
+                        <TextView
+                            android:id="@+id/away_name"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="-12dp"
+                            android:textColor="@android:color/white"
+                            android:textAllCaps="true"
+                            android:textSize="16sp"
+                            android:text="Broncos"/>
+                    </LinearLayout>
+
+                    <FrameLayout
+                        android:id="@+id/away_score_container"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_toRightOf="@id/away_name_container"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true">
+
+                        <TextView
+                            android:id="@+id/away_score_actual"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:gravity="center"
+                            android:textColor="@android:color/white"
+                            android:textSize="30sp"
+                            android:text="21"/>
+                    </FrameLayout>
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/home_block"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_toRightOf="@id/upper_middle_container">
+
+                    <LinearLayout
+                        android:id="@+id/home_name_container"
+                        android:orientation="vertical"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:gravity="right">
+
+                        <TextView
+                            android:id="@+id/home_abbr"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@android:color/white"
+                            android:textAllCaps="true"
+                            android:textSize="38sp"
+                            android:text="ATL"/>
+
+                        <TextView
+                            android:id="@+id/home_name"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="-12dp"
+                            android:textColor="@android:color/white"
+                            android:textAllCaps="true"
+                            android:textSize="16sp"
+                            android:text="Falcons"/>
+                    </LinearLayout>
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_toLeftOf="@id/home_name_container"
+                        android:layout_alignParentLeft="true"
+                        android:layout_centerVertical="true">
+
+                        <TextView
+                            android:id="@+id/home_score_actual"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:gravity="center"
+                            android:textColor="@android:color/white"
+                            android:textSize="30sp"
+                            android:text="14"/>
+                    </FrameLayout>
+
+                    <!-- <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/home_name_container"
+                        android:layout_centerHorizontal="true"
+                        android:textSize="32sp"
+                        android:text="22"/> -->
+
+                </RelativeLayout>
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/lower_scoreboard_container"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@android:color/white"
-                android:textSize="14sp"
-                android:text="12:34"/>
+                android:background="@android:color/holo_red_dark">
 
-            <ImageView
-                android:layout_width="14dp"
-                android:layout_height="14dp"
-                android:src="@drawable/ic_lock_outline_black_48dp"
-                android:tint="@android:color/white"/>
+                <!-- <FrameLayout
+                    android:id="@+id/lower_middle_container"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:layout_alignTop="@+id/away_prediction_block"
+                    android:layout_alignBottom="@+id/away_prediction_block">
+
+                    <include
+                        android:id="@+id/spread"
+                        layout="@layout/view_spread"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:textAllCaps="true"
+                        android:textSize="12sp"
+                        android:text="Prediction"/>
+
+                </FrameLayout> -->
+
+                <include
+                    android:id="@+id/lower_middle_container"
+                    layout="@layout/view_lower_middle_container"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:layout_alignTop="@+id/away_prediction_block"
+                    android:layout_alignBottom="@+id/away_prediction_block"/>
+
+                <FrameLayout
+                    android:id="@id/away_prediction_block"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_toLeftOf="@id/lower_middle_container"
+                    android:paddingTop="14dp"
+                    android:paddingBottom="14dp">
+
+                    <!-- <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:textSize="44sp"
+                        android:background="@drawable/prediction_square"
+                        android:textColor="#009ada"
+                        android:text="22"
+                        android:padding="6dp"/> -->
+                    <include
+                        android:id="@+id/away_flip_card"
+                        layout="@layout/view_prediction"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"/>
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/home_prediction_block"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_toRightOf="@id/lower_middle_container"
+                    android:paddingTop="14dp"
+                    android:paddingBottom="14dp">
+
+                    <!-- <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:textSize="44sp"
+                        android:textColor="@android:color/white"
+                        android:text="17"
+                        android:padding="6dp"/> -->
+
+                    <include
+                        android:id="@+id/home_flip_card"
+                        layout="@layout/view_prediction"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"/>
+
+                </FrameLayout>
+            </RelativeLayout>
         </LinearLayout>
 
-        <RelativeLayout
-            android:id="@+id/away_block"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_toLeftOf="@id/upper_middle_container">
-
-            <LinearLayout
-                android:id="@+id/away_name_container"
-                android:orientation="vertical"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_centerVertical="true"
-                android:gravity="left">
-
-                <TextView
-                    android:id="@+id/away_abbr"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="@android:color/white"
-                    android:textAllCaps="true"
-                    android:textSize="38sp"
-                    android:text="DEN"/>
-
-                <TextView
-                    android:id="@+id/away_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="-12dp"
-                    android:textColor="@android:color/white"
-                    android:textAllCaps="true"
-                    android:textSize="16sp"
-                    android:text="Broncos"/>
-            </LinearLayout>
-
-            <FrameLayout
-                android:id="@+id/away_score_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_toRightOf="@id/away_name_container"
-                android:layout_alignParentRight="true"
-                android:layout_centerVertical="true">
-
-                <TextView
-                    android:id="@+id/away_score_actual"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:textColor="@android:color/white"
-                    android:textSize="30sp"
-                    android:text="21"/>
-            </FrameLayout>
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:id="@+id/home_block"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/upper_middle_container">
-
-            <LinearLayout
-                android:id="@+id/home_name_container"
-                android:orientation="vertical"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_centerVertical="true"
-                android:gravity="right">
-
-                <TextView
-                    android:id="@+id/home_abbr"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="@android:color/white"
-                    android:textAllCaps="true"
-                    android:textSize="38sp"
-                    android:text="ATL"/>
-
-                <TextView
-                    android:id="@+id/home_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="-12dp"
-                    android:textColor="@android:color/white"
-                    android:textAllCaps="true"
-                    android:textSize="16sp"
-                    android:text="Falcons"/>
-            </LinearLayout>
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_toLeftOf="@id/home_name_container"
-                android:layout_alignParentLeft="true"
-                android:layout_centerVertical="true">
-
-                <TextView
-                    android:id="@+id/home_score_actual"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:textColor="@android:color/white"
-                    android:textSize="30sp"
-                    android:text="14"/>
-            </FrameLayout>
-
-            <!-- <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/home_name_container"
-                android:layout_centerHorizontal="true"
-                android:textSize="32sp"
-                android:text="22"/> -->
-
-        </RelativeLayout>
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:id="@+id/lower_scoreboard_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@android:color/holo_red_dark">
-
-        <!-- <FrameLayout
-            android:id="@+id/lower_middle_container"
+        <ProgressBar
+            android:id="@+id/loading_circle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:layout_alignTop="@+id/away_prediction_block"
-            android:layout_alignBottom="@+id/away_prediction_block">
+            android:layout_gravity="center"
+            android:indeterminate="true"/>
 
-            <include
-                android:id="@+id/spread"
-                layout="@layout/view_spread"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:textAllCaps="true"
-                android:textSize="12sp"
-                android:text="Prediction"/>
-
-        </FrameLayout> -->
-
-        <include
-            android:id="@+id/lower_middle_container"
-            layout="@layout/view_lower_middle_container"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:layout_alignTop="@+id/away_prediction_block"
-            android:layout_alignBottom="@+id/away_prediction_block"/>
-
-        <FrameLayout
-            android:id="@id/away_prediction_block"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_toLeftOf="@id/lower_middle_container"
-            android:paddingTop="14dp"
-            android:paddingBottom="14dp">
-
-            <!-- <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:textSize="44sp"
-                android:background="@drawable/prediction_square"
-                android:textColor="#009ada"
-                android:text="22"
-                android:padding="6dp"/> -->
-            <include
-                android:id="@+id/away_flip_card"
-                layout="@layout/view_prediction"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"/>
-        </FrameLayout>
-
-        <FrameLayout
-            android:id="@+id/home_prediction_block"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/lower_middle_container"
-            android:paddingTop="14dp"
-            android:paddingBottom="14dp">
-
-            <!-- <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:textSize="44sp"
-                android:textColor="@android:color/white"
-                android:text="17"
-                android:padding="6dp"/> -->
-
-            <include
-                android:id="@+id/home_flip_card"
-                layout="@layout/view_prediction"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"/>
-
-        </FrameLayout>
-    </RelativeLayout>
+    </FrameLayout>
 
     <FrameLayout
         android:layout_width="match_parent"

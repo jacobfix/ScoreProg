@@ -42,7 +42,7 @@
                 android:layout_gravity="center"
                 android:textColor="@android:color/white"
                 android:textSize="18sp"
-                android:text="ATL"/>
+                android:text=""/>
         </FrameLayout>
 
         <FrameLayout
@@ -58,7 +58,7 @@
                 android:layout_gravity="center"
                 android:textColor="@android:color/white"
                 android:textSize="18sp"
-                android:text="DEN"/>
+                android:text=""/>
         </FrameLayout>
 
     </RelativeLayout>

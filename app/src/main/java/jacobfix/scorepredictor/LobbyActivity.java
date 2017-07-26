@@ -67,7 +67,7 @@ public class LobbyActivity extends AppCompatActivity {
         Log.d(TAG, "initializeTabs()");
         Log.d(TAG, "" + Schedule.getCurrentSeasonType());
         // pagerAdapter = new LobbyPagerAdapter(getSupportFragmentManager(), Schedule.getSeason(Schedule.getCurrentSeason()));
-        pagerAdapter = new LobbyPagerAdapter(getSupportFragmentManager(), Schedule.getSeason(2016));
+        pagerAdapter = new LobbyPagerAdapter(getSupportFragmentManager(), Schedule.getSeason(Schedule.getCurrentSeason()));
         pager.setAdapter(pagerAdapter);
         tabs.setupWithViewPager(pager);
         tabs.setSelectedTabIndicatorColor(Color.WHITE);
