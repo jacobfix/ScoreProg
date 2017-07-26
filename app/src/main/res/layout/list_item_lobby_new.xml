@@ -107,6 +107,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:textAllCaps="true"
+            android:textColor="@color/standard_text"
             android:textSize="32dp"
             android:text="MMM"/>
 
@@ -114,6 +115,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAllCaps="true"
+            android:textColor="@color/standard_text"
             android:textSize="11dp"
             android:text="Buccaneers"
             android:layout_marginTop="-10dp"
@@ -136,6 +138,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="center"
+            android:textColor="@color/standard_text"
             android:textSize="36dp"
             android:text="27"/>
 
@@ -162,6 +165,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="center"
+            android:textColor="@color/standard_text"
             android:textSize="36dp"
             android:text="27"/>
 
@@ -190,6 +194,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:textAllCaps="true"
+            android:textColor="@color/standard_text"
             android:textSize="32dp"
             android:text="MMM"/>
 
@@ -197,6 +202,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAllCaps="true"
+            android:textColor="@color/standard_text"
             android:textSize="11dp"
             android:text="Falcons"
             android:layout_marginTop="-10dp"

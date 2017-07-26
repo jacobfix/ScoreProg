@@ -98,6 +98,11 @@ public abstract class BaseTask<T> implements Runnable {
         return mRunning;
     }
 
+    public void reportError(Exception e) {
+        Log.e(TAG, "Error reported: " + e.toString());
+        mError = e;
+    }
+
     public void reportError(Exception e, String where, TaskError type, String errorString) {
         Log.e(TAG, "Error reported!");
         Log.e(TAG, type + " in " + where + ": " + errorString);

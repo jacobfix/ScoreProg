@@ -1,5 +1,6 @@
 package jacobfix.scorepredictor.users;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -69,8 +70,15 @@ public class User implements Syncable {
     }
 
     public void sync(JSONObject json) throws JSONException {
-        mId = json.getString("uid");
-        mUsername = json.getString("username");
-        mEmail = json.getString("email");
+        synchronized (this) {
+            mId = json.getString("uid");
+            mUsername = json.getString("username");
+            mEmail = json.getString("email");
+
+            mFriends.clear();
+            JSONArray friendsJson = json.getJSONArray("friends");
+            for (int i = 0; i < friendsJson.length(); i++)
+                mFriends.add(friendsJson.getString(i));
+        }
     }
 }

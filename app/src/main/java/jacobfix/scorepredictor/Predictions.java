@@ -1,8 +1,10 @@
 package jacobfix.scorepredictor;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.Iterator;
 
 import jacobfix.scorepredictor.sync.Syncable;
 
@@ -32,7 +34,14 @@ public class Predictions implements Syncable {
     }
 
     @Override
-    public void sync(JSONObject json) {
-
+    public void sync(JSONObject json) throws JSONException {
+        synchronized (this) {
+            Iterator<String> gameIds = json.keys();
+            while (gameIds.hasNext()) {
+                String gid = gameIds.next();
+                JSONObject predictionsJson = json.getJSONObject(gid);
+                set(gid, predictionsJson.getInt("away"), predictionsJson.getInt("home"));
+            }
+        }
     }
 }

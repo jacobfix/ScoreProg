@@ -4,15 +4,19 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
+import jacobfix.scorepredictor.schedule.Schedule;
 import jacobfix.scorepredictor.sync.NflGameOracle;
 import jacobfix.scorepredictor.sync.SyncListener;
-import jacobfix.scorepredictor.sync.UserOracle;
+import jacobfix.scorepredictor.task.BaseTask;
+import jacobfix.scorepredictor.task.TaskFinishedListener;
+// import jacobfix.scorepredictor.sync.UserOracle;
 
 /**
  * Launcher activity. Checks if this is the user's first time launching the
  * app, or if the user is logged in, and passes this information on to
- * LobbyActivity. Displays a splash screen for the time it takes to check
+ * OriginalLobbyActivity. Displays a splash screen for the time it takes to check
  * user's login status and retrieve his profile information from the
  * server if he is indeed logged in.
  */
@@ -60,12 +64,12 @@ public class StartupActivity extends AppCompatActivity {
            onStart() method is called before this activity's onStop() method, so the next sync
            listener will be registered before this one is unregistered, thereby keeping the scheduled
            sync running across the transition. */
-        NflGameOracle.getInstance().registerSyncListener(mSyncListener);
+        // NflGameOracle.getInstance().registerSyncListener(mSyncListener);
 
         mPreferences = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
         mEditor = mPreferences.edit();
 
-        Intent intent = new Intent(this, LobbyActivity.class);
+        final Intent intent = new Intent(this, LobbyActivity.class);
 
         // TODO: Instead of check for first launch, do check for version
         if (mPreferences.getBoolean(KEY_FIRST_LAUNCH, true)) {
@@ -85,8 +89,37 @@ public class StartupActivity extends AppCompatActivity {
         }
         intent.putExtra(EXTRA_LOGGED_IN, loginStatus);
 
-        startActivity(intent);
-        finish();
+        TaskFinishedListener afterSeasonLoaded = new TaskFinishedListener() {
+            @Override
+            public void onTaskFinished(BaseTask task) {
+                if (task.errorOccurred()) {
+                    Log.e(TAG, "" + task.getError());
+                    return;
+                }
+                Log.d(TAG, "Season loaded successfully");
+                startActivity(intent);
+                finish();
+            }
+        };
+
+        new BaseTask(afterSeasonLoaded) {
+            @Override
+            public void execute() {
+                try {
+                    Log.d(TAG, "About to initialize LockGameManager");
+                    LockGameManager.get().init();
+                    Log.d(TAG, "Finished initializing LockGameManager");
+                    Log.d(TAG, "About to initialize Schedule");
+                    Schedule.init();
+                    Log.d(TAG, "Finished initializing schedule");
+                } catch (Exception e) {
+                    reportError(e);
+                    e.printStackTrace();
+                    // TODO: Display a dialog fragment announcing that there was an error loading the season
+                    Log.e(TAG, "There was an error loading the season: " + e);
+                }
+            }
+        }.start();
     }
 
     @Override
@@ -97,15 +130,16 @@ public class StartupActivity extends AppCompatActivity {
 
     // TODO: Just create a "me" for the time being
     private int attemptLogin(String userId) {
+        return LOGIN_NEGATIVE;
         /* Get username and password from device storage and make login request to server. */
         // TODO: Maybe userId and session key instead?
-        if (userId == null) {
+        /* if (userId == null) {
             return LOGIN_NEGATIVE;
-        }
+        } */
         // TODO: Have table with usernames, passwords, and all that and corresponding user ID
         // TODO: On login, return the information from that user ID
         // Have to consider the fact that provided user ID might not exist. How do we handle errors like that?
-        UserOracle.getInstance().sync(userId, true);
+        /* UserOracle.getInstance().sync(userId, true);
         if (UserOracle.getInstance().userExists(userId)) {
             UserOracle.getInstance().setMe(userId);
         } else {
@@ -113,6 +147,6 @@ public class StartupActivity extends AppCompatActivity {
         }
 
         mEditor.putBoolean(KEY_LOGGED_IN, true);
-        return LOGIN_POSITIVE;
+        return LOGIN_POSITIVE; */
     }
 }

@@ -36,7 +36,7 @@ public class PlayFeedFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        mGame = ((GameProvider) context).getGame();
+        mGame = ((GameActivity) context).getGame();
         mPlayFeed = mGame.getDriveFeed().getPlayFeed();
     }
 

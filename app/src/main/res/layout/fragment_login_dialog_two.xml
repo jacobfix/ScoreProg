@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
-        android:textColor="#3c5bf4"
+        android:textColor="#213642"
         android:textSize="36sp"
         android:text="Score"
         android:paddingLeft="6dp"
@@ -20,9 +20,9 @@
         android:id="@+id/title_comp2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="-24dp"
+        android:layout_marginTop="-16dp"
         android:gravity="center_horizontal"
-        android:textColor="#3c5bf4"
+        android:textColor="#213642"
         android:textSize="36sp"
         android:text="Prognosticator"
         android:paddingLeft="6dp"
@@ -69,7 +69,8 @@
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="14dp">
+            android:layout_marginTop="14dp"
+            android:elevation="4dp">
 
             <EditText
                 android:id="@+id/username_email"
@@ -90,8 +91,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:background="#3c5bf4"
-                android:textColor="@android:color/white"
+                android:textColor="#213642"
                 android:text="Log in"/>
         </LinearLayout>
 
@@ -107,8 +107,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:background="#3c5bf4"
-            android:textColor="@android:color/white"
+            android:textColor="#213642"
             android:textAllCaps="true"
             android:text="Create account"/>
 
@@ -117,8 +116,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:background="#3c5bf4"
-            android:textColor="@android:color/white"
+            android:textColor="#213642"
             android:textAllCaps="true"
             android:text="Continue without logging in"/>
 

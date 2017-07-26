@@ -3,7 +3,6 @@ package jacobfix.scorepredictor;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.util.Log;
-import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,13 +10,16 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Map;
 
 import jacobfix.scorepredictor.sync.SyncListener;
-import jacobfix.scorepredictor.sync.UserOracle;
+import jacobfix.scorepredictor.sync.UserProvider;
 import jacobfix.scorepredictor.task.BaseTask;
 import jacobfix.scorepredictor.task.LoginTask;
 import jacobfix.scorepredictor.task.TaskFinishedListener;
+import jacobfix.scorepredictor.users.User;
 import jacobfix.scorepredictor.util.FontHelper;
 import jacobfix.scorepredictor.util.ViewUtil;
 
@@ -97,7 +99,7 @@ public class LoginDialogFragment extends DialogFragment {
 
                 // TODO: Show progress dialog
                 // int loginStatus = Login.login(usernameEmail, password);
-                Log.d(TAG, "About to run LoginTask");
+                Log.d(TAG, "About to run OriginalLoginTask");
                 new LoginTask(usernameEmail, password, new TaskFinishedListener() {
                     @Override
                     public void onTaskFinished(BaseTask task) {
@@ -124,33 +126,29 @@ public class LoginDialogFragment extends DialogFragment {
             public void onClick(View view) {
                 // TODO: Dummy "me" user? How do we deal with friend retrieval if the user is not logged in?
                 Log.d(TAG, "Skip login button clicked");
-                /* Ad hoc LoginTask. */
+                /* Ad hoc OriginalLoginTask. */
                 new BaseTask() {
                     @Override
                     public void execute() {
                         final String userId = "1";
-                        UserSyncManager.getInstance().syncInForeground(userId, null, new SyncListener() {
+
+                        UserProvider.getUserDetails(Arrays.asList(new String[]{userId}), new AsyncCallback<Map<String, User>>() {
                             @Override
-                            public void onSyncFinished() {
-                                Log.d(TAG, "Sync done");
-                                UserSyncManager.getInstance().setMe(userId);
-                                UserSyncManager.getInstance().setUsersOfBackgroundSync(Collections.singletonList(userId));
-                                Log.d(TAG, UserSyncManager.getInstance().me().getFriends().toString());
-                                for (String friendId : UserSyncManager.getInstance().me().getFriends())
-                                    UserSyncManager.getInstance().addUserToBackgroundSync(friendId);
+                            public void onSuccess(Map<String, User> result) {
+                                User thisUser = (User) result.values().toArray()[0];
+                                Log.d(TAG, "Logged in as " + thisUser);
+                                LocalAccountManager.set(thisUser);
+                                UserProvider.setDetailsToSync(Collections.singletonList(userId));
                                 dismiss();
                             }
 
                             @Override
-                            public void onSyncError() {
-                                Log.d(TAG, "There was a sync error!");
+                            public void onFailure(Exception e) {
+                                Log.e(TAG, "There was a sync error");
                             }
                         });
                     }
                 }.start();
-//                UserOracle.getInstance().sync("1");
-//                UserOracle.getInstance().setMe("1");
-//                dismiss();
             }
         });
         return v;

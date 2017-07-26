@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import jacobfix.scorepredictor.NflGame;
+import jacobfix.scorepredictor.Prediction;
 
 
 public class Database {
@@ -28,13 +29,14 @@ public class Database {
     public static final String KEY_HOME_NAME = "home_name";
     public static final String KEY_AWAY_SCORE = "away_score";
     public static final String KEY_HOME_SCORE = "home_score";
-    public static final String KEY_AWAY_PREDICTION = "away_pred";
-    public static final String KEY_HOME_PREDICTION = "home_pred";
+    public static final String KEY_AWAY_PREDICTION = "away_prediction";
+    public static final String KEY_HOME_PREDICTION = "home_prediction";
 
     private static final String WHERE_GAMEID = KEY_GAMEID + " = ?";
 
-    private static class DatabaseHelper extends SQLiteOpenHelper {
+    private static final int NO_SCORE = -1;
 
+    private static class DatabaseHelper extends SQLiteOpenHelper {
 
         public DatabaseHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -76,18 +78,22 @@ public class Database {
     }
 
     public synchronized long createEntry(NflGame game) {
+        /* Adds the game to the database if it is not already present. */
+        if (entryExists(game.getGameId()))
+            return -1;
+
         ContentValues cv = new ContentValues();
         cv.put(KEY_GAMEID, game.getGameId());
         cv.put(KEY_AWAY_NAME, game.getAwayTeam().getAbbr());
         cv.put(KEY_HOME_NAME, game.getHomeTeam().getAbbr());
         cv.put(KEY_AWAY_SCORE, game.getAwayTeam().getScore());
         cv.put(KEY_HOME_SCORE, game.getHomeTeam().getScore());
-        cv.put(KEY_AWAY_PREDICTION, game.getAwayTeam().getPredictedScore());
-        cv.put(KEY_HOME_PREDICTION, game.getHomeTeam().getPredictedScore());
+        cv.put(KEY_AWAY_PREDICTION, NO_SCORE);
+        cv.put(KEY_HOME_PREDICTION, NO_SCORE);
         return mSqlDatabase.insert(TABLE_NAME, null, cv);
     }
 
-    public synchronized boolean gameExists(String gameId) {
+    public synchronized boolean entryExists(String gameId) {
         Cursor cursor = mSqlDatabase.query(TABLE_NAME, new String[]{KEY_ROWID}, WHERE_GAMEID, new String[]{gameId}, null, null, null);
         boolean success = cursor.moveToFirst();
         cursor.close();
@@ -109,5 +115,11 @@ public class Database {
         cv.put((isHome ? KEY_HOME_PREDICTION : KEY_AWAY_PREDICTION), prediction);
         mSqlDatabase.update(TABLE_NAME, cv, WHERE_GAMEID, new String[]{gameId});
         Log.d(TAG, "Updated prediction for " + gameId);
+    }
+
+    public synchronized void updatePrediction(String gameId, Prediction prediction) {
+        ContentValues cv = new ContentValues();
+        cv.put(KEY_AWAY_PREDICTION, prediction.getAwayScore());
+        cv.put(KEY_HOME_PREDICTION, prediction.getHomeScore());
     }
 }

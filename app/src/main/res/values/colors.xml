@@ -17,9 +17,11 @@
     <color name="scoreboard_background">#fdfdfd</color>
     <color name="friend_prediction_list_header_background">@android:color/darker_gray</color>
     <color name="friend_prediction_list_item_background">#fdfdfd</color>
-    <color name="me_in_ranking">#fff38b</color>
+    <color name="me_in_ranking">#80fff38b</color>
 
     <color name="gold">#FFDF00</color>
     <color name="silver">#C0C0C0</color>
     <color name="bronze">#CD7F32</color>
+
+    <color name="lobby_list_background">#efefef</color>
 </resources>

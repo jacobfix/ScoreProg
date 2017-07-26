@@ -1,10 +1,13 @@
 package jacobfix.scorepredictor;
 
 import android.graphics.Color;
+import android.util.Log;
 
 import java.util.HashMap;
 
 public class NflTeamProvider {
+
+    private static final String TAG = NflTeamProvider.class.getSimpleName();
 
     private static String[][] teams = {
             {"ARI", "Arizona",       "Cardinals",  "Arizona Cardinals",    "#b0063a", "#000000"},
@@ -17,10 +20,11 @@ public class NflTeamProvider {
             {"CLE", "Cleveland",     "Browns",     "Cleveland Browns",     "#3f230d", "#fe3c00"},
             {"DAL", "Dallas",        "Cowboys",    "Dallas Cowboys",       "#a0a6ab", "#c5ced6"},
             {"DEN", "Denver",        "Broncos",    "Denver Broncos",       "#002f69", "#002244"},
-            {"DET", "Detroit",       "Lions",      "Detroit Lions",        "#898b8c", "#c5c7cf"},
+            {"DET", "Detroit",       "Lions",      "Detroit Lions",        "#005a8b", "#c5c7cf"},
             {"GB",  "Green Bay",     "Packers",    "Green Bay Packers",    "#29433a", "#ffb612"},
             {"HOU", "Houston",       "Texans",     "Houston Texans",       "#00123f", "#b31b34"},
             {"IND", "Indianapolis",  "Colts",      "Indianapolis Colts",   "#003d79", "#ffffff"},
+            {"JAC", "Jacksonville",  "Jaguars",    "Jacksonville Jaguars", "#d8a328", "#9f792c"},
             {"JAX", "Jacksonville",  "Jaguars",    "Jacksonville Jaguars", "#d8a328", "#9f792c"},
             {"KC",  "Kansas City",   "Chiefs",     "Kansas City Chiefs",   "#e51937", "#f2c800"},
             {"MIA", "Miami",         "Dolphins",   "Miami Dolphins",       "#105878", "#f5811f"},
@@ -32,10 +36,12 @@ public class NflTeamProvider {
             {"OAK", "Oakland",       "Raiders",    "Oakland Raiders",      "#a5abaf", "#c4c8cb"},
             {"PHI", "Philadelphia",  "Eagles",     "Philadelphia Eagles",  "#004c54", "#708090"},
             {"PIT", "Pittsburgh",    "Steelers",   "Pittsburgh Steelers",  "#202020", "#000000"},
-            {"SD",  "San Diego",     "Chargers",   "San Diego Chargers",   "#007ec3", "#ffb81c"},
             {"SF",  "San Francisco", "49ers",      "San Francisco 49ers",  "#c8aa76", "#e6be8a"},
             {"SEA", "Seattle",       "Seahawks",   "Seattle Seahawks",     "#00295b", "#69be28"},
             {"LA",  "Los Angeles",   "Rams",       "Los Angeles Rams",     "#001f44", "#13264b"},
+            {"LAC", "Los Angeles",   "Chargers",   "Los Angeles Chargers", "#007ec3", "#ffb81c"},
+            {"SD",  "San Diego",     "Chargers",   "San Diego Chargers",   "#007ec3", "#ffb81c"},
+            {"STL", "St. Louis",     "Rams",       "St. Louis Rams",       "#001f44", "#13264b"},
             {"TB",  "Tampa Bay",     "Buccaneers", "Tampa Bay Buccaneers", "#636161", "#89765f"},
             {"TEN", "Tennessee",     "Titans",     "Tennessee Titans",     "#4095d1", "#0d254c"},
             {"WAS", "Washington",    "Redskins",   "Washington Redskins",  "#681b11", "#ffb612"}

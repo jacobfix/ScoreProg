@@ -11,10 +11,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Map;
 
 import jacobfix.scorepredictor.ApplicationContext;
@@ -38,17 +40,46 @@ public class NetUtil {
         outputStreamWriter.write(body.toString());
         outputStreamWriter.flush();
 
-        // readJsonFromConnection(conn);
         InputStream inputStream = connection.getInputStream();
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-        // String jsonString = bufferedReader.readLine();
-        String response = bufferedReader.readLine();
+        LinkedList<String> lines = new LinkedList<>();
+        String line;
+        while ((line = bufferedReader.readLine()) != null) {
+            lines.add(line);
+        }
+
+        String response = Util.join(lines, "\n");
+        // String response = bufferedReader.readLine();
 
         inputStream.close();
 
         // return new JSONObject(jsonString);
+        return response;
+    }
+
+    public static String makeGetRequest(String url) throws IOException {
+        URL toConnectTo = new URL(url);
+        HttpURLConnection connection = (HttpURLConnection) toConnectTo.openConnection();
+
+        InputStream inputStream = connection.getInputStream();
+        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+        // String response = bufferedReader.readLine();
+        LinkedList<String> lines = new LinkedList<>();
+        String line;
+        while ((line = bufferedReader.readLine()) != null) {
+            lines.add(line);
+        }
+
+        String response = Util.join(lines, "\n");
+
+        inputStream.close();
+
+        connection.getResponseCode();
+
         return response;
     }
 
@@ -62,19 +93,7 @@ public class NetUtil {
             query.deleteCharAt(query.length() - 1);
         }
         url = url + query.toString();
-
-        URL toConnectTo = new URL(url);
-        URLConnection connection = toConnectTo.openConnection();
-
-        InputStream inputStream = connection.getInputStream();
-        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-        String response = bufferedReader.readLine();
-
-        inputStream.close();
-
-        return response;
+        return makeGetRequest(url);
     }
 
     public static JSONArray getJsonArrayFromUrl(String url) throws JSONException, IOException {

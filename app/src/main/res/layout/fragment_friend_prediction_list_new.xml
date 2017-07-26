@@ -5,6 +5,7 @@
     android:layout_height="match_parent">
 
     <RelativeLayout
+        android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#858585"
@@ -66,10 +67,9 @@
         android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:dividerHeight="1dp"
+        android:dividerHeight="8dp"
         android:divider="@color/darker_light_gray"
         android:animateLayoutChanges="true">
-
     </ListView>
 
 </LinearLayout>

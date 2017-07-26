@@ -7,8 +7,9 @@ public class ApplicationContext extends Application {
 
     private static Context mContext;
 
-    public static final String HOST = "192.168.1.15";
+    public static final String HOST = "192.168.1.17";
     // public static final String HOST = "172.20.8.156";
+    // public static final String HOST = "192.168.1.19";
 
     @Override
     public void onCreate() {

@@ -5,6 +5,7 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -52,17 +53,23 @@ public class PredictionView extends FrameLayout {
         background.setVisibility(View.VISIBLE);
     }
 
-    public void transparentBackground(int textColor, int backgroundColor) {
+    public void strokedBackground(int textColor, int strokeColor) {
         // mText.setTextColor(ContextCompat.getColor(getContext(), android.R.color.white));
         mText.setTextColor(textColor);
         background.setImageDrawable(getResources().getDrawable(R.drawable.prediction_square_new));
-        background.getDrawable().setColorFilter(backgroundColor, PorterDuff.Mode.SRC_IN);
+        background.getDrawable().setColorFilter(strokeColor, PorterDuff.Mode.SRC_IN);
         background.setVisibility(View.VISIBLE);
     }
 
     public void noBackground(int textColor) {
         mText.setTextColor(textColor);
         background.setVisibility(View.INVISIBLE);
+    }
+
+    public void setScore(int score) {
+        mScore = score;
+        mText.setText(String.valueOf(score));
+        refresh();
     }
 
     public int getScore() {
@@ -112,6 +119,11 @@ public class PredictionView extends FrameLayout {
         mScore = -1;
         mText.setText(R.string.empty_string);
         refresh();
+    }
+
+    public void setTextSize(int dp) {
+        mText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, dp);
+        resize();
     }
 
     public void resize() {

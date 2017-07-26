@@ -3,8 +3,7 @@ package jacobfix.scorepredictor.sync;
 import java.util.Collection;
 import java.util.HashSet;
 
-import jacobfix.scorepredictor.ResultListener;
-import jacobfix.scorepredictor.sync.SyncableCache;
+import jacobfix.scorepredictor.AsyncCallback;
 import jacobfix.scorepredictor.task.BaseTask;
 import jacobfix.scorepredictor.task.SyncDetailsTask;
 import jacobfix.scorepredictor.task.TaskFinishedListener;
@@ -19,19 +18,19 @@ public class DetailsCache extends SyncableCache<String, User> {
             @Override
             public void onTaskFinished(BaseTask task) {
                 if (task.errorOccurred()) {
-                    notifyAllOfFailure();
+                    notifyAllOfFailure(task.getError());
                     return;
                 }
 
                 User[] result = (User[]) task.getResult();
                 for (User user : result)
                     set(user.getId(), user);
-                notifyAllOfSuccess();
+                notifyAllOfSuccess(result);
             }
         });
     }
 
-    public void sync(Collection<User> requested, final ResultListener<User[]> listener) {
+    public void sync(Collection<User> requested, final AsyncCallback<User[]> listener) {
         new SyncDetailsTask(requested, new TaskFinishedListener() {
             @Override
             public void onTaskFinished(BaseTask task) {
@@ -46,5 +45,18 @@ public class DetailsCache extends SyncableCache<String, User> {
                 listener.onSuccess(result);
             }
         }).start();
+    }
+
+    public void setDetailsToSync(Collection<User> users) {
+        detailsToSync.clear();
+        detailsToSync.addAll(users);
+    }
+
+    public void addDetailsToSync(User user) {
+        detailsToSync.add(user);
+    }
+
+    public void clearDetailsToSync() {
+        detailsToSync.clear();
     }
 }

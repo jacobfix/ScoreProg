@@ -1,12 +1,36 @@
 package jacobfix.scorepredictor;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import jacobfix.scorepredictor.schedule.Schedule;
+import jacobfix.scorepredictor.schedule.ScheduledGame;
+import jacobfix.scorepredictor.schedule.Season;
+import jacobfix.scorepredictor.sync.Syncable;
+
 public class NflGame {
 
     private static final String TAG = NflGame.class.getSimpleName();
 
     private String mGameId;
-    private boolean locked;
 
+    /* Schedule. */
+    private boolean locked;
+    private long startTime;
+    private String startTimeDisplay;
+    private String meridiem;
+    private Schedule.Day dayOfWeek;
+    private int season;
+    private int week;
+    private int seasonType;
+    private Season.WeekType weekType;
+
+    // TODO: Boolean variable to indicate whether a game has downloaded all the extra gamecenter data?
+    /* Game state. */
     private int quarter;
     private int down;
     private int toGo;
@@ -18,11 +42,14 @@ public class NflGame {
     private boolean isPregame;
     private boolean isFinal;
 
-    private NflTeam awayTeam;
-    private NflTeam homeTeam;
+    /* Teams. */
+    private NflTeam awayTeam = new NflTeam(false);
+    private NflTeam homeTeam = new NflTeam(true);
     private NflTeam posTeam;
 
-    private DriveFeed mDriveFeed;
+    private DriveFeed mDriveFeed = new DriveFeed();
+
+    private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd hh:mm aa");
 
     public static final int QTR_FIRST = 1;
     public static final int QTR_SECOND = 2;
@@ -33,6 +60,16 @@ public class NflGame {
     public static final int QTR_HALFTIME = 0xfff1;
     public static final int QTR_FINAL = 0xfff2;
     public static final int QTR_FINAL_OVERTIME = 0xfff3;
+
+    public NflGame() {
+        awayTeam = new NflTeam(false);
+        homeTeam = new NflTeam(true);
+        mDriveFeed = new DriveFeed();
+    }
+
+    public NflGame(ScheduledGame game) {
+        syncScheduleDetails(game);
+    }
 
     public NflGame(String gameId) {
         mGameId = gameId;
@@ -45,34 +82,33 @@ public class NflGame {
         return mGameId;
     }
 
+    public long getStartTime() {
+        /* Scheduled start time in milliseconds since epoch. */
+        return startTime;
+    }
+
+    public int getSeason() {
+        return season;
+    }
+
+    public int getWeek() {
+        return week;
+    }
+
+    public Season.WeekType getWeekType() {
+        return weekType;
+    }
+
     public boolean isPredicted() {
-        return awayTeam.isPredicted() && homeTeam.isPredicted();
+        return false;
     }
 
     public NflTeam getPredictedWinner() {
-        // Returns null if a tie is predicted
-        if (awayTeam.getPredictedScore() < homeTeam.getPredictedScore()) {
-            return homeTeam;
-        } else if (awayTeam.getPredictedScore() == homeTeam.getPredictedScore()) {
-            return null;
-        } else {
-            return awayTeam;
-        }
+        return null;
     }
 
     public boolean wasPredictedCorrectly() {
-        NflTeam winner = getLeadingTeam();
-        if (winner == null) {
-            if (getPredictedWinner() == null) {
-                return true;
-            } else {
-                return false;
-            }
-        } else if (winner == getPredictedWinner()) {
-            return true;
-        } else {
-            return false;
-        }
+        return false;
     }
 
     private NflTeam getLeadingTeam() {
@@ -214,4 +250,91 @@ public class NflGame {
         return mDriveFeed;
     }
 
+    public void syncScheduleDetails(ScheduledGame scheduledGame) {
+        synchronized (this) {
+            mGameId = scheduledGame.gid;
+            awayTeam.setTeamName(scheduledGame.awayAbbr);
+            homeTeam.setTeamName(scheduledGame.homeAbbr);
+            startTime = scheduledGame.startTime;
+            startTimeDisplay = scheduledGame.startTimeDisplay;
+            meridiem = scheduledGame.meridiem;
+            dayOfWeek = scheduledGame.dayOfWeek;
+            season = scheduledGame.season;
+            week = scheduledGame.week;
+            seasonType = scheduledGame.seasonType;
+            weekType = scheduledGame.weekType;
+
+            isPregame = true;
+        }
+    }
+
+    public void syncFullDetails(JSONObject gameJson) throws JSONException {
+        synchronized (this) {
+            awayTeam.sync(gameJson.getJSONObject("away"));
+            homeTeam.sync(gameJson.getJSONObject("home"));
+
+            Object quarterObj = gameJson.get("qtr");
+            if (quarterObj == JSONObject.NULL) {
+                quarter = NflGame.QTR_PREGAME;
+                setPregame(true);
+                setFinal(false);
+            } else if (quarterObj instanceof String) {
+                if (quarterObj.equals("Pregame")) {
+                    setQuarter(NflGame.QTR_PREGAME);
+                    setPregame(true);
+                    setFinal(false);
+                } else if (quarterObj.equals("Final") || quarterObj.equals("final overtime")) {
+                    setQuarter(NflGame.QTR_FINAL);
+                    setPregame(false);
+                    setFinal(true);
+                } else if (quarterObj.equals("Halftime")) {
+                    setQuarter(NflGame.QTR_HALFTIME);
+                    setPregame(false);
+                    setFinal(false);
+                }
+            } else {
+                setQuarter(gameJson.getInt("qtr"));
+                setPregame(false);
+                setFinal(false);
+            }
+
+            setDown((gameJson.get("down") != JSONObject.NULL) ? gameJson.getInt("down") : 0);
+            setToGo((gameJson.get("togo") != JSONObject.NULL) ? gameJson.getInt("togo") : 0);
+            setClock((gameJson.get("clock") != JSONObject.NULL) ? gameJson.getString("clock") : null);
+            setYardLine((gameJson.get("yl") != JSONObject.NULL) ? gameJson.getString("yl") : null);
+
+            Object posTeamAbbrObject = gameJson.get("posteam");
+            if (posTeamAbbrObject == JSONObject.NULL) {
+                setPosTeam(null);
+            } else {
+                String posTeamAbbr = gameJson.getString("posteam");
+                if (posTeamAbbr.equals(getAwayTeam().getAbbr())) {
+                    setPosTeam(getAwayTeam());
+                } else {
+                    setPosTeam(getHomeTeam());
+                }
+            }
+
+            setRedZone((gameJson.get("redzone") != JSONObject.NULL) ? gameJson.getBoolean("redzone") : false);
+            setStadium((gameJson.get("stadium") != JSONObject.NULL) ? gameJson.getString("stadium") : null);
+        }
+    }
+
+    private Date getUtcStartTime(String gid, String startTime) {
+        String dateString = gid.substring(0, 9) + " " + startTime;
+        try {
+            dateFormat.parse(dateString);
+        } catch (ParseException e) {
+            return null;
+        }
+        return null;
+    }
+
+    public String getStartTimeDisplay() {
+        return startTimeDisplay;
+    }
+
+    public String getMeridiem() {
+        return meridiem;
+    }
 }

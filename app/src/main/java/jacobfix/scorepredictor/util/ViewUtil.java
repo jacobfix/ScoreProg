@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.EmbossMaskFilter;
+import android.graphics.Paint;
 import android.graphics.PorterDuff;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.support.annotation.IdRes;
@@ -26,8 +28,25 @@ public class ViewUtil {
     }
 
     public static float convertDpToPx(Resources resources, int dp) {
-        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, resources.getDisplayMetrics());
+        // return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, resources.getDisplayMetrics());
+        return dp * resources.getDisplayMetrics().density;
     }
+
+    public static int convertPxToDp(Resources resources, float px) {
+        return (int) (px / resources.getDisplayMetrics().density);
+    }
+
+    /*
+    public void fitToText(View v, Paint paint, String boundsString, int padding) {
+        Rect boundingRect = new Rect();
+        paint.getTextBounds(boundsString, 0, boundsString.length(), boundingRect);
+        int length = (boundingRect.width() > boundingRect.height()) ? boundingRect.width() : boundingRect.height();
+        length += (2 * ViewUtil.convertDpToPx(getResources(), this.padding));
+        background.getLayoutParams().width = length;
+        background.getLayoutParams().height = length;
+        background.requestLayout();
+    }
+    */
 
     public static void setTwoLayerRectangleColor(Drawable rect, int color) {
         /*

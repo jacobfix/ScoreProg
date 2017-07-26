@@ -4,11 +4,10 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import jacobfix.scorepredictor.Predictions;
-import jacobfix.scorepredictor.ResultListener;
+import jacobfix.scorepredictor.AsyncCallback;
 import jacobfix.scorepredictor.task.BaseTask;
 import jacobfix.scorepredictor.task.SyncPredictionsTask;
 import jacobfix.scorepredictor.task.TaskFinishedListener;
-import jacobfix.scorepredictor.users.User;
 
 public class PredictionsCache extends SyncableCache<String, Predictions> {
 
@@ -20,19 +19,19 @@ public class PredictionsCache extends SyncableCache<String, Predictions> {
             @Override
             public void onTaskFinished(BaseTask task) {
                 if (task.errorOccurred()) {
-                    notifyAllOfFailure();
+                    notifyAllOfFailure(task.getError());
                     return;
                 }
 
                 Predictions[] result = (Predictions[]) task.getResult();
                 for (Predictions predictions : result)
                     set(predictions.getId(), predictions);
-                notifyAllOfSuccess();
+                notifyAllOfSuccess(result);
             }
         });
     }
 
-    public void sync(String gid, Collection<Predictions> predictions, final ResultListener<Predictions[]> listener) {
+    public void sync(String gid, Collection<Predictions> predictions, final AsyncCallback<Predictions[]> listener) {
         new SyncPredictionsTask(gid, predictions, new TaskFinishedListener() {
             @Override
             public void onTaskFinished(BaseTask task) {

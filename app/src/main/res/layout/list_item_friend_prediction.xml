@@ -5,7 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/friend_prediction_list_item_background"
-    android:gravity="center_vertical">
+    android:gravity="center_vertical"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp">
 
     <TextView
         android:id="@+id/ranking"
@@ -28,15 +30,15 @@
         android:id="@+id/name_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="0"
         android:layout_toRightOf="@id/ranking"
         android:layout_gravity="left"
         android:paddingTop="10dp"
-        android:paddingBottom="10dp">
+        android:paddingBottom="10dp"
+        android:background="@android:color/holo_red_dark">
 
         <ImageView
             android:id="@+id/icon"
-            android:layout_width="wrap_content"
+            android:layout_width="48dp"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_account_circle_black_48dp"
             android:tint="@android:color/holo_red_light"
@@ -83,11 +85,11 @@
 
     <RelativeLayout
         android:id="@+id/score_container"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_weight="1"
         android:layout_gravity="right"
-        android:gravity="right">
+        android:gravity="right"
+        android:background="@android:color/holo_green_dark">
 
         <FrameLayout
             android:id="@+id/spread_container"

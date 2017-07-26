@@ -6,9 +6,13 @@ import android.graphics.Color;
 import android.support.annotation.ColorRes;
 import android.support.v4.content.res.ResourcesCompat;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.net.URLConnection;
@@ -16,8 +20,11 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
+import jacobfix.scorepredictor.ApplicationContext;
 import jacobfix.scorepredictor.R;
 
 public class Util {
@@ -39,6 +46,14 @@ public class Util {
             default:
                 return resources.getString(R.string.empty_string);
         }
+    }
+
+    public static long millisSinceEpoch(Date date) {
+        return date.getTime();
+    }
+
+    public static Date convertTimeZone(String from, String to) {
+        return null;
     }
 
     public static int softenColor(int color) {
@@ -67,5 +82,27 @@ public class Util {
         }
         s += array[array.length - 1];
         return s;
+    }
+
+    public static String readLocalFile(String path) throws IOException, JSONException {
+        InputStream inputStream = ApplicationContext.getContext().getAssets().open(path);
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
+        String in = bufferedReader.readLine();
+
+        inputStream.close();
+
+        return in;
+    }
+
+    public static String join(List<String> strings, String delimiter) {
+        StringBuilder builder = new StringBuilder();
+        String toAppend = "";
+        for (String string : strings) {
+            builder.append(toAppend);
+            builder.append(string);
+            toAppend = delimiter;
+        }
+        return builder.toString();
     }
 }

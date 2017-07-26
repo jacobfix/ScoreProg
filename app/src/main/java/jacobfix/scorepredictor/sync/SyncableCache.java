@@ -6,12 +6,10 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 
-import jacobfix.scorepredictor.ResultListener;
+import jacobfix.scorepredictor.AsyncCallback;
 import jacobfix.scorepredictor.task.BaseTask;
-import jacobfix.scorepredictor.task.SyncDetailsTask;
-import jacobfix.scorepredictor.task.SyncTask;
 
-public abstract class SyncableCache<K, V extends Syncable> {
+public abstract class SyncableCache<K, V> {
 
     private static final String TAG = SyncableCache.class.getSimpleName();
 
@@ -19,7 +17,7 @@ public abstract class SyncableCache<K, V extends Syncable> {
 
     protected BaseTask syncTask;
     private boolean syncRunning;
-    private LinkedList<ResultListener<?>> syncListeners = new LinkedList<>();
+    private LinkedList<AsyncCallback<V[]>> syncListeners = new LinkedList<>();
 
     public synchronized V get(K key) {
         return cache.get(key);
@@ -33,7 +31,12 @@ public abstract class SyncableCache<K, V extends Syncable> {
         cache.clear();
     }
 
-    public synchronized void registerSyncListener(ResultListener<?> listener) {
+    public synchronized Collection<V> getAll() {
+        return cache.values();
+    }
+
+    public synchronized void registerSyncListener(AsyncCallback<V[]> listener) {
+        Log.d(getClass().getSimpleName(), "registering sync listener");
         if (!syncListeners.contains(listener))
             syncListeners.add(listener);
 
@@ -41,7 +44,7 @@ public abstract class SyncableCache<K, V extends Syncable> {
             startScheduledSync();
     }
 
-    public synchronized void unregisterSyncListener(ResultListener<?> listener) {
+    public synchronized void unregisterSyncListener(AsyncCallback<?> listener) {
         if (!syncListeners.remove(listener))
             return;
 
@@ -50,6 +53,7 @@ public abstract class SyncableCache<K, V extends Syncable> {
     }
 
     private void startScheduledSync() {
+        Log.d(getClass().getSimpleName(), "Starting scheduled sync!");
         if (!syncRunning) {
             syncRunning = true;
             syncTask.schedule(0, 60);
@@ -59,6 +63,7 @@ public abstract class SyncableCache<K, V extends Syncable> {
     }
 
     private void stopScheduledSync() {
+        Log.d(getClass().getSimpleName(), "Stopping scheduled sync");
         if (syncRunning) {
             syncTask.stop();
             syncRunning = false;
@@ -67,11 +72,15 @@ public abstract class SyncableCache<K, V extends Syncable> {
         }
     }
 
-    protected void notifyAllOfFailure() {
-
+    protected void notifyAllOfFailure(Exception e) {
+        Log.d(TAG, "Notify all of failure");
+        for (AsyncCallback<V[]> callback : syncListeners)
+            callback.onFailure(e);
     }
 
-    protected void notifyAllOfSuccess() {
-
+    protected void notifyAllOfSuccess(V[] result) {
+        Log.d(TAG, "Notify all of success");
+        for (AsyncCallback<V[]> callback : syncListeners)
+            callback.onSuccess(result);
     }
 }

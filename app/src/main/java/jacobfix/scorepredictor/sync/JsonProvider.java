@@ -1,5 +1,6 @@
 package jacobfix.scorepredictor.sync;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -11,23 +12,17 @@ import java.util.Map;
 import jacobfix.scorepredictor.ApplicationContext;
 import jacobfix.scorepredictor.util.NetUtil;
 
-public class JsonProvider {
+public abstract class JsonProvider {
 
-    private static final String GET_USERS       = "http://" + ApplicationContext.HOST + "/get_users.php";
-    private static final String GET_PREDICTIONS = "http://" + ApplicationContext.HOST + "/get_predictions.php";
+    private static final JsonProvider instance = new LocalJsonProvider();
 
-    public static JSONObject getDetailsJson(Collection<String> uids) throws IOException, JSONException {
-        Map<String, String[]> params = new HashMap<String, String[]>();
-        params.put("uid", uids.toArray(new String[uids.size()]));
-        String response = NetUtil.makeGetRequest(GET_USERS, params);
-        return new JSONObject(response);
+    public static JsonProvider get() {
+        return instance;
     }
 
-    public static JSONObject getPredictionsJson(String gid, Collection<String> uids) throws IOException, JSONException {
-        Map<String, String[]> params = new HashMap<String, String[]>();
-        params.put("game_id", new String[]{gid});
-        params.put("uids", uids.toArray(new String[uids.size()]));
-        String response = NetUtil.makeGetRequest(GET_PREDICTIONS, params);
-        return new JSONObject(response);
-    }
+    public abstract JSONArray getActiveGamesJson() throws IOException, JSONException;
+    public abstract JSONObject getGameJson(String gid) throws IOException, JSONException;
+    public abstract JSONObject getDetailsJson(Collection<String> uids) throws IOException, JSONException;
+    public abstract JSONObject getPredictionsJson(String gid, Collection<String> uids) throws IOException, JSONException;
+
 }

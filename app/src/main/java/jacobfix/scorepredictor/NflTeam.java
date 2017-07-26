@@ -2,12 +2,15 @@ package jacobfix.scorepredictor;
 
 import android.util.Log;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.HashMap;
 
+import jacobfix.scorepredictor.sync.Syncable;
 import jacobfix.scorepredictor.util.Util;
 
-public class NflTeam extends PredictableScorer {
-
+public class NflTeam extends PredictableScorer implements Syncable {
     private static final String TAG = NflTeam.class.getSimpleName();
 
     private int mId;
@@ -116,6 +119,40 @@ public class NflTeam extends PredictableScorer {
 
     public void setTimeOfPossession(String top) {
         mTimeOfPossession = top;
+    }
+    
+    @Override
+    public void sync(JSONObject teamJson) throws JSONException {
+        setTeamName(teamJson.getString("abbr"));
+        
+        JSONObject scoreJson = teamJson.getJSONObject("score");
+        int score = (scoreJson.get("T") != JSONObject.NULL) ? scoreJson.getInt("T") : 0;
+        setScore(score);
+
+        int[] scoresByQuarter = new int[6];
+        scoresByQuarter[0] = score;
+        scoresByQuarter[1] = (scoreJson.get("1") != JSONObject.NULL) ? scoreJson.getInt("1") : 0;
+        scoresByQuarter[2] = (scoreJson.get("2") != JSONObject.NULL) ? scoreJson.getInt("2") : 0;
+        scoresByQuarter[3] = (scoreJson.get("3") != JSONObject.NULL) ? scoreJson.getInt("3") : 0;
+        scoresByQuarter[4] = (scoreJson.get("4") != JSONObject.NULL) ? scoreJson.getInt("4") : 0;
+        scoresByQuarter[5] = (scoreJson.get("5") != JSONObject.NULL) ? scoreJson.getInt("5") : 0;
+        setScoresByQuarter(scoresByQuarter);
+
+        setTimeouts((teamJson.get("to") != JSONObject.NULL) ? teamJson.getInt("to") : 0);
+
+        JSONObject teamStatsJson = teamJson.getJSONObject("stats").getJSONObject("team");
+        setStat(NflTeam.Stat.FIRST_DOWNS, teamStatsJson.getInt("totfd"));
+        setStat(NflTeam.Stat.TOTAL_YARDS, teamStatsJson.getInt("totyds"));
+        setStat(NflTeam.Stat.PASSING_YARDS, teamStatsJson.getInt("pyds"));
+        setStat(NflTeam.Stat.RUSHING_YARDS, teamStatsJson.getInt("ryds"));
+        setStat(NflTeam.Stat.PENALTIES, teamStatsJson.getInt("pen"));
+        setStat(NflTeam.Stat.PENALTY_YARDS, teamStatsJson.getInt("penyds"));
+        setStat(NflTeam.Stat.TURNOVERS, teamStatsJson.getInt("trnovr"));
+        setStat(NflTeam.Stat.PUNTS, teamStatsJson.getInt("pt"));
+        setStat(NflTeam.Stat.PUNT_YARDS, teamStatsJson.getInt("ptyds"));
+        setStat(NflTeam.Stat.PUNT_AVERAGE, teamStatsJson.getInt("ptavg"));
+
+        setTimeOfPossession(teamStatsJson.getString("top"));
     }
 
     public enum Stat {

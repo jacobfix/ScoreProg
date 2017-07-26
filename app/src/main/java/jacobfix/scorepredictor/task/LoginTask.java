@@ -7,21 +7,24 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import jacobfix.scorepredictor.ApplicationContext;
-import jacobfix.scorepredictor.UserSyncManager;
-import jacobfix.scorepredictor.sync.SyncListener;
+import jacobfix.scorepredictor.AsyncCallback;
+import jacobfix.scorepredictor.LocalAccountManager;
+import jacobfix.scorepredictor.sync.UserProvider;
+import jacobfix.scorepredictor.users.User;
 import jacobfix.scorepredictor.util.NetUtil;
 
-public class LoginTask extends BaseTask<Integer> {
+public class LoginTask extends BaseTask {
 
     private static final String TAG = LoginTask.class.getSimpleName();
 
-    private String mUsernameEmail;
-    private String mPassword;
+    private String usernameEmail;
+    private String password;
 
     private static final String LOGIN_URL = "http://" + ApplicationContext.HOST + "/login.php";
 
@@ -40,56 +43,51 @@ public class LoginTask extends BaseTask<Integer> {
     public static final int LOGIN_ERROR_SYNC_FAILURE = 8;
     public static final int LOGIN_ERROR_UNKNOWN = 9;
 
-    public LoginTask(String usernameEmail, String password, TaskFinishedListener listener) {
+    public LoginTask(String ue, String p, TaskFinishedListener listener) {
         super(listener);
-        mUsernameEmail = usernameEmail;
-        mPassword = password;
+        usernameEmail = ue;
+        password = p;
     }
 
     @Override
     public void execute() {
-        Map<String, String> params = new HashMap<String, String>();
-        params.put(PARAM_USERNAME_EMAIL, mUsernameEmail);
-        params.put(PARAM_PASSWORD, mPassword);
-        params.put(PARAM_IS_EMAIL, String.valueOf(Patterns.EMAIL_ADDRESS.matcher(mUsernameEmail).matches()));
+        Map<String, String> params = new HashMap<>();
+        params.put(PARAM_USERNAME_EMAIL, usernameEmail);
+        params.put(PARAM_PASSWORD, password);
+        params.put(PARAM_IS_EMAIL, String.valueOf(Patterns.EMAIL_ADDRESS.matcher(usernameEmail).matches()));
 
         try {
-            String r = NetUtil.makePostRequest(LOGIN_URL, params);
-            JSONObject response = new JSONObject(r);
+            JSONObject response = new JSONObject(NetUtil.makePostRequest(LOGIN_URL, params));
 
             if (response.getBoolean("success")) {
-                final String myId = response.getString("uid");
-                UserSyncManager.getInstance().syncInForeground(myId, null, new SyncListener() {
+                final String loggedInId = response.getString("uid");
+                UserProvider.getUserDetails(Collections.singletonList(loggedInId), new AsyncCallback<Map<String, User>>() {
                     @Override
-                    public void onSyncFinished() {
-                        Log.d(TAG, "Login user sync success");
-                        UserSyncManager.getInstance().setMe(myId);
-                        UserSyncManager.getInstance().setUsersOfBackgroundSync(Collections.singletonList(myId));
-                        Log.d(TAG, UserSyncManager.getInstance().me().getFriends().toString());
-                        for (String friendId : UserSyncManager.getInstance().me().getFriends())
-                            UserSyncManager.getInstance().addUserToBackgroundSync(friendId);
-                        mResult = LOGIN_ERROR_NONE;
+                    public void onSuccess(Map<String, User> result) {
+                        Log.d(TAG, "Got details after login successfully");
+                        User thisUser = (User) result.keySet().toArray()[0];
+                        LocalAccountManager.set(thisUser);
+                        UserProvider.setDetailsToSync(LocalAccountManager.getFriends());
+                        setResult(LOGIN_ERROR_NONE);
                     }
 
                     @Override
-                    public void onSyncError() {
-                        /* Problem sync'ing me. Login not completed. */
-                        Log.d(TAG, "Login user sync failed!");
-                        mResult = LOGIN_ERROR_SYNC_FAILURE;
+                    public void onFailure(Exception e) {
+                        Log.e(TAG, "Getting user details after login failed");
+                        setResult(LOGIN_ERROR_SYNC_FAILURE);
                     }
                 });
-            } else {
-                mResult = Integer.valueOf(response.getString("errno"));
+
             }
-        } catch (JSONException e) {
-            reportError(e, TAG, TaskError.JSON_ERROR, e.toString());
-            mResult = LOGIN_ERROR_UNKNOWN_JSON;
         } catch (IOException e) {
+            reportError(e, TAG, TaskError.JSON_ERROR, e.toString());
+            setResult(LOGIN_ERROR_UNKNOWN_NETWORK);
+        } catch (JSONException e) {
             reportError(e, TAG, TaskError.IO_ERROR, e.toString());
-            mResult = LOGIN_ERROR_UNKNOWN_NETWORK;
+            setResult(LOGIN_ERROR_UNKNOWN_JSON);
         } catch (Exception e) {
             reportError(e, TAG, TaskError.UNKNOWN_ERROR, e.toString());
-            mResult = LOGIN_ERROR_UNKNOWN;
+            setResult(LOGIN_ERROR_UNKNOWN);
         }
     }
 }

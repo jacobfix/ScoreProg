@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jacobfix.scorepredictor.OriginalSpreadView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center">
+
+    <ImageView android:id="@+id/up_arrow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_keyboard_arrow_up_black_24dp"
+        android:tint="#808080"
+        android:layout_marginBottom="-12dp"
+        android:visibility="visible"/>
+
+    <TextView android:id="@+id/value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="26dp"
+        android:text="7"/>
+
+    <ImageView android:id="@+id/down_arrow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_keyboard_arrow_down_black_24dp"
+        android:tint="#808080"
+        android:layout_marginTop="-12dp"
+        android:visibility="invisible" />
+</jacobfix.scorepredictor.OriginalSpreadView>

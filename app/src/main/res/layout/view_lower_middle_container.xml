@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jacobfix.scorepredictor.LowerMiddleContainer xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <include
+        android:id="@+id/spread"
+        layout="@layout/view_spread"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:background="@android:color/holo_red_dark"/>
+
+    <TextView
+        android:id="@+id/prediction_text"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:textAllCaps="true"
+        android:text="Prediction"/>
+
+</jacobfix.scorepredictor.LowerMiddleContainer>

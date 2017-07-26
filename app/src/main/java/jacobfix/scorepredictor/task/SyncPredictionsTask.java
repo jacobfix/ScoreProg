@@ -32,7 +32,7 @@ public class SyncPredictionsTask extends BaseTask<Predictions[]> {
         int i = 0;
 
         try {
-            JSONObject json = JsonProvider.getPredictionsJson(gameId, uids);
+            JSONObject json = JsonProvider.get().getPredictionsJson(gameId, uids);
 
             for (Predictions p : predictions) {
                 JSONObject predictionsJson = json.optJSONObject(p.getId());

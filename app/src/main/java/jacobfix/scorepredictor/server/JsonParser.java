@@ -12,22 +12,22 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import jacobfix.scorepredictor.Login;
 import jacobfix.scorepredictor.NflGame;
 import jacobfix.scorepredictor.NflTeam;
 import jacobfix.scorepredictor.Prediction;
+import jacobfix.scorepredictor.task.LoginTask;
 import jacobfix.scorepredictor.users.User;
 
 public class JsonParser {
 
     /* This vector must match the errors vector in the server script. */
     public static final int[] LOGIN_ERROR_CODES = new int[]{
-            Login.LOGIN_ERROR_NONE,
-            Login.LOGIN_ERROR_INSUFFICIENT_PARAMS,
-            Login.LOGIN_ERROR_EMAIL_NO_MATCH,
-            Login.LOGIN_ERROR_USERNAME_NO_MATCH,
-            Login.LOGIN_ERROR_INVALID_PASSWORD,
-            Login.LOGIN_ERROR_DATABASE_FAILURE,
+            LoginTask.LOGIN_ERROR_NONE,
+            LoginTask.LOGIN_ERROR_INSUFFICIENT_PARAMS,
+            LoginTask.LOGIN_ERROR_EMAIL_NO_MATCH,
+            LoginTask.LOGIN_ERROR_USERNAME_NO_MATCH,
+            LoginTask.LOGIN_ERROR_INVALID_PASSWORD,
+            LoginTask.LOGIN_ERROR_DATABASE_FAILURE,
     };
 
     private static final String TAG = JsonParser.class.getSimpleName();

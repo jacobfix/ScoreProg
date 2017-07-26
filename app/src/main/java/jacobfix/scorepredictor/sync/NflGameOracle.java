@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import jacobfix.scorepredictor.task.BaseTask;
-import jacobfix.scorepredictor.task.GetActiveGamesTask;
+import jacobfix.scorepredictor.task.OriginalGetActiveGamesTask;
 import jacobfix.scorepredictor.NflGame;
 import jacobfix.scorepredictor.task.SyncNflGamesTask;
 import jacobfix.scorepredictor.task.TaskFinishedListener;
@@ -44,7 +44,7 @@ public class NflGameOracle extends BaseOracle {
     }
 
     @Override
-    public GetActiveGamesTask initScheduledSyncTask() {
+    public OriginalGetActiveGamesTask initScheduledSyncTask() {
         Log.d(TAG, "initScheduledSyncTask");
         mJsonRetriever = new RemoteNflGameJsonRetriever();
         Log.d(TAG, String.valueOf(mJsonRetriever != null));
@@ -87,7 +87,7 @@ public class NflGameOracle extends BaseOracle {
                 }).start();
             }
         };
-        return new GetActiveGamesTask(mJsonRetriever, mPostSyncProcedure);
+        return new OriginalGetActiveGamesTask(mJsonRetriever, mPostSyncProcedure);
     }
 
     @Override
@@ -102,7 +102,7 @@ public class NflGameOracle extends BaseOracle {
 
     public void sync() {
         Log.d(TAG, "On-demand sync");
-        new GetActiveGamesTask(mJsonRetriever, mPostSyncProcedure).start();
+        new OriginalGetActiveGamesTask(mJsonRetriever, mPostSyncProcedure).start();
     }
 
     public boolean isActiveGame(String gameId) {

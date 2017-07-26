@@ -1,10 +1,8 @@
 package jacobfix.scorepredictor;
 
-import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.FragmentTabHost;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
@@ -18,37 +16,46 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
 
+import jacobfix.scorepredictor.schedule.Schedule;
+import jacobfix.scorepredictor.sync.GameProvider;
 import jacobfix.scorepredictor.sync.NflGameOracle;
 import jacobfix.scorepredictor.sync.SyncListener;
-import jacobfix.scorepredictor.task.BaseTask;
-import jacobfix.scorepredictor.task.RankUsersTask;
-import jacobfix.scorepredictor.task.TaskFinishedListener;
+import jacobfix.scorepredictor.sync.UserProvider;
 import jacobfix.scorepredictor.users.User;
 import jacobfix.scorepredictor.util.FontHelper;
 import jacobfix.scorepredictor.util.Util;
 import jacobfix.scorepredictor.util.ViewUtil;
 
-public class GameActivity extends AppCompatActivity implements GameProvider, NumberPadFragment.NumberPadFragmentListener {
+public class GameActivity extends AppCompatActivity implements NumberPadFragment.NumberPadFragmentListener {
 
     private static final String TAG = GameActivity.class.getSimpleName();
 
-    private NflGame mGame;
+    private NflGame game;
+    private Prediction prediction;
+
     private ArrayList<User> mRankedParticipants;
 
+    private ProgressBar loadingSymbol;
     private Toolbar mToolbar;
 
     private RelativeLayout mUpperScoreboard;
     private RelativeLayout mLowerScoreboard;
 
     private LinearLayout mUpperMiddleContainer;
-    private LinearLayout mLowerMiddleContainer;
+    private SpreadView spread;
+
+    private LinearLayout upperMiddleContainer;
+    private LowerMiddleContainer lowerMiddleContainer;
 
     private RelativeLayout mAwayScoreBlock;
     private RelativeLayout mHomeScoreBlock;
@@ -79,9 +86,17 @@ public class GameActivity extends AppCompatActivity implements GameProvider, Num
     private ViewPager mPager;
     private GamePagerAdapter mPagerAdapter;
 
+    private int scoreboardColor;
+
     private SyncListener mNflGameOracleSyncListener;
     // private SyncListener mUserOracleSyncListener;
-    private SyncListener mUserSyncListener;
+    // private SyncListener mUserSyncListener;
+
+    private HashSet<GameStateChangeListener> gameStateChangeListeners = new HashSet<>();
+
+    private AsyncCallback<Map<String, NflGame>> gameSyncListener;
+    private AsyncCallback<User[]> detailsSyncListener;
+    private AsyncCallback<Predictions[]> predictionsSyncListener;
 
     private FriendPredictionFragment mFriendPredictionFragment;
     private NumberPadFragment mNumberPadFragment;
@@ -103,22 +118,21 @@ public class GameActivity extends AppCompatActivity implements GameProvider, Num
         setContentView(R.layout.activity_game_material_triple_new);
 
         /* This activity must be passed a game ID on creation. */
-        String gameId = getIntent().getStringExtra(GAME_ID_EXTRA);
-        if (gameId == null) Log.e(TAG, GameActivity.class.getSimpleName() + " was started without a game ID");
-        mGame = NflGameOracle.getInstance().getActiveGame(gameId);
-        if (mGame == null && (mGame = NflGameOracle.getInstance().getArchivedGame(gameId)) == null) {
-            /* There's a problem. */
-        }
+        final String gameId = getIntent().getStringExtra("game");
+        if (gameId == null)
+            Log.wtf(TAG, "GameActivity was started without a game ID");
 
-        mRankedParticipants = new ArrayList<>();
+        game = Schedule.getGame(gameId);
+        if (game == null)
+            Log.wtf(TAG, "Game did not exist in Schedule's collections of games");
 
         initializeActionBar();
         initializeViews();
         initializeTabsAndPager();
         initializeListeners();
-        updateState();
-        // changeScoreboardColor(mGame.getAwayTeam().getPrimaryColor());
-        changeScoreboardColor(ContextCompat.getColor(this, android.R.color.darker_gray));
+        updateDisplayedGameState();
+
+        changeScoreboardColor(ContextCompat.getColor(GameActivity.this, R.color.standard_text));
     }
 
     private void initializeActionBar() {
@@ -130,12 +144,21 @@ public class GameActivity extends AppCompatActivity implements GameProvider, Num
     }
 
     private void initializeViews() {
+        loadingSymbol = ViewUtil.findById(this, R.id.loading_circle);
+
         // mScoreboard = ViewUtil.findById(this, R.id.scoreboard);
         mUpperScoreboard = ViewUtil.findById(this, R.id.upper_scoreboard_container);
         mLowerScoreboard = ViewUtil.findById(this, R.id.lower_scoreboard_container);
 
         mUpperMiddleContainer = ViewUtil.findById(this, R.id.upper_middle_container);
-        mLowerMiddleContainer = ViewUtil.findById(this, R.id.lower_middle_container);
+        // spread = ViewUtil.findById(this, R.id.lower_middle_container);
+
+        // upperMiddleContainer = ViewUtil.findById(this, R.id.upper_middle_container);
+        lowerMiddleContainer = ViewUtil.findById(this, R.id.lower_middle_container);
+        lowerMiddleContainer.setPredictionTextColor(Color.WHITE);
+        lowerMiddleContainer.getSpreadView().setProgressBarColor(Color.WHITE);
+        lowerMiddleContainer.getSpreadView().setTextColor(Color.WHITE);
+        lowerMiddleContainer.showSpread();
 
         mAwayNameContainer = ViewUtil.findById(this, R.id.away_name_container);
         mHomeNameContainer = ViewUtil.findById(this, R.id.home_name_container);
@@ -175,27 +198,30 @@ public class GameActivity extends AppCompatActivity implements GameProvider, Num
         mAwayFlipCard.getTextView().setTypeface(FontHelper.getYantramanavRegular(this));
         mHomeFlipCard.getTextView().setTypeface(FontHelper.getYantramanavRegular(this));
 
-        // mAwayFlipCard.getTextView().setTextColor(mGame.getAwayTeam().getPrimaryColor());
+        // mAwayFlipCard.getTextView().setTextColor(game.getAwayTeam().getPrimaryColor());
         // mAwayFlipCard.getTextView().setText("26");
         // mAwayFlipCard.getTextView().setTypeface(FontHelper.getYantramanavBold(this));
         // mHomeFlipCard.hideBackground();
         // mHomeFlipCard.getTextView().setText("14");
-        // mHomeFlipCard.getTextView().setTextColor(mGame.getAwayTeam().getPrimaryColor());
+        // mHomeFlipCard.getTextView().setTextColor(game.getAwayTeam().getPrimaryColor());
         // mHomeFlipCard.setColor(0x40ffffff);
         // mHomeFlipCard.hideBackground();
 
         ViewUtil.applyDeboss(mAwayFlipCard.getTextView());
         ViewUtil.applyDeboss(mHomeFlipCard.getTextView());
 
-        mAwayFlipCard.transparentBackground(ContextCompat.getColor(this, android.R.color.white), ContextCompat.getColor(this, android.R.color.white));
-        mHomeFlipCard.transparentBackground(ContextCompat.getColor(this, android.R.color.white), ContextCompat.getColor(this, android.R.color.white));
+        mAwayFlipCard.strokedBackground(ContextCompat.getColor(this, android.R.color.white), ContextCompat.getColor(this, android.R.color.white));
+        mHomeFlipCard.strokedBackground(ContextCompat.getColor(this, android.R.color.white), ContextCompat.getColor(this, android.R.color.white));
 
         View.OnClickListener onTeamClickedListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                /* if (!mGame.isPregame()) {
+                /* if (!game.isPregame()) {
                     return;
                 } */
+
+                Log.d(TAG, "AWAY SCORE: " + prediction.getAwayScore());
+                Log.d(TAG, "HOME SCORE: " + prediction.getHomeScore());
 
                 Log.d(TAG, "CLICKED");
 
@@ -204,11 +230,11 @@ public class GameActivity extends AppCompatActivity implements GameProvider, Num
                 switch ((int) view.getTag()) {
                     case AWAY_TAG:
                         touched = mAwayFlipCard;
-                        team = mGame.getAwayTeam();
+                        team = game.getAwayTeam();
                         break;
                     case HOME_TAG:
                         touched = mHomeFlipCard;
-                        team = mGame.getHomeTeam();
+                        team = game.getHomeTeam();
                         break;
                 }
 
@@ -225,7 +251,7 @@ public class GameActivity extends AppCompatActivity implements GameProvider, Num
                 NflTeam predictedWinner = getPredictedWinner();
                 int bufferColor;
                 if (predictedWinner == null)
-                    bufferColor = ContextCompat.getColor(GameActivity.this, android.R.color.darker_gray);
+                    bufferColor = ContextCompat.getColor(GameActivity.this, R.color.standard_text);
                 else
                     bufferColor = predictedWinner.getPrimaryColor();
                 showNumberPadFragment(team, bufferColor, !team.isHome());
@@ -266,14 +292,14 @@ public class GameActivity extends AppCompatActivity implements GameProvider, Num
         mNflGameOracleSyncListener = new SyncListener() {
             @Override
             public void onSyncFinished() {
-                NflGame updatedGame = NflGameOracle.getInstance().getActiveGame(mGame.getGameId());
+                NflGame updatedGame = NflGameOracle.getInstance().getActiveGame(game.getGameId());
                 /* Might no longer be a part of the active games. */
                 if (updatedGame == null) {
-                    updatedGame = NflGameOracle.getInstance().getArchivedGame(mGame.getGameId());
+                    updatedGame = NflGameOracle.getInstance().getArchivedGame(game.getGameId());
                 }
-                mGame = updatedGame;
-                // mScoreboard.updateState(mGame);
-                updateState();
+                game = updatedGame;
+                // mScoreboard.updateState(game);
+                updateDisplayedGameState();
             }
 
             @Override
@@ -281,16 +307,29 @@ public class GameActivity extends AppCompatActivity implements GameProvider, Num
 
             }
         };
+
+        gameSyncListener = new AsyncCallback<Map<String, NflGame>>() {
+            @Override
+            public void onFailure(Exception e) {
+
+            }
+
+            @Override
+            public void onSuccess(Map<String, NflGame> result) {
+                updateDisplayedGameState();
+            }
+        };
+
         /* After the UserOracle syncs, we need to update the ranking of friends for this game. */
-        mUserSyncListener = new SyncListener() {
+        /* mUserSyncListener = new SyncListener() {
             @Override
             public void onSyncFinished() {
                 Log.d(TAG, "User sync finished");
-                Collection<User> participants = UserSyncManager.getInstance().getParticipatingFriends(mGame.getGameId());
+                Collection<User> participants = UserSyncManager.getInstance().getParticipatingFriends(game.getGameId());
                 participants.add(UserSyncManager.getInstance().me());
 
                 Log.d(TAG, "About to start RankUsersTask");
-                new RankUsersTask(participants, mGame, new TaskFinishedListener() {
+                new RankUsersTask(participants, game, new TaskFinishedListener() {
                     @Override
                     public void onTaskFinished(BaseTask task) {
                         mRankedParticipants = (ArrayList<User>) task.getResult();
@@ -308,14 +347,14 @@ public class GameActivity extends AppCompatActivity implements GameProvider, Num
                 FriendPredictionFragment fragment = (FriendPredictionFragment) mPagerAdapter.getRegisteredFragment(GamePagerAdapter.FRIENDS_PAGE);
                 fragment.setFriends(asList); */
 
-                // TODO: We should be able to reset the users to sync to a much smaller set, i.e., only the users playing this game
+        /*        // TODO: We should be able to reset the users to sync to a much smaller set, i.e., only the users playing this game
             }
 
             @Override
             public void onSyncError() {
                 Log.d(TAG, "User sync error");
             }
-        };
+        }; */
     }
 
     @Override
@@ -326,44 +365,78 @@ public class GameActivity extends AppCompatActivity implements GameProvider, Num
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+            case R.id.action_refresh:
+                return true;
+        }
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        NflGameOracle.getInstance().registerSyncListener(mNflGameOracleSyncListener);
 
-        UserSyncManager.getInstance().setPredictionsOfBackgroundSync(Collections.singletonList(mGame.getGameId()));
-        UserSyncManager.getInstance().registerSyncListener(mUserSyncListener);
+        // loadingSymbol.setVisibility(View.GONE);
+        /* Pull existing prediction for this game from the server. */
+
+        /*
+        UserProvider.getUserPredictions(game.getGameId(), Arrays.asList(LocalAccountManager.getId()), new AsyncCallback<Map<String, Predictions>>() {
+            @Override
+            public void onSuccess(Map<String, Predictions> result) {
+                if (!result.isEmpty()) {
+                    Predictions predictions = (Predictions) result.values().toArray()[0];
+                    prediction = predictions.get(game.getGameId());
+                    updateDisplayedPredictions();
+                }
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+
+            }
+        });
+        */
+
+        // Schedule.registerGameSyncListener(gameSyncListener);
+
+        // NflGameOracle.getInstance().registerSyncListener(mNflGameOracleSyncListener);
+
+        // UserSyncManager.getInstance().setPredictionsOfBackgroundSync(Collections.singletonList(game.getGameId()));
+        // UserSyncManager.getInstance().registerSyncListener(mUserSyncListener);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        NflGameOracle.getInstance().unregisterSyncListener(mNflGameOracleSyncListener);
-        UserSyncManager.getInstance().unregisterSyncListener(mUserSyncListener);
+        // NflGameOracle.getInstance().unregisterSyncListener(mNflGameOracleSyncListener);
+        // Schedule.unregisterGameSyncListener(gameSyncListener);
+        // UserSyncManager.getInstance().unregisterSyncListener(mUserSyncListener);
     }
 
-    public void updateState() {
-        Log.d(TAG, "updateState()");
-        Log.d(TAG, String.valueOf(mGame.getQuarter()));
-        Log.d(TAG, Util.formatQuarter(getResources(), mGame.getQuarter()));
-        if (mGame.isFinal()) {
+    public void updateDisplayedGameState() {
+        Log.d(TAG, "updateDisplayedGameState()");
+        Log.d(TAG, String.valueOf(game.getQuarter()));
+        Log.d(TAG, Util.formatQuarter(getResources(), game.getQuarter()));
+        if (game.isFinal()) {
             mQuarter.setText("FINAL");
             mClock.setVisibility(View.GONE);
         } else {
-            mQuarter.setText(Util.formatQuarter(getResources(), mGame.getQuarter()));
-            mClock.setText(mGame.getClock());
+            mQuarter.setText(Util.formatQuarter(getResources(), game.getQuarter()));
+            mClock.setText(game.getClock());
         }
 
-        mAwayAbbr.setText(mGame.getAwayTeam().getAbbr());
-        mAwayName.setText(mGame.getAwayTeam().getName());
-        mHomeAbbr.setText(mGame.getHomeTeam().getAbbr());
-        mHomeName.setText(mGame.getHomeTeam().getName());
+        mAwayAbbr.setText(game.getAwayTeam().getAbbr());
+        mAwayName.setText(game.getAwayTeam().getName());
+        mHomeAbbr.setText(game.getHomeTeam().getAbbr());
+        mHomeName.setText(game.getHomeTeam().getName());
 
-        mAwayScore.setText(String.valueOf(mGame.getAwayTeam().getScore()));
-        mHomeScore.setText(String.valueOf(mGame.getHomeTeam().getScore()));
+        mAwayScore.setText(String.valueOf(game.getAwayTeam().getScore()));
+        mHomeScore.setText(String.valueOf(game.getHomeTeam().getScore()));
+
+        notifyGameStateChanged();
     }
 
     private void showNumberPadFragment(NflTeam team, int bufferColor, boolean fromLeft) {
@@ -398,29 +471,50 @@ public class GameActivity extends AppCompatActivity implements GameProvider, Num
     }
 
     private NflTeam getPredictedWinner() {
-        if (!isPredicted())
-            return null;
-        if (mAwayFlipCard.getScore() > mHomeFlipCard.getScore())
-            return mGame.getAwayTeam();
-        else if (mAwayFlipCard.getScore() < mHomeFlipCard.getScore())
-            return mGame.getHomeTeam();
-        else
-            return null;
+        switch (prediction.winner()) {
+            case Prediction.W_AWAY:
+                return game.getAwayTeam();
+            case Prediction.W_HOME:
+                return game.getHomeTeam();
+            default:
+                return null;
+        }
+    }
+
+    private void updateDisplayedPredictions() {
+        mAwayFlipCard.setScore(prediction.getAwayScore());
+        mHomeFlipCard.setScore(prediction.getHomeScore());
+        lowerMiddleContainer.getSpreadView().setSpread(prediction.getSpread(game));
+        lowerMiddleContainer.getSpreadView().setProgress(prediction.getSpread(game));
+        markPredictedWinner();
     }
 
     private void confirmPrediction() {
-        int bufferColor;
-        if (isPredicted()) {
+        synchronized (prediction) {
+            if (mSelectedFlipCard == mAwayFlipCard)
+                prediction.setAwayScore(mAwayFlipCard.getScore());
+            else if (mSelectedFlipCard == mHomeFlipCard)
+                prediction.setHomeScore(mHomeFlipCard.getScore());
+
+            // Database.putPrediction(prediction);
+        }
+
+        markPredictedWinner();
+        /* int bufferColor;
+        if (prediction.isComplete()) {
             markPredictedWinner();
             bufferColor = getPredictedWinner().getPrimaryColor();
         } else {
-            bufferColor = ContextCompat.getColor(this, android.R.color.darker_gray);
+            bufferColor = ContextCompat.getColor(this, R.color.standard_text);
         }
         mNumberPadFragment.setBufferColor(bufferColor);
+        */
         hideNumberPadFragment(!mSelectedTeam.isHome());
         mSelectedFlipCard = null;
         mSelectedTeam = null;
         mPredictSession = false;
+
+        notifyPredictionChanged();
     }
 
     private void clearPrediction() {
@@ -437,35 +531,71 @@ public class GameActivity extends AppCompatActivity implements GameProvider, Num
     }
 
     private void markPredictedWinner() {
-        if (mAwayFlipCard.getScore() > mHomeFlipCard.getScore()) {
-            mAwayFlipCard.solidBackground(mGame.getAwayTeam().getPrimaryColor(), ContextCompat.getColor(this, android.R.color.white));
-            mHomeFlipCard.transparentBackground(ContextCompat.getColor(this, android.R.color.white), ContextCompat.getColor(this, android.R.color.white));
-            changeScoreboardColor(mGame.getAwayTeam().getPrimaryColor());
-        } else if (mAwayFlipCard.getScore() < mHomeFlipCard.getScore()) {
-            mAwayFlipCard.transparentBackground(ContextCompat.getColor(this, android.R.color.white), ContextCompat.getColor(this, android.R.color.white));
-            mHomeFlipCard.solidBackground(mGame.getHomeTeam().getPrimaryColor(), ContextCompat.getColor(this, android.R.color.white));
-            changeScoreboardColor(mGame.getHomeTeam().getPrimaryColor());
-        } else {
-            mAwayFlipCard.transparentBackground(ContextCompat.getColor(this, android.R.color.white), ContextCompat.getColor(this, android.R.color.white));
-            mHomeFlipCard.transparentBackground(ContextCompat.getColor(this, android.R.color.white), ContextCompat.getColor(this, android.R.color.white));
+        int white = ContextCompat.getColor(this, android.R.color.white);
+        int standardText = ContextCompat.getColor(this, R.color.standard_text);
+
+        switch (prediction.winner()) {
+            case Prediction.W_AWAY:
+                if (mNumberPadFragment != null)
+                    mNumberPadFragment.setBufferColor(game.getAwayTeam().getPrimaryColor());
+                mAwayFlipCard.solidBackground(game.getAwayTeam().getPrimaryColor(), white);
+                mHomeFlipCard.strokedBackground(white, white);
+                changeScoreboardColor(game.getAwayTeam().getPrimaryColor());
+                break;
+            case Prediction.W_HOME:
+                if (mNumberPadFragment != null)
+                    mNumberPadFragment.setBufferColor(game.getHomeTeam().getPrimaryColor());
+                mAwayFlipCard.strokedBackground(white, white);
+                mHomeFlipCard.solidBackground(game.getHomeTeam().getPrimaryColor(), white);
+                changeScoreboardColor(game.getHomeTeam().getPrimaryColor());
+                break;
+            default:
+                if (mNumberPadFragment != null)
+                    mNumberPadFragment.setBufferColor(standardText);
+                mAwayFlipCard.strokedBackground(white, white);
+                mHomeFlipCard.strokedBackground(white, white);
+                changeScoreboardColor(standardText);
+
         }
     }
 
     private void changeScoreboardColor(int color) {
+        scoreboardColor = color;
+
         mToolbar.setBackgroundColor(color);
         mUpperScoreboard.setBackgroundColor(color);
         mLowerScoreboard.setBackgroundColor(color);
         mTabs.setBackgroundColor(color);
+
+        FriendPredictionFragment f = (FriendPredictionFragment) mPagerAdapter.getRegisteredFragment(GamePagerAdapter.FRIENDS_PAGE);
+        if (f != null)
+            f.setHeaderColor(color & 0xc0ffffff);
     }
 
-    @Override
+    public int getScoreboardColor() {
+        return scoreboardColor;
+    }
+
     public NflGame getGame() {
-        return mGame;
+        return game;
     }
 
-    @Override
-    public ArrayList<User> getRankedParticipants() {
-        return mRankedParticipants;
+    public void registerGameStateChangeListener(GameStateChangeListener listener) {
+        gameStateChangeListeners.add(listener);
+    }
+
+    public void unregisterGameStateChangeListener(GameStateChangeListener listener) {
+        gameStateChangeListeners.remove(listener);
+    }
+
+    public void notifyGameStateChanged() {
+        for (GameStateChangeListener listener : gameStateChangeListeners)
+            listener.onGameStateChanged(game);
+    }
+
+    public void notifyPredictionChanged() {
+        for (GameStateChangeListener listener : gameStateChangeListeners)
+            listener.onPredictionChanged(prediction);
     }
 
     @Override

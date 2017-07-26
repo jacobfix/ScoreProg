@@ -1,43 +1,31 @@
 package jacobfix.scorepredictor.task;
 
-import android.util.Log;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.io.IOException;
-import java.util.Collection;
+import java.util.LinkedList;
 
-import jacobfix.scorepredictor.server.JsonParser;
-import jacobfix.scorepredictor.server.NflGameJsonRetriever;
+import jacobfix.scorepredictor.sync.JsonProvider;
 
-/**
- * Retrieves a list of game IDs corresponding to the games which are currently active.
- */
-public class GetActiveGamesTask extends BaseTask<Collection<String>> {
+public class GetActiveGamesTask extends BaseTask<String[]> {
 
-    private static final String TAG = GetActiveGamesTask.class.getSimpleName();
-
-    NflGameJsonRetriever mJsonRetriever;
-    JsonParser mJsonParser = new JsonParser();
-
-    public GetActiveGamesTask(NflGameJsonRetriever jsonRetriever, TaskFinishedListener listener) {
+    public GetActiveGamesTask(TaskFinishedListener listener) {
         super(listener);
-        mJsonRetriever = jsonRetriever;
     }
 
     @Override
     public void execute() {
-        Log.d(TAG, "Task " + getTaskId() + ": Executing GetActiveGamesTask");
         try {
-            JSONArray json = mJsonRetriever.getActiveGamesJson();
-            mResult = mJsonParser.parseActiveGamesJson(json);
-        } catch (JSONException e) {
-            reportError(e, TAG, TaskError.JSON_ERROR, e.toString());
+            JSONArray json = JsonProvider.get().getActiveGamesJson();
+            String[] result = new String[json.length()];
+            for (int i = 0; i < json.length(); i++)
+                result[i] = json.getString(i);
+            setResult(result);
         } catch (IOException e) {
-            reportError(e, TAG, TaskError.IO_ERROR, e.toString());
-        } catch (Exception e) {
-            reportError(e, TAG, TaskError.UNKNOWN_ERROR, e.toString());
+            reportError(e);
+        } catch (JSONException e) {
+            reportError(e);
         }
     }
 }

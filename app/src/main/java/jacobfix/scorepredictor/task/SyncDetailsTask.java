@@ -30,7 +30,7 @@ public class SyncDetailsTask extends BaseTask<User[]> {
         int i = 0;
 
         try {
-            JSONObject json = JsonProvider.getDetailsJson(ids);
+            JSONObject json = JsonProvider.get().getDetailsJson(ids);
 
             for (User user : users) {
                 JSONObject detailsJson = json.optJSONObject(user.getId());
