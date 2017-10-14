@@ -5,6 +5,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import jacobfix.scorepredictor.util.ViewUtil;
@@ -13,8 +14,11 @@ public class LowerMiddleContainer extends FrameLayout {
 
     private static final String TAG = LowerMiddleContainer.class.getSimpleName();
 
+    private ProgressBar loadingCircle;
     private TextView predictionText;
     private SpreadView spread;
+
+    private static final String BOUND_STRING = "UNPREDICTED";
 
     public LowerMiddleContainer(Context context) {
         this(context, null);
@@ -31,25 +35,42 @@ public class LowerMiddleContainer extends FrameLayout {
     @Override
     public void onFinishInflate() {
         super.onFinishInflate();
+        loadingCircle = ViewUtil.findById(this, R.id.submit_prediction_pending);
         predictionText = ViewUtil.findById(this, R.id.prediction_text);
         spread = ViewUtil.findById(this, R.id.spread);
         resize();
     }
 
     public void resize() {
-        predictionText.measure(0, 0);
-        getLayoutParams().width = predictionText.getMeasuredWidth();
+        float width = predictionText.getPaint().measureText(BOUND_STRING);
+        getLayoutParams().width = (int) width;
         requestLayout();
     }
 
-    public void showPredictionText() {
-        predictionText.setVisibility(View.VISIBLE);
+    public void showPredictedText() {
+        predictionText.setText("Predicted");
+        loadingCircle.setVisibility(View.GONE);
         spread.setVisibility(View.GONE);
+        predictionText.setVisibility(View.VISIBLE);
+    }
+
+    public void showUnpredictedText() {
+        predictionText.setText("Unpredicted");
+        loadingCircle.setVisibility(View.GONE);
+        spread.setVisibility(View.GONE);
+        predictionText.setVisibility(View.VISIBLE);
+    }
+
+    public void showLoading() {
+        loadingCircle.setVisibility(View.VISIBLE);
+        spread.setVisibility(View.GONE);
+        predictionText.setVisibility(View.GONE);
     }
 
     public void showSpread() {
-        predictionText.setVisibility(View.GONE);
+        loadingCircle.setVisibility(View.GONE);
         spread.setVisibility(View.VISIBLE);
+        predictionText.setVisibility(View.GONE);
     }
 
     public SpreadView getSpreadView() {

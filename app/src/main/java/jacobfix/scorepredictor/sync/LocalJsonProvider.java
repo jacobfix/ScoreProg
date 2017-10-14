@@ -44,24 +44,28 @@ public class LocalJsonProvider extends JsonProvider {
     }
 
     @Override
-    public JSONObject getPredictionsJson(String gid, Collection<String> uids) throws IOException, JSONException {
-        JSONObject jsonIn = new JSONObject(Util.readLocalFile(PREDICTIONS_PATH));
-        JSONObject jsonOut = new JSONObject();
+    public JSONObject getPredictionsJson(Collection<String> gids, Collection<String> uids) throws IOException, JSONException {
+        /* {
+             uid_1: {gid_1: {"away": 14, "home": 21}}
+         */
+        JSONObject in = new JSONObject(Util.readLocalFile(PREDICTIONS_PATH));
+        JSONObject out = new JSONObject();
 
         for (String uid : uids) {
-            JSONObject allPredictionsJson = jsonIn.optJSONObject(uid);
-            if (allPredictionsJson == null)
+            JSONObject userOutJson = new JSONObject();
+            JSONObject gamesJson = in.optJSONObject(uid);
+            if (gamesJson == null)
                 continue;
 
-            JSONObject predictionJson = allPredictionsJson.optJSONObject(gid);
-            if (predictionJson == null)
-                continue;
+            for (String gid : gids) {
+                JSONObject gameJson = gamesJson.optJSONObject(gid);
+                if (gameJson == null)
+                    continue;
 
-            JSONObject out = new JSONObject();
-            out.put(gid, predictionJson);
-            jsonOut.put(uid, out);
+                userOutJson.put(gid, gameJson);
+            }
+            out.put(uid, userOutJson);
         }
-
-        return jsonOut;
+        return out;
     }
 }

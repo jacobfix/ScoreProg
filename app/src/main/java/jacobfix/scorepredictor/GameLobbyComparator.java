@@ -2,9 +2,9 @@ package jacobfix.scorepredictor;
 
 import java.util.Comparator;
 
-public class GameLobbyComparator implements Comparator<NflGame> {
+public class GameLobbyComparator implements Comparator<AtomicGame> {
 
-    public int compare(NflGame g1, NflGame g2) {
+    public int compare(AtomicGame g1, AtomicGame g2) {
         /* Order of precedence:
            predicted games,
            favorite teams,

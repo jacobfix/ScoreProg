@@ -39,4 +39,9 @@ public class RemoteJsonProvider extends JsonProvider {
         String response = NetUtil.makeGetRequest(GET_PREDICTIONS, params);
         return new JSONObject(response);
     }
+
+    @Override
+    public JSONObject getPredictionsJson(Collection<String> gids, Collection<String> uids) throws IOException, JSONException {
+        return null;
+    }
 }

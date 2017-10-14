@@ -13,6 +13,7 @@
     <color name="enter_green">#108732</color>
     <color name="delete_red">#d0021b</color>
     <color name="dark_blue">#09003f</color>
+    <color name="background_light_gray">#cccccc</color>
 
     <color name="scoreboard_background">#fdfdfd</color>
     <color name="friend_prediction_list_header_background">@android:color/darker_gray</color>
@@ -25,4 +26,6 @@
 
     <color name="lobby_list_background">#efefef</color>
     <color name="standard_color">#213642</color>
+
+    <color name="unselected_tab_color">#bdc3c7</color>
 </resources>

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="jacobfix.scorepredictor.LoginActivity"
+    android:background="@color/standard_color"
+    android:gravity="center">
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="0dp"
+        android:layout_gravity="center"
+        android:textSize="36sp"
+        android:textColor="@color/lobby_list_background"
+        android:text="ScoreProg"/>
+
+    <!-- <ProgressBar
+        android:id="@+id/authenticating_progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/box"
+        android:layout_centerHorizontal="true"/> -->
+
+    <LinearLayout
+        android:id="@+id/box"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="center"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp"
+        android:background="@drawable/rounded_rectangle"
+        android:backgroundTint="@color/lobby_list_background"
+        android:elevation="4dp">
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/username_email_field_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:hintTextAppearance="@style/TextInputLayoutAppearance">
+
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/username_email_field"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Username or email"
+                android:inputType="text"
+                android:textColorHint="@color/standard_text"
+                android:backgroundTint="@color/standard_text"/>
+
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/password_field_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:hintTextAppearance="@style/TextInputLayoutAppearance">
+
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/password_field"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Password"
+                android:inputType="textPassword"
+                android:textColorHint="@color/standard_text"
+                android:backgroundTint="@color/standard_text"/>
+
+        </android.support.design.widget.TextInputLayout>
+
+        <Button
+            android:id="@+id/sign_in_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Sign In"
+            android:textSize="18sp"
+            android:textColor="@color/standard_color"
+            android:paddingTop="10dp"/>
+
+        <TextView
+            android:id="@+id/no_account_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:gravity="center"
+            android:text="Don't have an account?"
+            android:textColor="@color/standard_text"
+            android:textSize="18sp"/>
+
+        <Button
+            android:id="@+id/register_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Register"
+            android:textSize="18sp"
+            android:textColor="@color/standard_color"
+            android:paddingTop="10dp"/>
+    </LinearLayout>
+
+</LinearLayout>

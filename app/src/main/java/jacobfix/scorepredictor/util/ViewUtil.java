@@ -1,6 +1,7 @@
 package jacobfix.scorepredictor.util;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.EmbossMaskFilter;
@@ -11,6 +12,8 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.TextView;
@@ -25,6 +28,20 @@ public class ViewUtil {
 
     public static <T extends View> T findById(@NonNull Activity parent, @IdRes int resId) {
         return (T) parent.findViewById(resId);
+    }
+
+    public static void initializeToolbar(AppCompatActivity activity, Toolbar toolbar) {
+        toolbar.setPadding(0, getStatusBarHeight(activity), 0, 0);
+        toolbar.getLayoutParams().height += getStatusBarHeight(activity);
+
+        activity.setSupportActionBar(toolbar);
+        activity.getSupportActionBar().setDisplayShowTitleEnabled(false);
+        activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    public static void setCompoundDrawablesColor(TextView view, int color) {
+        for (Drawable d : view.getCompoundDrawables())
+            if (d != null) d.setColorFilter(color, PorterDuff.Mode.SRC_IN);
     }
 
     public static float convertDpToPx(Resources resources, int dp) {
@@ -78,4 +95,11 @@ public class ViewUtil {
     public static void applyDeboss(TextView textView) {
         applyFilter(textView, new float[]{0f, -1f, 0.5f}, 0.8f, 15f, 1f);
     }
+
+    public static int getStatusBarHeight(Context context) {
+        int resId = context.getResources().getIdentifier("status_bar_height", "dimen", "android");
+        return context.getResources().getDimensionPixelSize(resId);
+    }
+
+
 }

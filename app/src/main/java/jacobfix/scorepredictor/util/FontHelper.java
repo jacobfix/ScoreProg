@@ -21,6 +21,8 @@ public class FontHelper {
     private static Typeface mPermanentMarker;
     private static Typeface mLobsterRegular;
     private static Typeface mAntonRegular;
+    private static Typeface mBitterRegular;
+    private static Typeface mBitterBold;
 
     private static Typeface getFont(Context context, String fontFile) {
         return Typeface.createFromAsset(context.getAssets(), "fonts/" + fontFile);
@@ -143,5 +145,17 @@ public class FontHelper {
             mAntonRegular = getFont(context, "Anton-Regular.ttf");
         }
         return mAntonRegular;
+    }
+
+    public static Typeface getBitterRegular(Context context) {
+        if (mBitterRegular == null)
+            mBitterRegular = getFont(context, "Bitter-Regular.ttf");
+        return mBitterRegular;
+    }
+
+    public static Typeface getBitterBold(Context context) {
+        if (mBitterBold == null)
+            mBitterBold = getFont(context, "Bitter-Bold.ttf");
+        return mBitterBold;
     }
 }

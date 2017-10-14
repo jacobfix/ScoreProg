@@ -15,6 +15,16 @@ public class ApplicationContext extends Application {
     public void onCreate() {
         super.onCreate();
         mContext = getApplicationContext();
+        // initializeLockGameManager();
+        // initializeSchedule();
+    }
+
+    public void intializeLockGameManager() {
+        // LockGameManager.get().init();
+    }
+
+    public void initializeSchedule() {
+
     }
 
     public static Context getContext() {

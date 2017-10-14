@@ -9,6 +9,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="center"
         android:gravity="center"
+        android:textColor="@android:color/white"
         android:textSize="30sp"
         android:text="22"/>
 
@@ -19,6 +20,7 @@
         android:layout_gravity="center"
         android:indeterminate="false"
         android:progressDrawable="@drawable/circular_progress_bar"
+        android:progressTint="@android:color/white"
         style="?android:attr/progressBarStyleHorizontal"
         android:max="100"
         android:progress="30"/>

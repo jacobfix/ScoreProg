@@ -1,47 +1,53 @@
 package jacobfix.scorepredictor;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Set;
 
-import jacobfix.scorepredictor.sync.Syncable;
+public class Predictions {
 
-public class Predictions implements Syncable {
+    private boolean indexByUser;
+    private HashMap<String, LinkedList<Prediction>> contents;
 
-    private String uid;
-    private HashMap<String, Prediction> predictions = new HashMap<>();
-
-    public Predictions(String userId) {
-        uid = userId;
+    public Predictions(boolean indexByUser) {
+        this.indexByUser = indexByUser;
+        this.contents = new HashMap<String, LinkedList<Prediction>>();
     }
 
-    public String getId() {
-        return uid;
-    }
-
-    public void set(String gid, Prediction prediction) {
-        predictions.put(gid, prediction);
-    }
-
-    public void set(String gid, int awayScore, int homeScore) {
-        predictions.put(gid, new Prediction(gid, awayScore, homeScore));
-    }
-
-    public Prediction get(String gid) {
-        return predictions.get(gid);
-    }
-
-    @Override
-    public void sync(JSONObject json) throws JSONException {
-        synchronized (this) {
-            Iterator<String> gameIds = json.keys();
-            while (gameIds.hasNext()) {
-                String gid = gameIds.next();
-                JSONObject predictionsJson = json.getJSONObject(gid);
-                set(gid, predictionsJson.getInt("away"), predictionsJson.getInt("home"));
-            }
+    public void put(Prediction prediction) {
+        String index = (indexByUser) ? prediction.getUserId() : prediction.getGameId();
+        LinkedList<Prediction> predictions = contents.get(index);
+        if (predictions == null) {
+            predictions = new LinkedList<Prediction>();
+            contents.put(index, predictions);
         }
+        predictions.add(prediction);
+    }
+
+    public void putAll(Collection<Prediction> all) {
+        for (Prediction p : all)
+            put(p);
+    }
+
+    public LinkedList<Prediction> get(String key) {
+        return contents.get(key);
+    }
+
+    public LinkedList<Prediction> getAll() {
+        Collection<LinkedList<Prediction>> allLists = contents.values();
+
+        LinkedList<Prediction> result = new LinkedList<>();
+        for (LinkedList<Prediction> list : allLists)
+            result.addAll(list);
+        return result;
+    }
+
+    public Set<String> keys() {
+        return contents.keySet();
+    }
+
+    public boolean getIndexByUser() {
+        return indexByUser;
     }
 }

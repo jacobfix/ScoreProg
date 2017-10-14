@@ -24,7 +24,7 @@ public class PlayFeedFragment extends Fragment {
 
     private static final String TAG = PlayFeedFragment.class.getSimpleName();
 
-    NflGame mGame;
+    FullGame mGame;
     ArrayList<Play> mPlayFeed;
     PlayFeedAdapter mPlayFeedAdapter;
     LayoutInflater mInflater;
@@ -36,7 +36,7 @@ public class PlayFeedFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        mGame = ((GameActivity) context).getGame();
+        mGame = ((GameActivity) context).getFullGame();
         mPlayFeed = mGame.getDriveFeed().getPlayFeed();
     }
 

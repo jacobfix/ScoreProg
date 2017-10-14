@@ -1,5 +1,8 @@
 package jacobfix.scorepredictor.schedule;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class ScheduledGame {
 
     public String gid;
@@ -14,4 +17,17 @@ public class ScheduledGame {
     public int seasonType;
     public Season.WeekType weekType;
 
+    public ScheduledGame() {
+
+    }
+
+    public ScheduledGame(ScheduledGame other) {
+
+    }
+
+    public void sync(JSONObject json) throws JSONException {
+        synchronized (this) {
+            gid = json.getString("gid");
+        }
+    }
 }

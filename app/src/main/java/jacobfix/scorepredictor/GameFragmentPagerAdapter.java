@@ -7,11 +7,11 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.ViewGroup;
 
-public class GamePagerAdapter extends FragmentStatePagerAdapter {
+public class GameFragmentPagerAdapter extends FragmentStatePagerAdapter {
 
-    private static final String TAG = GamePagerAdapter.class.getSimpleName();
+    private static final String TAG = GameFragmentPagerAdapter.class.getSimpleName();
 
-    private SparseArray<Fragment> mRegisteredFragments = new SparseArray<Fragment>();
+    private SparseArray<Fragment> mRegisteredFragments = new SparseArray<>();
 
     private static final String[] PAGE_TITLES = {"Friends", "Live", "Stats", "Compare"};
 
@@ -20,7 +20,7 @@ public class GamePagerAdapter extends FragmentStatePagerAdapter {
     public static final int STATS_PAGE = 2;
     public static final int COMPARE_PAGE = 3;
 
-    public GamePagerAdapter(FragmentManager fm) {
+    public GameFragmentPagerAdapter(FragmentManager fm) {
         super(fm);
     }
 
@@ -33,9 +33,12 @@ public class GamePagerAdapter extends FragmentStatePagerAdapter {
     public Fragment getItem(int position) {
         switch (position) {
             case FRIENDS_PAGE:
-                return FriendPredictionFragment.newInstance();
+                // return FriendPredictionFragment.newInstance();
+                return PredictionFragment.newInstance();
+                // return StatsFragment.newInstance();
             case LIVE_PAGE:
-                return PlayFeedFragment.newInstance();
+                return StatsFragment.newInstance();
+                // return PlayFeedFragment.newInstance();
             case STATS_PAGE:
                 return StatsFragment.newInstance();
             case COMPARE_PAGE:
@@ -51,6 +54,12 @@ public class GamePagerAdapter extends FragmentStatePagerAdapter {
         Fragment fragment = (Fragment) super.instantiateItem(container, position);
         mRegisteredFragments.put(position, fragment);
         return fragment;
+    }
+
+    @Override
+    public void destroyItem(ViewGroup container, int position, Object object) {
+        mRegisteredFragments.remove(position);
+        super.destroyItem(container, position, object);
     }
 
     @Override

@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 
-public abstract class SortTask<T> extends BaseTask {
+public class SortTask<T> extends BaseTask<ArrayList<T>> {
 
     private static final String TAG = SortTask.class.getSimpleName();
 

@@ -60,7 +60,13 @@ public class NumberPadFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        this.listener = (NumberPadFragmentListener) context;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        listener = (NumberPadFragmentListener) getParentFragment();
     }
 
     @Override

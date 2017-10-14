@@ -1,70 +1,81 @@
 package jacobfix.scorepredictor.sync;
 
-import android.util.Log;
-
 import java.util.Collection;
 import java.util.HashSet;
 
-import jacobfix.scorepredictor.Predictions;
+import jacobfix.scorepredictor.OriginalPredictions;
 import jacobfix.scorepredictor.AsyncCallback;
 import jacobfix.scorepredictor.task.BaseTask;
-import jacobfix.scorepredictor.task.SyncPredictionsTask;
+import jacobfix.scorepredictor.task.OriginalSyncPredictionsTask;
 import jacobfix.scorepredictor.task.TaskFinishedListener;
-import jacobfix.scorepredictor.util.Util;
 
-public class PredictionsCache extends SyncableCache<String, Predictions> {
+public class PredictionsCache extends SyncableCache<String, OriginalPredictions> {
 
-    private String gameToSync;
-    private HashSet<Predictions> predictionsToSync = new HashSet<>();
+    private OriginalSyncPredictionsTask scheduledTask;
+    private AsyncCallback<OriginalPredictions[]> scheduledCallback;
+
+    private HashSet<String> gamesToSync = new HashSet<String>();
+    private HashSet<OriginalPredictions> predictionsToSync = new HashSet<>();
 
     public PredictionsCache() {
-        syncTask = new SyncPredictionsTask(gameToSync, predictionsToSync, new TaskFinishedListener() {
+        scheduledCallback = new AsyncCallback<OriginalPredictions[]>() {
             @Override
-            public void onTaskFinished(BaseTask task) {
-                if (task.errorOccurred()) {
-                    notifyAllOfFailure(task.getError());
-                    return;
-                }
-
-                Predictions[] result = (Predictions[]) task.getResult();
-                for (Predictions predictions : result)
-                    set(predictions.getId(), predictions);
+            public void onSuccess(OriginalPredictions[] result) {
                 notifyAllOfSuccess(result);
             }
-        });
-    }
 
-    public void sync(String gid, Collection<Predictions> predictions, final AsyncCallback<Predictions[]> listener) {
-        new SyncPredictionsTask(gid, predictions, new TaskFinishedListener() {
             @Override
-            public void onTaskFinished(BaseTask task) {
-                if (task.errorOccurred()) {
-                    listener.onFailure(task.getError());
-                    return;
-                }
-
-                Predictions[] result = (Predictions[]) task.getResult();
-                for (Predictions predictions : result)
-                    set(predictions.getId(), predictions);
-                listener.onSuccess(result);
+            public void onFailure(Exception e) {
+                notifyAllOfFailure(e);
             }
-        }).start();
+        };
+        scheduledTask = new OriginalSyncPredictionsTask(gamesToSync, predictionsToSync, getTaskFinishedListener(scheduledCallback));
     }
 
-    public void setGameToSync(String gid) {
-        gameToSync = gid;
+    public void sync(Collection<String> gids, Collection<OriginalPredictions> predictions, final AsyncCallback<OriginalPredictions[]> callback) {
+        new OriginalSyncPredictionsTask(gids, predictions, getTaskFinishedListener(callback)).start();
     }
 
-    public void addPredictionsToSync(Predictions predictions) {
+    public void addGameToSync(String gid) {
+        gamesToSync.add(gid);
+    }
+
+    public void setGamesToSync(Collection<String> gids) {
+        gamesToSync.clear();
+        gamesToSync.addAll(gids);
+    }
+
+    public void clearGamesToSync() {
+        gamesToSync.clear();
+    }
+
+    public void addPredictionsToSync(OriginalPredictions predictions) {
         predictionsToSync.add(predictions);
     }
 
-    public void setPredictionsToSync(Collection<Predictions> predictions) {
+    public void setPredictionsToSync(Collection<OriginalPredictions> predictions) {
         predictionsToSync.clear();
         predictionsToSync.addAll(predictions);
     }
 
     public void clearPredictionsToSync() {
         predictionsToSync.clear();
+    }
+
+    private TaskFinishedListener getTaskFinishedListener(final AsyncCallback<OriginalPredictions[]> callback) {
+        return new TaskFinishedListener() {
+            @Override
+            public void onTaskFinished(BaseTask task) {
+                if (task.errorOccurred()) {
+                    callback.onFailure(task.getError());
+                    return;
+                }
+
+                OriginalPredictions[] result = (OriginalPredictions[]) task.getResult();
+                for (OriginalPredictions predictions : result)
+                    set(predictions.getId(), predictions);
+                callback.onSuccess(result);
+            }
+        };
     }
 }

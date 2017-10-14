@@ -1,90 +1,90 @@
 package jacobfix.scorepredictor;
 
 import android.content.Context;
-import android.util.AttributeSet;
-import android.util.Log;
+import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import jacobfix.scorepredictor.components.FlipCardView;
-import jacobfix.scorepredictor.util.Util;
+import jacobfix.scorepredictor.util.ColorUtil;
+import jacobfix.scorepredictor.util.FontHelper;
 import jacobfix.scorepredictor.util.ViewUtil;
 
-public class ScoreboardView extends RelativeLayout {
+public class ScoreboardView extends FrameLayout {
 
-    private static final String TAG = ScoreboardView.class.getSimpleName();
+    private RelativeLayout upperScoreboard;
+    private RelativeLayout lowerScoreboard;
 
-    LinearLayout mMiddleContainer;
-    LinearLayout mAwayNameContainer;
-    LinearLayout mHomeNameContainer;
+    private UpperMiddleContainer upperMiddleContainer;
+    private LowerMiddleContainer lowerMiddleContainer;
 
-    TextView mQuarter;
-    TextView mClock;
+    private RelativeLayout awayScoreContainer;
+    private RelativeLayout homeScoreContainer;
 
-    TextView mAwayAbbr;
-    TextView mHomeAbbr;
-    TextView mAwayName;
-    TextView mHomeName;
+    private FrameLayout awayPredictionContainer;
+    private FrameLayout homePredictionContainer;
 
-    TextView mAwayScore;
-    TextView mHomeScore;
-    FlipCardView mAwayFlipCard;
-    FlipCardView mHomeFlipCard;
+    private LinearLayout awayNameContainer;
+    private LinearLayout homeNameContainer;
+
+    private TextView quarter;
+    private TextView clock;
+
+    private TextView awayAbbr;
+    private TextView homeAbbr;
+    private TextView awayName;
+    private TextView homeName;
+    private TextView awayScore;
+    private TextView homeScore;
+
+    private PredictionView awayPrediction;
+    private PredictionView homePrediction;
 
     public ScoreboardView(Context context) {
-        this(context, null);
-    }
-
-    public ScoreboardView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
-    }
-
-    public ScoreboardView(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
+        super(context);
     }
 
     @Override
     public void onFinishInflate() {
         super.onFinishInflate();
 
-        mMiddleContainer = ViewUtil.findById(this, R.id.middle_container);
-        mAwayNameContainer = ViewUtil.findById(this, R.id.away_name_container);
-        mHomeNameContainer = ViewUtil.findById(this, R.id.home_name_container);
+        upperScoreboard = ViewUtil.findById(this, R.id.upper_scoreboard_container);
+        lowerScoreboard = ViewUtil.findById(this, R.id.lower_scoreboard_container);
 
-        mQuarter = ViewUtil.findById(this, R.id.quarter);
-        mClock = ViewUtil.findById(this, R.id.clock);
+        upperMiddleContainer = ViewUtil.findById(this, R.id.upper_middle_container);
+        lowerMiddleContainer = ViewUtil.findById(this, R.id.lower_middle_container);
 
-        mAwayAbbr = ViewUtil.findById(this, R.id.away_abbr);
-        mHomeAbbr = ViewUtil.findById(this, R.id.home_abbr);
-        mAwayName = ViewUtil.findById(this, R.id.away_name);
-        mHomeName = ViewUtil.findById(this, R.id.home_name);
+        awayNameContainer = ViewUtil.findById(this, R.id.away_name_container);
+        homeNameContainer = ViewUtil.findById(this, R.id.home_name_container);
 
-        mAwayScore = ViewUtil.findById(this, R.id.away_score_actual);
-        mHomeScore = ViewUtil.findById(this, R.id.home_score_actual);
+        awayAbbr = ViewUtil.findById(this, R.id.away_abbr);
+        homeAbbr = ViewUtil.findById(this, R.id.home_abbr);
+        awayName = ViewUtil.findById(this, R.id.away_name);
+        homeName = ViewUtil.findById(this, R.id.home_name);
+        
+        awayScore = ViewUtil.findById(this, R.id.away_score_actual);
+        homeScore = ViewUtil.findById(this, R.id.home_score_actual);
 
-        mAwayFlipCard = ViewUtil.findById(this, R.id.away_flip_card);
-        mHomeFlipCard = ViewUtil.findById(this, R.id.home_flip_card);
-    }
+        awayPrediction = ViewUtil.findById(this, R.id.away_flip_card);
+        homePrediction = ViewUtil.findById(this, R.id.home_flip_card);
 
-    public void updateState(NflGame game) {
-        mQuarter.setText(Util.formatQuarter(getResources(), game.getQuarter()));
-        mClock.setText(game.getClock());
+        Context context = getContext();
 
-        mAwayAbbr.setText(game.getAwayTeam().getAbbr());
-        mAwayName.setText(game.getAwayTeam().getName());
-        mHomeAbbr.setText(game.getHomeTeam().getAbbr());
-        mHomeName.setText(game.getHomeTeam().getName());
+        awayAbbr.setTypeface(FontHelper.getYantramanavBold(context));
+        homeAbbr.setTypeface(FontHelper.getYantramanavBold(context));
+        awayName.setTypeface(FontHelper.getYantramanavBold(context));
+        homeName.setTypeface(FontHelper.getYantramanavBold(context));
 
-        mAwayScore.setText(String.valueOf(game.getAwayTeam().getScore()));
-        mHomeScore.setText(String.valueOf(game.getHomeTeam().getScore()));
-    }
+        awayScore.setTypeface(FontHelper.getYantramanavRegular(context));
+        homeScore.setTypeface(FontHelper.getYantramanavRegular(context));
 
-    public FlipCardView getAwayFlipCard() {
-        return mAwayFlipCard;
-    }
+        awayPrediction.setTypeface(FontHelper.getYantramanavRegular(context));
+        homePrediction.setTypeface(FontHelper.getYantramanavRegular(context));
 
-    public FlipCardView getHomeFlipCard() {
-        return mHomeFlipCard;
+        awayPrediction.strokedBackground(ColorUtil.WHITE, ColorUtil.WHITE);
+        homePrediction.strokedBackground(ColorUtil.WHITE, ColorUtil.WHITE);
+
+        // TODO: Deboss
     }
 }

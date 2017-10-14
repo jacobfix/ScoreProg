@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="120dp"
     android:background="@android:color/white"
-    android:paddingLeft="10dp"
-    android:paddingRight="10dp"
-    android:elevation="2dp"
-    android:paddingTop="6dp"
-    android:paddingBottom="10dp">
+    android:paddingLeft="0dp"
+    android:paddingRight="0dp"
+    android:elevation="4dp"
+    android:paddingTop="0dp"
+    android:paddingBottom="0dp">
     
     <include
         android:id="@+id/middle_container"
@@ -99,19 +99,17 @@
 
     <LinearLayout android:id="@+id/away_name_container"
         android:layout_width="90dp"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical"
         android:layout_gravity="center"
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
-        android:gravity="left|center_vertical"
-        android:paddingLeft="4dp">
+        android:gravity="center">
         <!-- Programmatically lower the text size if it wraps. -->
 
         <TextView android:id="@+id/away_abbr"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="left"
             android:textAllCaps="true"
             android:textColor="@color/standard_text"
             android:textSize="32dp"
@@ -124,6 +122,7 @@
             android:textColor="@color/standard_text"
             android:textSize="14dp"
             android:text="Buccaneers"
+            android:lines="1"
             android:layout_marginTop="-8dp"
             android:visibility="visible"/>
 
@@ -185,16 +184,17 @@
 
     <LinearLayout android:id="@+id/home_name_container"
         android:layout_width="90dp"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:gravity="right|center_vertical">
+        android:gravity="center">
+        <!--
+        android:gravity="right|center_vertical"> -->
 
         <TextView android:id="@+id/home_abbr"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="right"
             android:textAllCaps="true"
             android:textColor="@color/standard_text"
             android:textSize="32dp"
@@ -207,6 +207,7 @@
             android:textColor="@color/standard_text"
             android:textSize="14dp"
             android:text="Falcons"
+            android:lines="1"
             android:layout_marginTop="-8dp"
             android:visibility="visible"/>
 

@@ -2,143 +2,115 @@ package jacobfix.scorepredictor.sync;
 
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 
-import jacobfix.scorepredictor.Predictions;
 import jacobfix.scorepredictor.AsyncCallback;
-import jacobfix.scorepredictor.users.User;
+import jacobfix.scorepredictor.Friends;
+import jacobfix.scorepredictor.server.UserServerInterface;
+import jacobfix.scorepredictor.task.SyncFriendsTask;
+import jacobfix.scorepredictor.task.TaskFinishedListener;
+import jacobfix.scorepredictor.users.UserDetails;
 
 public class UserProvider {
 
     private static final String TAG = UserProvider.class.getSimpleName();
 
-    private static final DetailsCache detailsCache = new DetailsCache();
-    private static final PredictionsCache predictionsCache = new PredictionsCache();
+    private static UserDetailsCache userDetailsCache = new UserDetailsCache();
 
-    public static boolean getUserDetails(Collection<String> ids, final AsyncCallback<Map<String, User>> listener) {
-        final HashMap<String, User> retrieved = new HashMap<>();
-        final LinkedList<User> needed = new LinkedList<>();
-
-        for (String id : ids) {
-            User cachedUser = detailsCache.get(id);
-            if (cachedUser != null)
-                retrieved.put(id, cachedUser);
-            else
-                needed.add(new User(id));
-        }
-
-        Log.d(TAG, "Hit in the cache: " + retrieved.toString());
-        if (needed.isEmpty()) {
-            Log.d(TAG, "All hit in the cache");
-            listener.onSuccess(retrieved);
-            return true;
-        }
-        Log.d(TAG, "Not all hit in the cache. Retrieving now...");
-
-        detailsCache.sync(needed, new AsyncCallback<User[]>() {
+    public static boolean getUserDetails(final String userId, final AsyncCallback<UserDetails> callback) {
+        return getUserDetails(Collections.singletonList(userId), new AsyncCallback<Map<String, UserDetails>>() {
             @Override
-            public void onSuccess(User[] users) {
-                for (User user : users)
-                    retrieved.put(user.getId(), user);
-                listener.onSuccess(retrieved);
+            public void onSuccess(Map<String, UserDetails> result) {
+                callback.onSuccess(result.get(userId));
             }
 
             @Override
-            public void onFailure(Exception exception) {
-                listener.onFailure(exception);
+            public void onFailure(Exception e) {
+                callback.onFailure(e);
             }
         });
-
-        return false;
     }
 
-    public static boolean getUserPredictions(String gid, Collection<String> uids, final AsyncCallback<Map<String, Predictions>> listener) {
-        final HashMap<String, Predictions> retrieved = new HashMap<>();
-        final LinkedList<Predictions> needed = new LinkedList<>();
+    public static boolean getUserDetails(Collection<String> userIds, final AsyncCallback<Map<String, UserDetails>> callback) {
+        return getUserDetails(userIds, callback, false);
+    }
 
-        for (String uid : uids) {
-            Predictions cachedPredictions = predictionsCache.get(uid);
-            if (cachedPredictions != null) {
-                if (cachedPredictions.get(gid) != null) {
-                    retrieved.put(uid, cachedPredictions);
-                } else {
-                    needed.add(cachedPredictions);
-                }
+    public static boolean getUserDetails(Collection<String> userIds, final AsyncCallback<Map<String, UserDetails>> callback, boolean foreground) {
+        final Map<String, UserDetails> retrieved = new HashMap<>();
+        LinkedList<UserDetails> needed = new LinkedList<>();
+
+        for (String userId : userIds) {
+            UserDetails cachedUserDetails = userDetailsCache.get(userId);
+            if (cachedUserDetails != null) {
+                retrieved.put(userId, cachedUserDetails);
             } else {
-                needed.add(new Predictions(uid));
+                needed.add(new UserDetails(userId));
             }
         }
 
         if (needed.isEmpty()) {
-            listener.onSuccess(retrieved);
+            callback.onSuccess(retrieved);
             return true;
         }
 
-        predictionsCache.sync(gid, needed, new AsyncCallback<Predictions[]>() {
+        userDetailsCache.sync(needed, new AsyncCallback<ArrayList<UserDetails>>() {
             @Override
-            public void onSuccess(Predictions[] predictions) {
-                for (Predictions p : predictions)
-                    retrieved.put(p.getId(), p);
-                listener.onSuccess(retrieved);
+            public void onSuccess(ArrayList<UserDetails> result) {
+                for (UserDetails userDetails : result)
+                    retrieved.put(userDetails.getId(), userDetails);
+                callback.onSuccess(retrieved);
             }
 
             @Override
-            public void onFailure(Exception exception) {
-                listener.onFailure(exception);
+            public void onFailure(Exception e) {
+                callback.onFailure(e);
             }
-        });
-
+        }, foreground);
         return false;
     }
 
-    public static void addDetailsToSync(String uid) {
-        User cachedUser = detailsCache.get(uid);
-        if (cachedUser != null)
-            detailsCache.addDetailsToSync(cachedUser);
-        else
-            detailsCache.addDetailsToSync(new User(uid));
+    public static void getFriends(String userId, final AsyncCallback<Friends> callback) {
+        new SyncFriendsTask(userId, new TaskFinishedListener<SyncFriendsTask>() {
+            @Override
+            public void onTaskFinished(SyncFriendsTask task) {
+                if (task.errorOccurred()) {
+                    Log.e(TAG, task.getError().toString());
+                    callback.onFailure(task.getError());
+                    return;
+                }
+
+                Friends friends = task.getResult();
+                callback.onSuccess(friends);
+            }
+        }).start();
     }
 
-    public static void setDetailsToSync(Collection<String> uids) {
-        detailsCache.clearDetailsToSync();
-        for (String uid : uids)
-            addDetailsToSync(uid);
+    public static void getInvitees(String gameId, AsyncCallback<ArrayList<String>> callback) {
+
     }
 
-    public static void setGamePredictionsToSync(String gameId) {
-        predictionsCache.setGameToSync(gameId);
+    public static void registerSyncCallback(AsyncCallback<ArrayList<UserDetails>> callback) {
+        userDetailsCache.registerSyncListener(callback);
     }
 
-    public static void addPredictionsToSync(String uid) {
-        Predictions cachedPredictions = predictionsCache.get(uid);
-        if (cachedPredictions != null)
-            predictionsCache.addPredictionsToSync(cachedPredictions);
-        else
-            predictionsCache.addPredictionsToSync(new Predictions(uid));
+    public static void unregisterSyncCallback(AsyncCallback<ArrayList<UserDetails>> callback) {
+        userDetailsCache.unregisterSyncListener(callback);
     }
 
-    public static void setPredictionsToSync(Collection<String> uids) {
-        predictionsCache.clearPredictionsToSync();
-        for (String uid : uids)
-            addPredictionsToSync(uid);
-    }
-
-    public static void registerDetailsSyncListener(AsyncCallback<User[]> listener) {
-        detailsCache.registerSyncListener(listener);
-    }
-
-    public static void registerPredictionsSyncListener(AsyncCallback<Predictions[]> listener) {
-        predictionsCache.registerSyncListener(listener);
-    }
-
-    public static void unregisterDetailsSyncListener(AsyncCallback<User[]> listener) {
-        detailsCache.unregisterSyncListener(listener);
-    }
-
-    public static void unregisterPredictionsSyncListener(AsyncCallback<Predictions[]> listener) {
-        predictionsCache.unregisterSyncListener(listener);
+    public static void setUserIdsToSync(Collection<String> userIds) {
+        ArrayList<UserDetails> uds = new ArrayList<>();
+        for (String userId : userIds) {
+            UserDetails cachedUserDetails = userDetailsCache.get(userId);
+            if (cachedUserDetails == null)
+                cachedUserDetails = new UserDetails(userId);
+            uds.add(cachedUserDetails);
+        }
+        userDetailsCache.setUserDetailsToSync(uds);
     }
 }

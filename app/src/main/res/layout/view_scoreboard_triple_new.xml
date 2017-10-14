@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<jacobfix.scorepredictor.ScoreboardView xmlns:android="http://schemas.android.com/apk/res/android"
+<jacobfix.scorepredictor.OriginalScoreboardView xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -128,4 +128,4 @@
 
     </LinearLayout>
 
-</jacobfix.scorepredictor.ScoreboardView>
+</jacobfix.scorepredictor.OriginalScoreboardView>

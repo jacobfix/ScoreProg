@@ -23,6 +23,6 @@ public abstract class JsonProvider {
     public abstract JSONArray getActiveGamesJson() throws IOException, JSONException;
     public abstract JSONObject getGameJson(String gid) throws IOException, JSONException;
     public abstract JSONObject getDetailsJson(Collection<String> uids) throws IOException, JSONException;
-    public abstract JSONObject getPredictionsJson(String gid, Collection<String> uids) throws IOException, JSONException;
+    public abstract JSONObject getPredictionsJson(Collection<String> gids, Collection<String> uids) throws IOException, JSONException;
 
 }

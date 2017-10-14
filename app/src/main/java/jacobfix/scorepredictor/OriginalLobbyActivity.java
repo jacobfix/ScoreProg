@@ -25,7 +25,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import jacobfix.scorepredictor.sync.GameProvider;
+import jacobfix.scorepredictor.sync.OriginalGameProvider;
 import jacobfix.scorepredictor.sync.SyncListener;
 import jacobfix.scorepredictor.task.BaseTask;
 import jacobfix.scorepredictor.task.SortGamesTask;
@@ -91,8 +91,8 @@ public class OriginalLobbyActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_lobby, menu);
-        MenuItem menuItem = menu.findItem(R.id.action_change_source);
-        getMenuInflater().inflate(R.menu.change_source_submenu, menuItem.getSubMenu());
+        // MenuItem menuItem = menu.findItem(R.id.action_change_source);
+        // getMenuInflater().inflate(R.menu.change_source_submenu, menuItem.getSubMenu());
         return true;
     }
 
@@ -130,7 +130,7 @@ public class OriginalLobbyActivity extends AppCompatActivity {
         super.onStart();
         Log.d(TAG, "onStart()");
         // NflGameOracle.getInstance().registerSyncListener(mNflOracleSyncListener);
-        GameProvider.registerActiveGamesSyncListener(activeGameSyncListener);
+        // OriginalGameProvider.registerActiveGamesSyncListener(activeGameSyncListener);
     }
 
     @Override
@@ -144,7 +144,7 @@ public class OriginalLobbyActivity extends AppCompatActivity {
         super.onStop();
         Log.d(TAG, "onStop()");
         // NflGameOracle.getInstance().unregisterSyncListener(mNflOracleSyncListener);
-        GameProvider.unregisterActiveGamesSyncListener(activeGameSyncListener);
+        // OriginalGameProvider.unregisterActiveGamesSyncListener(activeGameSyncListener);
     }
 
     @Override
@@ -188,6 +188,7 @@ public class OriginalLobbyActivity extends AppCompatActivity {
                 // Show a dialog
             }
         }; */
+        /*
         activeGameSyncListener = new AsyncCallback<NflGame[]>() {
             @Override
             public void onSuccess(NflGame[] result) {
@@ -212,6 +213,7 @@ public class OriginalLobbyActivity extends AppCompatActivity {
 
             }
         };
+        */
     }
 
     private void switchToGameActivity(String gameId) {

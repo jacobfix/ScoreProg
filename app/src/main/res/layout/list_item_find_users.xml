@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="80dp"
+    android:background="@color/friend_prediction_list_item_background"
+    android:gravity="center_vertical"
+    android:paddingTop="0dp"
+    android:paddingBottom="0dp"
+    android:paddingLeft="15dp"
+    android:paddingRight="20dp">
+
+    <ImageView
+        android:id="@+id/profile_pic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_alignParentLeft="true"
+        android:src="@drawable/ic_account_circle_black_48dp"/>
+
+    <TextView
+        android:id="@+id/username"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@id/profile_pic"
+        android:layout_marginLeft="5dp"
+        android:textColor="@color/standard_text"
+        android:textSize="20sp"
+        android:text="abcdefghijk"
+        android:maxLines="1"/>
+
+    <ImageButton
+        android:id="@+id/add_friend"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:backgroundTint="@color/standard_color"
+        android:src="@drawable/ic_person_add_black_24dp"
+        android:tint="@android:color/white"/>
+</RelativeLayout>

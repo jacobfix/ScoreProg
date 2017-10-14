@@ -8,8 +8,7 @@
         layout="@layout/view_spread"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:background="@android:color/holo_red_dark"/>
+        android:layout_gravity="center"/>
 
     <TextView
         android:id="@+id/prediction_text"
@@ -17,6 +16,16 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:textAllCaps="true"
+        android:textColor="@android:color/white"
         android:text="Prediction"/>
+
+    <ProgressBar
+        android:id="@+id/submit_prediction_pending"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:indeterminate="true"
+        android:indeterminateTint="@android:color/white"
+        android:indeterminateTintMode="src_in"/>
 
 </jacobfix.scorepredictor.LowerMiddleContainer>

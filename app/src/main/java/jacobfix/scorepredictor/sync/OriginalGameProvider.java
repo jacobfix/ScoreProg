@@ -7,7 +7,7 @@ import jacobfix.scorepredictor.AsyncCallback;
 import jacobfix.scorepredictor.NflGame;
 import jacobfix.scorepredictor.schedule.ScheduledGame;
 
-public class GameProvider {
+public class OriginalGameProvider {
 
     private static final ActiveGameCache activeGamesCache = new ActiveGameCache();
     private static final GameCache otherGamesCache = new GameCache();

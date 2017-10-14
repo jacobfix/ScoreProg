@@ -18,16 +18,17 @@
             android:name=".GameActivity"
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="portrait"
-            android:theme="@style/MaterialTheme">
-        </activity>
-
+            android:theme="@style/MaterialTheme" />
+        <activity
+            android:name=".NewGameActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"
+            android:theme="@style/MaterialTheme" />
         <activity
             android:name=".LobbyActivity"
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="portrait"
-            android:theme="@style/MaterialTheme">
-        </activity>
-
+            android:theme="@style/MaterialTheme" />
         <activity
             android:name=".StartupActivity"
             android:configChanges="orientation|keyboardHidden"
@@ -38,7 +39,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
+        <activity
+            android:name=".RegisterActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"
+            android:theme="@style/MaterialTheme" />
+        <activity android:name=".ProfileActivity" />
+        <activity
+            android:name=".LoginActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/MaterialTheme" />
+        <activity
+            android:name=".FindUsersActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/MaterialTheme"/>
     </application>
 
 </manifest>

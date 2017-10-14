@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
@@ -8,13 +8,31 @@
         <item name="colorAccent">@color/colorPrimary</item>
     </style>
 
-    <style name="MaterialTheme" parent="Theme.AppCompat.NoActionBar">
+    <style name="MaterialTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+        <item name="android:actionMenuTextColor">@android:color/white</item>
+        <item name="android:windowTranslucentStatus" tools:targetApi="21">true</item>
+        <item name="colorControlNormal">@android:color/white</item>
+    </style>
+
+    <style name="MaterialLightTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:actionMenuTextColor">@android:color/white</item>
+        <item name="android:tabWidgetStyle">@style/TabLayoutStyle</item>
+    </style>
+
+    <style name="TabLayoutStyle" parent="Theme.AppCompat">
+        <item name="tabIndicatorColor">@android:color/white</item>
+        <item name="tabTextColor">#bdc3c7</item>
+        <item name="tabSelectedTextColor">@android:color/white</item>
+        <item name="tabIndicatorHeight">4dp</item>
     </style>
 
     <style name="SplashTheme" parent="Theme.AppCompat.NoActionBar">
         <item name="android:windowBackground">@drawable/splash_screen</item>
+        <item name="android:statusBarColor" tools:targetApi="21">@color/standard_color</item>
     </style>
 
     <style name="SpTheme" parent="Theme.AppCompat.Light.DarkActionBar">
@@ -36,6 +54,62 @@
 
     <style name="number_pad_button" parent="Base.Widget.AppCompat.Button.Borderless">
         <item name="android:textSize">38sp</item>
+    </style>
+
+    <style name="TextInputLayoutAppearance" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@color/standard_color</item>
+        <item name="android:textColorHint">@color/standard_color</item>
+        <item name="colorAccent">@color/standard_color</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="EditTextStyle" parent="Base.V7.Widget.AppCompat.EditText">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:backgroundTint" tools:targetApi="21">@android:color/white</item>
+        <item name="android:paddingBottom">15dp</item>
+        <item name="android:drawablePadding">15dp</item>
+    </style>
+
+    <style name="TextInputLayoutStyle" parent="Widget.Design.TextInputLayout">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textColorHint">@android:color/white</item>
+    </style>
+
+    <style name="TextAppearance.App.TextInputLayout.Hint" parent="@style/TextAppearance.AppCompat">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="TextAppearance.App.TextInputLayout.Error" parent="@style/TextAppearance.AppCompat">
+        <item name="android:textColor">#ff4444</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="ErrorTextInputLayoutAppearance" parent="TextInputLayoutAppearance">
+        <item name="android:textColor">@android:color/holo_red_dark</item>
+        <item name="colorAccent">@android:color/holo_green_light</item>
+    </style>
+
+    <style name="TextInputEditTextAppearance" parent="TextAppearance.AppCompat">
+        <item name="android:textColorHint">@color/standard_text</item>
+        <item name="android:backgroundTint" tools:targetApi="21">@color/standard_text</item>
+        <item name="colorAccent">@color/standard_color</item>
+    </style>
+
+    <style name="ErrorTextInputEditTextAppearance" parent="TextInputEditTextAppearance">
+        <item name="colorControlNormal">@android:color/holo_red_dark</item>
+        <item name="colorControlActivated">@android:color/holo_red_dark</item>
+    </style>
+
+    <style name="HelpTextAppearance" parent="@style/TextAppearance.AppCompat">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="colorAccent">@android:color/white</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="NullTextAppearance" parent="TextAppearance.AppCompat">
+        <item name="android:textSize">0sp</item>
     </style>
 
 </resources>

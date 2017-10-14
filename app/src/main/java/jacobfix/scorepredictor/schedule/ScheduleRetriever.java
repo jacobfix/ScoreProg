@@ -42,6 +42,7 @@ public class ScheduleRetriever {
 
     public ScheduleRetriever() {
         try {
+            Log.d(TAG, "Creating schedule retriever");
             factory = XmlPullParserFactory.newInstance();
             parser = factory.newPullParser();
 
@@ -57,6 +58,7 @@ public class ScheduleRetriever {
             "year"
             "week"
             "type" */
+        Log.d(TAG, "Retrieving current season state");
         String xml = NetUtil.makeGetRequest(CURRENT_WEEK_URL);
         parser.setInput(new StringReader(xml));
 

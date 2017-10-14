@@ -17,6 +17,7 @@ public class LobbyListItemMiddleContainer extends LinearLayout {
     private LinearLayout startTimeContainer;
     private TextView startTime;
     private TextView meridiem;
+    private TextView date;
 
     private LinearLayout gameTimeContainer;
     private TextView clock;
@@ -44,9 +45,11 @@ public class LobbyListItemMiddleContainer extends LinearLayout {
         startTimeContainer = ViewUtil.findById(this, R.id.start_time_container);
         startTime = ViewUtil.findById(this, R.id.start_time);
         meridiem = ViewUtil.findById(this, R.id.meridiem);
+        date = ViewUtil.findById(this, R.id.date);
 
         startTime.setTypeface(FontHelper.getYantramanavRegular(getContext()));
         meridiem.setTypeface(FontHelper.getYantramanavRegular(getContext()));
+        date.setTypeface(FontHelper.getYantramanavRegular(getContext()));
 
         gameTimeContainer = ViewUtil.findById(this, R.id.game_time_container);
         clock = ViewUtil.findById(this, R.id.clock);
@@ -62,19 +65,28 @@ public class LobbyListItemMiddleContainer extends LinearLayout {
         lock = ViewUtil.findById(this, R.id.lock);
     }
 
-    public void pregameDisplay() {
+    public void pregameDisplay(AtomicGame game) {
         startTimeContainer.setVisibility(View.VISIBLE);
         gameTimeContainer.setVisibility(View.GONE);
         finalText.setVisibility(View.GONE);
+
+        String[] split = game.getStartTimeDisplay().split(" ");
+        startTime.setText(split[0]);
+        meridiem.setText(" " + split[1]);
+        date.setText(String.format("%s, %s", Util.getDayOfWeekString(game.getDayOfWeek()), Util.getDateString(game.getId())));
     }
 
-    public void inProgressDisplay() {
+    public void inProgressDisplay(AtomicGame game) {
         startTimeContainer.setVisibility(View.GONE);
         gameTimeContainer.setVisibility(View.VISIBLE);
         finalText.setVisibility(View.GONE);
+
+        // clock.setText(game.getClock());
+        clock.setText("12:00");
+        quarter.setText(Util.getQuarterString(game.getQuarter()));
     }
 
-    public void finalDisplay() {
+    public void finalDisplay(AtomicGame game) {
         startTimeContainer.setVisibility(View.GONE);
         gameTimeContainer.setVisibility(View.GONE);
         finalText.setVisibility(View.VISIBLE);
@@ -86,6 +98,11 @@ public class LobbyListItemMiddleContainer extends LinearLayout {
 
     public void unlock() {
         lock.setVisibility(View.GONE);
+    }
+
+    public void setStartTime(String startTime) {
+        this.startTime.setText(startTime);
+        this.meridiem.setText("");
     }
 
     public void setStartTime(String startTime, String meridiem) {

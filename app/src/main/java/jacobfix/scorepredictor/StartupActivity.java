@@ -1,16 +1,27 @@
 package jacobfix.scorepredictor;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+
 import jacobfix.scorepredictor.schedule.Schedule;
 import jacobfix.scorepredictor.sync.NflGameOracle;
+import jacobfix.scorepredictor.sync.OriginalUserProvider;
 import jacobfix.scorepredictor.sync.SyncListener;
+import jacobfix.scorepredictor.sync.UserProvider;
 import jacobfix.scorepredictor.task.BaseTask;
 import jacobfix.scorepredictor.task.TaskFinishedListener;
+import jacobfix.scorepredictor.users.User;
+import jacobfix.scorepredictor.users.UserDetails;
+import jacobfix.scorepredictor.util.Util;
 // import jacobfix.scorepredictor.sync.UserOracle;
 
 /**
@@ -77,46 +88,53 @@ public class StartupActivity extends AppCompatActivity {
             intent.putExtra(EXTRA_FIRST_LAUNCH, true);
         }
 
-        /* Because the above will be a version check, this login bit should run each time,
-           even on the first launch, when it is guaranteed to return LOGIN_NEGATIVE. */
-        // TODO: I guess it should just be the user ID stored on the device
-        int loginStatus;
-        if (mPreferences.getBoolean(KEY_LOGGED_IN, false)) {
-            loginStatus = attemptLogin(mPreferences.getString(KEY_USER_ID, null));
-            // TODO: Get the user ID and do
-        } else {
-            loginStatus = LOGIN_NEGATIVE;
-        }
-        intent.putExtra(EXTRA_LOGGED_IN, loginStatus);
-
         TaskFinishedListener afterSeasonLoaded = new TaskFinishedListener() {
             @Override
             public void onTaskFinished(BaseTask task) {
                 if (task.errorOccurred()) {
+                    /* Initialization error occurred. */
                     Log.e(TAG, "" + task.getError());
                     return;
                 }
-                Log.d(TAG, "Season loaded successfully");
-                startActivity(intent);
-                finish();
+                boolean loggedIn = (boolean) task.getResult();
+                if (loggedIn) switchToLobbyActivity();
+                else          switchToLoginActivity();
             }
         };
 
-        new BaseTask(afterSeasonLoaded) {
+        Log.d(TAG, "Starting task to load schedule");
+        new BaseTask<Boolean>(afterSeasonLoaded) {
             @Override
             public void execute() {
                 try {
-                    Log.d(TAG, "About to initialize LockGameManager");
                     LockGameManager.get().init();
-                    Log.d(TAG, "Finished initializing LockGameManager");
-                    Log.d(TAG, "About to initialize Schedule");
                     Schedule.init();
-                    Log.d(TAG, "Finished initializing schedule");
+
+                    boolean loggedIn = mPreferences.getBoolean(KEY_LOGGED_IN, false);
+                    if (loggedIn) {
+                        final String loggedInId = mPreferences.getString(KEY_USER_ID, null);
+                        UserProvider.getUserDetails(Collections.singletonList(loggedInId), new AsyncCallback<Map<String, UserDetails>>() {
+                            @Override
+                            public void onSuccess(Map<String, UserDetails> result) {
+                                UserDetails userDetails = result.get(loggedInId);
+                                LocalAccountManager.get().init(userDetails);
+                                setResult(true);
+                            }
+
+                            @Override
+                            public void onFailure(Exception e) {
+                                reportError(e);
+                            }
+                        });
+                    } else {
+                        setResult(false);
+                    }
                 } catch (Exception e) {
                     reportError(e);
                     e.printStackTrace();
                     // TODO: Display a dialog fragment announcing that there was an error loading the season
                     Log.e(TAG, "There was an error loading the season: " + e);
+                    setResult(false);
                 }
             }
         }.start();
@@ -128,25 +146,15 @@ public class StartupActivity extends AppCompatActivity {
         NflGameOracle.getInstance().unregisterSyncListener(mSyncListener);
     }
 
-    // TODO: Just create a "me" for the time being
-    private int attemptLogin(String userId) {
-        return LOGIN_NEGATIVE;
-        /* Get username and password from device storage and make login request to server. */
-        // TODO: Maybe userId and session key instead?
-        /* if (userId == null) {
-            return LOGIN_NEGATIVE;
-        } */
-        // TODO: Have table with usernames, passwords, and all that and corresponding user ID
-        // TODO: On login, return the information from that user ID
-        // Have to consider the fact that provided user ID might not exist. How do we handle errors like that?
-        /* UserOracle.getInstance().sync(userId, true);
-        if (UserOracle.getInstance().userExists(userId)) {
-            UserOracle.getInstance().setMe(userId);
-        } else {
-            return LOGIN_NEGATIVE;
-        }
+    private void switchToLobbyActivity() {
+        Intent intent = new Intent(this, LobbyActivity.class);
+        startActivity(intent);
+        finish();
+    }
 
-        mEditor.putBoolean(KEY_LOGGED_IN, true);
-        return LOGIN_POSITIVE; */
+    private void switchToLoginActivity() {
+        Intent intent = new Intent(this, LoginActivity.class);
+        startActivity(intent);
+        finish();
     }
 }

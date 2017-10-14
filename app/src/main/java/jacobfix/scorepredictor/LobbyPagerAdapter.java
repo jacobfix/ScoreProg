@@ -9,6 +9,7 @@ import java.util.ArrayList;
 
 import jacobfix.scorepredictor.schedule.Schedule;
 import jacobfix.scorepredictor.schedule.Season;
+import jacobfix.scorepredictor.util.Util;
 
 public class LobbyPagerAdapter extends FragmentStatePagerAdapter {
 
@@ -21,10 +22,11 @@ public class LobbyPagerAdapter extends FragmentStatePagerAdapter {
     public LobbyPagerAdapter(FragmentManager fm, Season season) {
         super(fm);
         this.season = season;
-        weeks.addAll(season.getWeeks(Schedule.PRE));
+        weeks.addAll(season.getWeeks(Season.SeasonType.PRE));
+        // weeks.addAll(season.getWeeks(Schedule.PRE));
         Log.d(TAG, "After adding preseason weeks: " + weeks.size());
-        weeks.addAll(season.getWeeks(Schedule.REG));
-        weeks.addAll(season.getWeeks(Schedule.POS));
+        weeks.addAll(season.getWeeks(Season.SeasonType.REG));
+        weeks.addAll(season.getWeeks(Season.SeasonType.POST));
     }
 
     @Override
@@ -42,22 +44,6 @@ public class LobbyPagerAdapter extends FragmentStatePagerAdapter {
     @Override
     public CharSequence getPageTitle(int position) {
         Season.Week week = weeks.get(position);
-        switch (week.getWeekType()) {
-            case HOF:
-                return "Hall of Fame";
-            case PRE:
-                return "Preseason Week " + week.getWeekNumber();
-            case REG:
-                return "Week " + week.getWeekNumber();
-            case WC:
-                return "Wild Card";
-            case DIV:
-                return "Division";
-            case CON:
-                return "Conference";
-            case SB:
-                return "Super Bowl";
-        }
-        return new String();
+        return Util.getWeekTitle(week.getWeekType(), week.getWeekNumber());
     }
 }

@@ -15,18 +15,18 @@ import jacobfix.scorepredictor.schedule.ScheduledGame;
 import jacobfix.scorepredictor.task.BaseTask;
 import jacobfix.scorepredictor.task.TaskFinishedListener;
 
-public class GameSyncableMap extends SyncableMap<String, NflGame> {
+public class OriginalGameSyncableMap { //extends SyncableMap<String, NflGame> {
 
     private LinkedList<GameSyncObject> syncObjects = new LinkedList<>();
 
-    public GameSyncableMap() {
-        syncTask = new SyncGamesTask(syncObjects, new TaskFinishedListener() {
+    public OriginalGameSyncableMap() {
+        /* syncTask = new SyncGamesTask(syncObjects, new TaskFinishedListener() {
             @Override
             public void onTaskFinished(BaseTask task) {
-                if (task.errorOccurred()) notifyAllOfFailure(task.getError());
-                else                      notifyAllOfSuccess((NflGame[]) task.getResult());
+                // if (task.errorOccurred()) notifyAllOfFailure(task.getError());
+                // else                      notifyAllOfSuccess((Collection<NflGame>) task.getResult());
             }
-        });
+        });*/
     }
 
     public void sync(int year, int week, int seasonType, boolean full, final AsyncCallback<NflGame[]> callback) {
@@ -64,7 +64,8 @@ public class GameSyncableMap extends SyncableMap<String, NflGame> {
                     for (int week : syncable.weeks) {
                         ScheduledGame[] scheduledGames = ScheduleRetriever.get().getWeek(syncable.season, week, syncable.seasonType);
                         for (ScheduledGame scheduledGame : scheduledGames) {
-                            NflGame game = (NflGame) get(scheduledGame.gid);
+                            // NflGame game = (NflGame) get(scheduledGame.gid);
+                            NflGame game = null;
 
                             boolean newGame = false;
                             if (game == null) {
@@ -77,8 +78,8 @@ public class GameSyncableMap extends SyncableMap<String, NflGame> {
                             if (syncable.full)
                                 game.syncFullDetails(GameRetriever.getGameJson(game.getGameId()));
 
-                            if (newGame)
-                                put(game.getGameId(), game);
+                            // if (newGame)
+                            //     put(game.getGameId(), game);
 
                             result.add(game);
                         }

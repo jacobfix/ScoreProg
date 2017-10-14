@@ -9,6 +9,7 @@ import java.util.Comparator;
 import java.util.TreeSet;
 
 import jacobfix.scorepredictor.schedule.Schedule;
+import jacobfix.scorepredictor.server.ScheduleServerInterface;
 import jacobfix.scorepredictor.task.BaseTask;
 import jacobfix.scorepredictor.util.NetUtil;
 
@@ -22,7 +23,7 @@ public class LockGameManager {
     private long loadTimeReferenceMillis;
     private final TreeSet<LockGameReference> lockGameReferences = new TreeSet<>(new LockGameComparator());
 
-    private final String TIME_URL = "http://" + ApplicationContext.HOST + "/time.php";
+    // private final String TIME_URL = "http://" + ApplicationContext.HOST + "/time.php";
 
     public static synchronized LockGameManager get() {
         if (instance == null)
@@ -31,7 +32,8 @@ public class LockGameManager {
     }
 
     public void init() throws Exception {
-        loadTimeMillis = Long.parseLong(NetUtil.makeGetRequest(TIME_URL));
+        // loadTimeMillis = Long.parseLong(NetUtil.makeGetRequest(TIME_URL));
+        loadTimeMillis = ScheduleServerInterface.getDefault().currentTimeMillis();
         loadTimeReferenceMillis = SystemClock.elapsedRealtime();
 
         Log.d(TAG, "Load time millis: " + loadTimeMillis);
@@ -67,7 +69,7 @@ public class LockGameManager {
         @Override
         public void execute() {
             try {
-                loadTimeMillis = Long.parseLong(NetUtil.makeGetRequest(TIME_URL));
+                loadTimeMillis = ScheduleServerInterface.getDefault().currentTimeMillis();
                 loadTimeReferenceMillis = SystemClock.elapsedRealtime();
             } catch (Exception e) {
                 reportError(e);
@@ -84,6 +86,7 @@ public class LockGameManager {
 
                 synchronized (lockGameReferences) {
                     try {
+                        Log.d(TAG, "About to check if lockGameReferences is empty");
                         while (lockGameReferences.isEmpty()) lockGameReferences.wait();
 
                         LockGameReference reference = lockGameReferences.first();

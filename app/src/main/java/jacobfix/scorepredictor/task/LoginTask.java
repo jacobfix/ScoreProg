@@ -7,7 +7,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,11 +14,14 @@ import java.util.Map;
 import jacobfix.scorepredictor.ApplicationContext;
 import jacobfix.scorepredictor.AsyncCallback;
 import jacobfix.scorepredictor.LocalAccountManager;
+import jacobfix.scorepredictor.server.UserServerInterface;
+import jacobfix.scorepredictor.sync.OriginalUserProvider;
 import jacobfix.scorepredictor.sync.UserProvider;
 import jacobfix.scorepredictor.users.User;
+import jacobfix.scorepredictor.users.UserDetails;
 import jacobfix.scorepredictor.util.NetUtil;
 
-public class LoginTask extends BaseTask {
+public class LoginTask extends BaseTask<Integer> {
 
     private static final String TAG = LoginTask.class.getSimpleName();
 
@@ -27,10 +29,6 @@ public class LoginTask extends BaseTask {
     private String password;
 
     private static final String LOGIN_URL = "http://" + ApplicationContext.HOST + "/login.php";
-
-    private static final String PARAM_USERNAME_EMAIL = "username_email";
-    private static final String PARAM_PASSWORD = "password";
-    private static final String PARAM_IS_EMAIL = "is_email";
 
     public static final int LOGIN_ERROR_NONE = 0;
     public static final int LOGIN_ERROR_INSUFFICIENT_PARAMS = 1;
@@ -51,43 +49,32 @@ public class LoginTask extends BaseTask {
 
     @Override
     public void execute() {
-        Map<String, String> params = new HashMap<>();
-        params.put(PARAM_USERNAME_EMAIL, usernameEmail);
-        params.put(PARAM_PASSWORD, password);
-        params.put(PARAM_IS_EMAIL, String.valueOf(Patterns.EMAIL_ADDRESS.matcher(usernameEmail).matches()));
-
         try {
-            JSONObject response = new JSONObject(NetUtil.makePostRequest(LOGIN_URL, params));
+            boolean isEmail = Patterns.EMAIL_ADDRESS.matcher(usernameEmail).matches();
+            JSONObject response = UserServerInterface.getDefault().authenticate(usernameEmail, password, isEmail);
 
             if (response.getBoolean("success")) {
                 final String loggedInId = response.getString("uid");
-                UserProvider.getUserDetails(Collections.singletonList(loggedInId), new AsyncCallback<Map<String, User>>() {
+                Log.d(TAG, "Got ID: " + loggedInId);
+                UserProvider.getUserDetails(Collections.singletonList(loggedInId), new AsyncCallback<Map<String, UserDetails>>() {
                     @Override
-                    public void onSuccess(Map<String, User> result) {
-                        Log.d(TAG, "Got details after login successfully");
-                        User thisUser = (User) result.keySet().toArray()[0];
-                        LocalAccountManager.set(thisUser);
-                        UserProvider.setDetailsToSync(LocalAccountManager.getFriends());
+                    public void onSuccess(Map<String, UserDetails> result) {
+                        Log.d(TAG, "Got UserDetails of logged in user");
+                        UserDetails userDetails = result.get(loggedInId);
+                        LocalAccountManager.get().init(userDetails);
                         setResult(LOGIN_ERROR_NONE);
                     }
 
                     @Override
                     public void onFailure(Exception e) {
-                        Log.e(TAG, "Getting user details after login failed");
-                        setResult(LOGIN_ERROR_SYNC_FAILURE);
+                        reportError(e);
                     }
-                });
-
+                }, true);
+            } else {
+                setResult(response.getInt("errno"));
             }
-        } catch (IOException e) {
-            reportError(e, TAG, TaskError.JSON_ERROR, e.toString());
-            setResult(LOGIN_ERROR_UNKNOWN_NETWORK);
-        } catch (JSONException e) {
-            reportError(e, TAG, TaskError.IO_ERROR, e.toString());
-            setResult(LOGIN_ERROR_UNKNOWN_JSON);
         } catch (Exception e) {
-            reportError(e, TAG, TaskError.UNKNOWN_ERROR, e.toString());
-            setResult(LOGIN_ERROR_UNKNOWN);
+            reportError(e);
         }
     }
 }

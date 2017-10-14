@@ -1,6 +1,6 @@
 package jacobfix.scorepredictor.task;
 
-public interface TaskFinishedListener {
+public interface TaskFinishedListener<T extends BaseTask> {
 
-    void onTaskFinished(BaseTask task);
+    void onTaskFinished(T task);
 }

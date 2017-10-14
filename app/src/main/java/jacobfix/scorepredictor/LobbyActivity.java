@@ -1,31 +1,45 @@
 package jacobfix.scorepredictor;
 
+import android.app.ActionBar;
 import android.content.Intent;
 import android.graphics.Color;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
 
 import jacobfix.scorepredictor.schedule.Schedule;
+import jacobfix.scorepredictor.schedule.Season;
+import jacobfix.scorepredictor.util.ColorUtil;
+import jacobfix.scorepredictor.util.FontHelper;
+import jacobfix.scorepredictor.util.Util;
 import jacobfix.scorepredictor.util.ViewUtil;
 
 public class LobbyActivity extends AppCompatActivity {
 
     private static final String TAG = LobbyActivity.class.getSimpleName();
 
-    private DialogFragment loginDialog;
-
-    private AsyncCallback weekSyncListener;
+    private Season season;
 
     private Toolbar toolbar;
     private TabLayout tabs;
     private ViewPager pager;
     private LobbyPagerAdapter pagerAdapter;
+
+    private AsyncCallback gameSyncCallback; // Atomic games!
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,29 +47,60 @@ public class LobbyActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lobby_new);
 
-        Intent intent = getIntent();
-        if (intent.getBooleanExtra(StartupActivity.EXTRA_FIRST_LAUNCH, false)) {
-            /* Show first launch dialog. */
-            Log.d(TAG, "FIRST LAUNCH/NEW VERSION DIALOG DISPLAYED");
-            showLoginDialog();
-        } else if (!intent.getBooleanExtra(StartupActivity.EXTRA_LOGGED_IN, false)) {
-            /* Show login dialog. */
-            showLoginDialog();
-            Log.d(TAG, "LOGIN DIALOG DISPLAYED");
-        } else {
-            /* Procedure for logged in user. */
-            Log.d(TAG, "USER IS LOGGED IN");
-        }
+        int year = getIntent().getIntExtra("season", Schedule.getCurrentSeason());
+        season = Schedule.getSeason(year);
 
         initializeToolbar();
         initializeViews();
         initializeTabs();
-        initializeListeners();
+        initializeCallbacks();
+
+        pager.setCurrentItem(season.getAbsoluteWeekNumber(Schedule.getCurrentWeek(), Schedule.getCurrentSeasonType()));
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_lobby, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_find_friends:
+                switchToFindUsersActivity();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void initializeToolbar() {
         toolbar = ViewUtil.findById(this, R.id.toolbar);
+        ViewUtil.initializeToolbar(this, toolbar);
+
+        toolbar.setBackgroundColor(ColorUtil.STANDARD_COLOR);
+        TextView toolbarTitle = ViewUtil.findById(this, R.id.title);
+        // toolbarTitle.setTypeface(FontHelper.getYantramanavBold(this));
+        toolbarTitle.setTypeface(FontHelper.getLobsterRegular(this));
+        toolbarTitle.setAllCaps(false);
+        toolbarTitle.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 26);
+        // toolbarTitle.setText("Thursday, Sept. 14");
+        toolbarTitle.setText("ScoreProg");
+
+        /*
         toolbar.setBackgroundColor(Color.parseColor("#213642"));
+        TextView title = ViewUtil.findById(this, R.id.title);
+        title.setText("Lobby");
+        toolbar.setPadding(0, ViewUtil.getStatusBarHeight(this), 0, 0);
+        toolbar.getLayoutParams().height = toolbar.getLayoutParams().height + ViewUtil.getStatusBarHeight(this);
+        toolbar.requestLayout();
+
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        */
     }
 
     private void initializeViews() {
@@ -65,24 +110,21 @@ public class LobbyActivity extends AppCompatActivity {
 
     private void initializeTabs() {
         Log.d(TAG, "initializeTabs()");
-        Log.d(TAG, "" + Schedule.getCurrentSeasonType());
-        // pagerAdapter = new LobbyPagerAdapter(getSupportFragmentManager(), Schedule.getSeason(Schedule.getCurrentSeason()));
-        pagerAdapter = new LobbyPagerAdapter(getSupportFragmentManager(), Schedule.getSeason(Schedule.getCurrentSeason()));
+        pagerAdapter = new LobbyPagerAdapter(getSupportFragmentManager(), season);
         pager.setAdapter(pagerAdapter);
         tabs.setupWithViewPager(pager);
-        tabs.setSelectedTabIndicatorColor(Color.WHITE);
-        // pager.setCurrentItem();
+        // tabs.setSelectedTabIndicatorColor(Color.WHITE);
     }
 
-    private void initializeListeners() {
-        weekSyncListener = new AsyncCallback<Void>()  {
+    private void initializeCallbacks() {
+        gameSyncCallback = new AsyncCallback<ArrayList<FullGame>>() {
             @Override
-            public void onFailure(Exception e) {
+            public void onSuccess(ArrayList<FullGame> result) {
 
             }
 
             @Override
-            public void onSuccess(Void v) {
+            public void onFailure(Exception e) {
 
             }
         };
@@ -91,19 +133,29 @@ public class LobbyActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-        // Schedule.registerWeekSyncListener(weekSyncListener);
-    }
+        Season currentSeason = Schedule.getSeason(Schedule.getCurrentSeason());
+        Season.Week currentWeek = currentSeason.getWeek(Schedule.getCurrentWeek(), Schedule.getCurrentSeasonType());
 
-    private void showLoginDialog() {
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        loginDialog = LoginDialogFragment.newInstance();
-        loginDialog.show(ft, "login_dialog");
-    }
-
-    private void hideLoginDialog() {
-        if (loginDialog != null) {
-            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-            ft.remove(loginDialog);
+        LinkedList<AtomicGame> atomicGames = new LinkedList<>();
+        for (String gameId : currentWeek.getGames()) {
+            AtomicGame game = Schedule.getGame(gameId);
+            Log.d(TAG, game.getAwayTeam().getAbbr() + " @ " + game.getHomeTeam().getAbbr());
+            atomicGames.add(game);
         }
+
+        GameProvider.setGamesToSync(atomicGames);
+        // TODO: Don't register the sync callback here, do it in the fragment
+        GameProvider.registerSyncCallback(gameSyncCallback);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        GameProvider.unregisterSyncCallback(gameSyncCallback);
+    }
+
+    private void switchToFindUsersActivity() {
+        Intent intent = new Intent(this, FindUsersActivity.class);
+        startActivity(intent);
     }
 }

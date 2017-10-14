@@ -19,13 +19,12 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 
-import jacobfix.scorepredictor.sync.UserProvider;
+import jacobfix.scorepredictor.sync.OriginalUserProvider;
 import jacobfix.scorepredictor.task.BaseTask;
 import jacobfix.scorepredictor.task.RankPredictionsTask;
 import jacobfix.scorepredictor.task.TaskFinishedListener;
@@ -33,7 +32,7 @@ import jacobfix.scorepredictor.users.User;
 import jacobfix.scorepredictor.util.FontHelper;
 import jacobfix.scorepredictor.util.ViewUtil;
 
-public class FriendPredictionFragment extends Fragment implements GameStateChangeListener {
+public class FriendPredictionFragment extends Fragment {
 
     private static final String TAG = FriendPredictionFragment.class.getSimpleName();
 
@@ -42,9 +41,11 @@ public class FriendPredictionFragment extends Fragment implements GameStateChang
     private ArrayList<User> mFriends = new ArrayList<>();
 
     private Map<String, User> allDetails = new HashMap<>();
-    private ArrayList<Predictions> rankedPredictions = new ArrayList<>();
+    private ArrayList<OriginalPredictions> rankedPredictions = new ArrayList<>();
 
     private NflGame mGame;
+
+    private AtomicGame game;
 
     private RelativeLayout header;
     private TextView awayAbbr;
@@ -54,6 +55,11 @@ public class FriendPredictionFragment extends Fragment implements GameStateChang
     private ListView list;
     private FriendPredictionAdapter adapter;
     private LayoutInflater mInflater;
+
+    private ProgressBar loadingSymbol;
+
+    private boolean detailsRetrieved;
+    private boolean predictionsRetrieved;
 
     private AsyncCallback<User[]> detailsSyncListener = new AsyncCallback<User[]>() {
         @Override
@@ -67,27 +73,28 @@ public class FriendPredictionFragment extends Fragment implements GameStateChang
         }
     };
 
-    private AsyncCallback<Predictions[]> predictionsSyncListener = new AsyncCallback<Predictions[]>() {
+    /*
+    private AsyncCallback<OriginalPredictions[]> predictionsSyncListener = new AsyncCallback<OriginalPredictions[]>() {
         @Override
-        public void onSuccess(Predictions[] result) {
+        public void onSuccess(OriginalPredictions[] result) {
             HashSet<String> toRetrieve = new HashSet<>(LocalAccountManager.getFriends());
             toRetrieve.add(LocalAccountManager.getId());
-            UserProvider.getUserPredictions(mGame.getGameId(), toRetrieve, new AsyncCallback<Map<String, Predictions>>() {
+            OriginalUserProvider.getUserPredictions(game.getId(), toRetrieve, new AsyncCallback<Map<String, OriginalPredictions>>() {
                 @Override
-                public void onSuccess(final Map<String, Predictions> result) {
+                public void onSuccess(final Map<String, OriginalPredictions> result) {*/
                     /* If game is not pregame, rank and display the predictions. Otherwise, just show which users have
-                    predicted. */
+                    predicted. */ /*
                     Log.d(TAG, "User predictions were retrieved: " + result.toString());
-                    Log.d(TAG, "Retrieved user predictions size: " + result.size());
+                    Log.d(TAG, "Retrieved user predictions size: " + result.size()); */
                     /* Rank the predictions, and collect the user details. */
-
-                    new RankPredictionsTask(mGame, result.values(), new TaskFinishedListener() {
+                    /*
+                    new RankPredictionsTask(game, result.values(), new TaskFinishedListener() {
                         @Override
                         public void onTaskFinished(BaseTask task) {
                             rankedPredictions.clear();
-                            rankedPredictions.addAll((ArrayList<Predictions>) task.getResult());
+                            rankedPredictions.addAll((ArrayList<OriginalPredictions>) task.getResult());
 
-                            UserProvider.getUserDetails(result.keySet(), new AsyncCallback<Map<String, User>>() {
+                            OriginalUserProvider.getUserDetails(result.keySet(), new AsyncCallback<Map<String, User>>() {
                                 @Override
                                 public void onSuccess(Map<String, User> result) {
                                     allDetails = result;
@@ -114,7 +121,7 @@ public class FriendPredictionFragment extends Fragment implements GameStateChang
         public void onFailure(Exception exception) {
 
         }
-    };
+    };*/
 
     public static FriendPredictionFragment newInstance() {
         return new FriendPredictionFragment();
@@ -124,7 +131,77 @@ public class FriendPredictionFragment extends Fragment implements GameStateChang
     public void onAttach(Context context) {
         Log.d(TAG, "onAttach()");
         super.onAttach(context);
-        mGame = ((GameActivity) context).getGame();
+        // mGame = ((GameActivity) context).getGame();
+        game = ((GameActivity) context).getAtomicGame();
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        OriginalUserProvider.getFriends(LocalAccountManager.get().getId(), new AsyncCallback<Collection<String>>() {
+            @Override
+            public void onSuccess(Collection<String> result) {
+                OriginalUserProvider.getUserPredictions(game.getId(), result, new AsyncCallback<Map<String, OriginalPredictions>>() {
+                    @Override
+                    public void onSuccess(final Map<String, OriginalPredictions> result) {
+                        /* new RankPredictionsTask(game, result.values(), new TaskFinishedListener() {
+                            @Override
+                            public void onTaskFinished(BaseTask task) {
+                                if (task.errorOccurred()) {
+                                    Log.e(TAG, task.getError().toString());
+                                    return;
+                                }
+
+                                rankedPredictions = (ArrayList<OriginalPredictions>) task.getResult();
+
+                                predictionsRetrieved = true;
+                                if (detailsRetrieved) {
+                                    showList();
+                                    adapter.notifyDataSetChanged();
+                                }
+                            }
+                        }).start();*/
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+                        Log.e(TAG, e.toString());
+                    }
+                });
+
+                OriginalUserProvider.getUserDetails(result, new AsyncCallback<Map<String, User>>() {
+                    @Override
+                    public void onSuccess(Map<String, User> result) {
+                        allDetails = result;
+                        detailsRetrieved = true;
+                        if (predictionsRetrieved) {
+                            showList();
+                            adapter.notifyDataSetChanged();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+                        Log.e(TAG, e.toString());
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Log.e(TAG, e.toString());
+            }
+        });
+    }
+
+    private void showList() {
+        list.setVisibility(View.VISIBLE);
+        loadingSymbol.setVisibility(View.GONE);
+    }
+
+    private void showLoading() {
+        loadingSymbol.setVisibility(View.VISIBLE);
+        list.setVisibility(View.GONE);
     }
 
     @Override
@@ -139,16 +216,15 @@ public class FriendPredictionFragment extends Fragment implements GameStateChang
         homeAbbr = ViewUtil.findById(view, R.id.home_abbr);
         spreadAbbr = ViewUtil.findById(view, R.id.spread_abbr);
 
-        // TODO: Make the color of the header containing the abbreviations a lighter version of the current scoreboard color
-
         awayAbbr.setTypeface(FontHelper.getYantramanavRegular(getContext()));
         homeAbbr.setTypeface(FontHelper.getYantramanavRegular(getContext()));
         spreadAbbr.setTypeface(FontHelper.getYantramanavRegular(getContext()));
 
-        awayAbbr.setText(mGame.getAwayTeam().getAbbr());
-        homeAbbr.setText(mGame.getHomeTeam().getAbbr());
+        awayAbbr.setText(game.getAwayTeam().getAbbr());
+        homeAbbr.setText(game.getHomeTeam().getAbbr());
 
         list = ViewUtil.findById(view, R.id.list);
+        loadingSymbol = ViewUtil.findById(view, R.id.loading_circle);
 
         View emptyView = createEmptyView(inflater, container);
         list.setEmptyView(emptyView);
@@ -170,10 +246,10 @@ public class FriendPredictionFragment extends Fragment implements GameStateChang
     public void onStart() {
         super.onStart();
         Log.d(TAG, "onStart()");
-        ((GameActivity) getContext()).registerGameStateChangeListener(this);
-        // UserProvider.registerDetailsSyncListener(detailsSyncListener);
+        // ((GameActivity) getContext()).registerGameStateChangeListener(this);
+        // OriginalUserProvider.registerDetailsSyncListener(detailsSyncListener);
         Log.d(TAG, "Registering prediction sync listener");
-        // UserProvider.registerPredictionsSyncListener(predictionsSyncListener);
+        // OriginalUserProvider.registerPredictionsSyncListener(predictionsSyncListener);
         Log.d(TAG, "Listeners registered");
     }
 
@@ -181,9 +257,9 @@ public class FriendPredictionFragment extends Fragment implements GameStateChang
     public void onStop() {
         super.onStop();
         Log.d(TAG, "onStop()");
-        ((GameActivity) getContext()).unregisterGameStateChangeListener(this);
-        // UserProvider.unregisterDetailsSyncListener(detailsSyncListener);
-        // UserProvider.unregisterPredictionsSyncListener(predictionsSyncListener);
+        // ((GameActivity) getContext()).unregisterGameStateChangeListener(this);
+        // OriginalUserProvider.unregisterDetailsSyncListener(detailsSyncListener);
+        // OriginalUserProvider.unregisterPredictionsSyncListener(predictionsSyncListener);
         Log.d(TAG, "Listeners unregistered");
     }
 
@@ -191,19 +267,25 @@ public class FriendPredictionFragment extends Fragment implements GameStateChang
         header.setBackgroundColor(color);
     }
 
+    /*
+    @Override
+    public void onGameStateChanged(AtomicGame game) {
+        this.game = game;
+        awayAbbr.setText(game.getAwayTeam().getAbbr());
+        homeAbbr.setText(game.getHomeTeam().getAbbr());
+    }
+    */
+
+    /*
     @Override
     public void onGameStateChanged(NflGame game) {
         mGame = game;
         awayAbbr.setText(game.getAwayTeam().getAbbr());
         homeAbbr.setText(game.getHomeTeam().getAbbr());
     }
+    */
 
-    @Override
-    public void onPredictionChanged(Prediction p) {
-
-    }
-
-    public ArrayList<Predictions> getRankedPredictions() {
+    public ArrayList<OriginalPredictions> getRankedPredictions() {
         return rankedPredictions;
     }
 
@@ -217,7 +299,7 @@ public class FriendPredictionFragment extends Fragment implements GameStateChang
 
         @Override
         public int getCount() {
-            Log.d(TAG, "Predictions size: " + rankedPredictions.size());
+            Log.d(TAG, "OriginalPredictions size: " + rankedPredictions.size());
             if (allDetails.size() != rankedPredictions.size()) {
                 Log.d(TAG, "ALL DETAILS SIZE DID NOT MATCH");
                 return 0;
@@ -227,7 +309,7 @@ public class FriendPredictionFragment extends Fragment implements GameStateChang
         }
 
         @Override
-        public Predictions getItem(int position) {
+        public OriginalPredictions getItem(int position) {
             return rankedPredictions.get(position);
         }
 
@@ -259,7 +341,7 @@ public class FriendPredictionFragment extends Fragment implements GameStateChang
                 convertView.setTag(holder);
             }
 
-            Predictions predictions = getItem(position);
+            OriginalPredictions predictions = getItem(position);
             User user = allDetails.get(predictions.getId());
 
             ViewHolder holder = (ViewHolder) convertView.getTag();
@@ -271,7 +353,7 @@ public class FriendPredictionFragment extends Fragment implements GameStateChang
             int white = ContextCompat.getColor(getContext(), android.R.color.white);
             int standardText = ContextCompat.getColor(getContext(), R.color.standard_text);
 
-            if (mGame.isPregame()) {
+            if (game.isPregame()) {
                 /* Show the users who have submitted predictions, but don't display their predictions. */
                 holder.awayFlipCard.setVisibility(View.INVISIBLE);
                 holder.homeFlipCard.setVisibility(View.INVISIBLE);
@@ -286,33 +368,33 @@ public class FriendPredictionFragment extends Fragment implements GameStateChang
                 holder.spread.setVisibility(View.VISIBLE);
                 holder.spreadStatus.setVisibility(View.VISIBLE);
 
-                if (user.getId().equals(LocalAccountManager.getId()))
+                if (user.getId().equals(LocalAccountManager.get().getId()))
                     holder.root.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.me_in_ranking));
                 else
                     holder.root.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.friend_prediction_list_item_background));
 
-                Prediction p = predictions.get(mGame.getGameId());
+                Prediction p = predictions.get(game.getId());
                 holder.awayFlipCard.setScore(p.getAwayScore());
                 holder.homeFlipCard.setScore(p.getHomeScore());
 
-                int spread = p.getSpread(mGame);
-                holder.spread.setText(String.valueOf(spread));
-                holder.spreadStatus.setProgress(100 - spread);
+                // int spread = p.getSpread(game);
+                // holder.spread.setText(String.valueOf(spread));
+                // holder.spreadStatus.setProgress(100 - spread);
 
                 if (p.getAwayScore() == p.getHomeScore()) {
                     holder.awayFlipCard.strokedBackground(standardText, standardText);
                     holder.homeFlipCard.strokedBackground(standardText, standardText);
                     holder.spreadStatus.getProgressDrawable().setColorFilter(standardText, PorterDuff.Mode.SRC_IN);
                 } else if (p.getAwayScore() > p.getHomeScore()) {
-                    holder.awayFlipCard.solidBackground(white, mGame.getAwayTeam().getPrimaryColor());
+                    holder.awayFlipCard.solidBackground(white, game.getAwayTeam().getPrimaryColor());
                     // holder.homeFlipCard.noBackground(standardText);
                     holder.homeFlipCard.strokedBackground(standardText, standardText);
-                    holder.spreadStatus.getProgressDrawable().setColorFilter(mGame.getAwayTeam().getPrimaryColor(), PorterDuff.Mode.SRC_IN);
+                    holder.spreadStatus.getProgressDrawable().setColorFilter(game.getAwayTeam().getPrimaryColor(), PorterDuff.Mode.SRC_IN);
                 } else {
                     // holder.awayFlipCard.noBackground(standardText);
                     holder.awayFlipCard.strokedBackground(standardText, standardText);
-                    holder.homeFlipCard.solidBackground(white, mGame.getHomeTeam().getPrimaryColor());
-                    holder.spreadStatus.getProgressDrawable().setColorFilter(mGame.getHomeTeam().getPrimaryColor(), PorterDuff.Mode.SRC_IN);
+                    holder.homeFlipCard.solidBackground(white, game.getHomeTeam().getPrimaryColor());
+                    holder.spreadStatus.getProgressDrawable().setColorFilter(game.getHomeTeam().getPrimaryColor(), PorterDuff.Mode.SRC_IN);
                 }
 
                 holder.ranking.setText(String.valueOf(position + 1));

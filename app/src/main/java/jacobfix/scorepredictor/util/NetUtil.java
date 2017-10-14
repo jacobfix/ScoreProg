@@ -25,7 +25,7 @@ public class NetUtil {
 
     private static final String TAG = NetUtil.class.getSimpleName();
 
-    public static String makePostRequest(String url, Map<String, String> params) throws IOException, JSONException {
+    public static String makePostRequest(String url, Map<String, String> params) throws IOException {
         URLConnection connection = new URL(url).openConnection();
 
         /* Assemble the request body containing the POST parameters. */
@@ -91,7 +91,9 @@ public class NetUtil {
                 query.append(String.format("%s_", URLEncoder.encode(value, "UTF-8")));
             }
             query.deleteCharAt(query.length() - 1);
+            query.append("&");
         }
+        query.deleteCharAt(query.length() - 1);
         url = url + query.toString();
         return makeGetRequest(url);
     }

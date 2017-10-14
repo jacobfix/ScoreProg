@@ -14,8 +14,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
-import jacobfix.scorepredictor.sync.SyncListener;
-import jacobfix.scorepredictor.sync.UserProvider;
+import jacobfix.scorepredictor.sync.OriginalUserProvider;
 import jacobfix.scorepredictor.task.BaseTask;
 import jacobfix.scorepredictor.task.LoginTask;
 import jacobfix.scorepredictor.task.TaskFinishedListener;
@@ -132,13 +131,14 @@ public class LoginDialogFragment extends DialogFragment {
                     public void execute() {
                         final String userId = "1";
 
-                        UserProvider.getUserDetails(Arrays.asList(new String[]{userId}), new AsyncCallback<Map<String, User>>() {
+                        /*
+                        OriginalUserProvider.getUserDetails(Arrays.asList(new String[]{userId}), new AsyncCallback<Map<String, User>>() {
                             @Override
                             public void onSuccess(Map<String, User> result) {
                                 User thisUser = (User) result.values().toArray()[0];
                                 Log.d(TAG, "Logged in as " + thisUser);
                                 LocalAccountManager.set(thisUser);
-                                UserProvider.setDetailsToSync(Collections.singletonList(userId));
+                                OriginalUserProvider.setDetailsToSync(Collections.singletonList(userId));
                                 dismiss();
                             }
 
@@ -147,6 +147,7 @@ public class LoginDialogFragment extends DialogFragment {
                                 Log.e(TAG, "There was a sync error");
                             }
                         });
+                        */
                     }
                 }.start();
             }

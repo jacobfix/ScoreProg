@@ -6,17 +6,19 @@
     android:orientation="vertical">
 
     <include
-        layout="@layout/toolbar"
-        android:elevation="4dp"/>
+        layout="@layout/toolbar"/>
 
     <android.support.design.widget.TabLayout
         android:id="@+id/tabs"
+        style="@style/TabLayoutStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#213642"
         android:elevation="4dp"
         app:tabGravity="center"
         app:tabMode="scrollable"/>
+        <!-- app:tabSelectedTextColor="@android:color/white"
+        app:tabIndicatorColor="@android:color/white"/> -->
 
     <android.support.v4.view.ViewPager
         android:id="@+id/pager"
