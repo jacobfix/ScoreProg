@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="120dp"
-    android:background="@android:color/white">
+    android:layout_height="100dp"
+    android:background="@android:color/white"
+    android:elevation="4dp">
 
     <android.support.constraint.Guideline
         android:id="@+id/horizontal_guideline_1"
@@ -71,37 +73,26 @@
         </LinearLayout>
     </LinearLayout>
 
-    <jacobfix.scorepredictor.components.PredictionListItemPredictionContainer
+    <include layout="@layout/view_prediction_list_item_prediction_container"
+        android:id="@+id/away_prediction_container"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintLeft_toRightOf="@id/horizontal_guideline_1"
         app:layout_constraintRight_toLeftOf="@id/horizontal_guideline_2"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent">
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
-        <include layout="@layout/view_prediction"
-            android:id="@+id/away_prediction"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"/>
-    </jacobfix.scorepredictor.components.PredictionListItemPredictionContainer>
-
-    <jacobfix.scorepredictor.components.PredictionListItemPredictionContainer
+    <include layout="@layout/view_prediction_list_item_prediction_container"
+        android:id="@+id/home_prediction_container"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintLeft_toRightOf="@id/horizontal_guideline_2"
         app:layout_constraintRight_toLeftOf="@id/horizontal_guideline_3"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent">
-
-        <include layout="@layout/view_prediction"
-            android:id="@+id/home_prediction"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"/>
-    </jacobfix.scorepredictor.components.PredictionListItemPredictionContainer>
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
     <FrameLayout
+        android:id="@+id/spread_container"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintLeft_toRightOf="@id/horizontal_guideline_3"

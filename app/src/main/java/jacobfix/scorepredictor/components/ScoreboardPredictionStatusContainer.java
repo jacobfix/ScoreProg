@@ -10,6 +10,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import jacobfix.scorepredictor.R;
+import jacobfix.scorepredictor.SpreadView;
 import jacobfix.scorepredictor.util.FontHelper;
 import jacobfix.scorepredictor.util.ViewUtil;
 
@@ -19,7 +20,7 @@ public class ScoreboardPredictionStatusContainer extends FrameLayout {
 
     private TextView predictedLabel;
     private ProgressBar submittingIcon;
-    private ProgressBar predictionSpread;
+    private SpreadView predictionSpread;
 
     public enum State {
         SUBMITTING,

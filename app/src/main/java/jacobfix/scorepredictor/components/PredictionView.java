@@ -28,6 +28,8 @@ public class PredictionView extends FrameLayout {
     private ImageView background;
     private TextView text;
 
+    private float sizeRatio = DEFAULT_SIZE_RATIO;
+
     private int padding;
 
     private boolean modified;
@@ -35,7 +37,7 @@ public class PredictionView extends FrameLayout {
     private static final int NO_SCORE = -1;
     private static final int MAX_NUMBER_OF_DIGITS = 2;
 
-    public static final float SIZE_RATIO = 0.4f;
+    public static final float DEFAULT_SIZE_RATIO = 0.4f;
     private static final int BACKGROUND_PADDING = 16;
 
     public PredictionView(Context context) {
@@ -71,7 +73,7 @@ public class PredictionView extends FrameLayout {
 
         /* We want to get the maximum text size without the background padding; we'll add it back in
            later when setting the background size. */
-        int desiredWidth = (int) (suggestedWidth * SIZE_RATIO);
+        int desiredWidth = (int) (suggestedWidth * sizeRatio);
         float textSize = ViewUtil.fitTextToWidth(text, desiredWidth, boundsString);
         Log.d(TAG, "PredictionView text size: " + textSize);
 
@@ -118,6 +120,10 @@ public class PredictionView extends FrameLayout {
 
     public int getScore() {
         return score;
+    }
+
+    public void setSizeRatio(float sizeRatio) {
+        this.sizeRatio = sizeRatio;
     }
 
     public boolean isModified() {

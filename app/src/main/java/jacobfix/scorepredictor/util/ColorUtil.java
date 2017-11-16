@@ -16,4 +16,6 @@ public class ColorUtil {
     public static int TRANSPARENT = ContextCompat.getColor(ApplicationContext.getContext(), android.R.color.transparent);
     public static int LIGHT_RED = ContextCompat.getColor(ApplicationContext.getContext(), android.R.color.holo_red_light);
 
+    public static int DEFAULT_SCOREBOARD_COLOR = ContextCompat.getColor(ApplicationContext.getContext(), R.color.default_scoreboard_color);
+
 }

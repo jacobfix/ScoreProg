@@ -1,15 +1,23 @@
 package jacobfix.scorepredictor.components;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.FrameLayout;
 
 import jacobfix.scorepredictor.R;
+import jacobfix.scorepredictor.util.ColorUtil;
 import jacobfix.scorepredictor.util.ViewUtil;
 
 public class PredictionListItemPredictionContainer extends FrameLayout {
 
     private PredictionView prediction;
+
+    private int originalBackgroundColor;
+
+    // private static final float PREDICTION_VIEW_SIZE_RATIO = 0.6f;
 
     public PredictionListItemPredictionContainer(Context context) {
         this(context, null);
@@ -27,10 +35,33 @@ public class PredictionListItemPredictionContainer extends FrameLayout {
         super.onFinishInflate();
 
         prediction = ViewUtil.findById(this, R.id.prediction);
+        // prediction.setSizeRatio(PREDICTION_VIEW_SIZE_RATIO);
     }
 
     public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+
+    public void showPrediction() {
+        prediction.setVisibility(View.VISIBLE);
+    }
+
+    public void hidePrediction() {
+        prediction.setVisibility(View.GONE);
+    }
+
+    public void setPredictedScore(int predictedScore) {
+        prediction.setScore(predictedScore);
+    }
+
+    public void color(int color) {
+        setBackgroundColor(color);
+        prediction.solidBackground(color, ColorUtil.WHITE);
+    }
+
+    public void uncolor() {
+        setBackgroundColor(ColorUtil.TRANSPARENT);
+        prediction.strokedBackground(ColorUtil.STANDARD_TEXT, ColorUtil.STANDARD_TEXT);
     }
 }

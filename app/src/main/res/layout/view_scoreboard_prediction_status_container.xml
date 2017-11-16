@@ -25,17 +25,9 @@
         android:indeterminateTintMode="src_in"
         android:indeterminate="true"/>
 
-    <!-- SpreadView -->
-    <ProgressBar
+    <include layout="@layout/view_spread"
         android:id="@+id/prediction_spread"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:indeterminate="false"
-        android:progressDrawable="@drawable/circular_progress_bar"
-        android:progressTint="@android:color/white"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:max="100"
-        android:progress="65"/>
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
 </jacobfix.scorepredictor.components.ScoreboardPredictionStatusContainer>

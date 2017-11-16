@@ -26,7 +26,7 @@ public class SyncFullGamesTask extends BaseTask<ArrayList<FullGame>> {
     @Override
     public void execute() {
         try {
-            Thread.sleep(4000);
+            // Thread.sleep(4000);
             ArrayList<FullGame> result = new ArrayList<>();
             for (FullGame game : games) {
                 JSONObject json = GameServerInterface.getDefault().getFullGameJson(game.getId());

@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -22,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
+import jacobfix.scorepredictor.components.PredictionListItemPredictionContainer;
 import jacobfix.scorepredictor.components.PredictionView;
 import jacobfix.scorepredictor.sync.UserProvider;
 import jacobfix.scorepredictor.task.BaseTask;
@@ -47,7 +49,7 @@ public class PredictionFragment extends Fragment implements GameStateChangeListe
 
     private PredictionFragmentListener listener;
 
-    private RelativeLayout header;
+    private ConstraintLayout header;
     private TextView awayHeader;
     private TextView homeHeader;
     private TextView spreadAbbr;
@@ -78,7 +80,7 @@ public class PredictionFragment extends Fragment implements GameStateChangeListe
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // super.onCreateView(inflater, container, savedInstanceState);
-        View view = inflater.inflate(R.layout.fragment_friend_prediction_list_new, container, false);
+        View view = inflater.inflate(R.layout.fragment_prediction, container, false);
 
         header = ViewUtil.findById(view, R.id.header);
         setHeaderColor(listener.getScoreboardColor());
@@ -199,10 +201,14 @@ public class PredictionFragment extends Fragment implements GameStateChangeListe
                 convertView = getActivity().getLayoutInflater().inflate(R.layout.list_item_friend_prediction_constraint, parent, false);
                 ViewHolder holder = new ViewHolder();
 
+                holder.root = ViewUtil.findById(convertView, R.id.root);
+
                 holder.ranking = ViewUtil.findById(convertView, R.id.ranking);
                 holder.username = ViewUtil.findById(convertView, R.id.username);
-                holder.awayPrediction = ViewUtil.findById(convertView, R.id.away_prediction);
-                holder.homePrediction = ViewUtil.findById(convertView, R.id.home_prediction);
+                holder.awayPredictionContainer = ViewUtil.findById(convertView,
+                        R.id.away_prediction_container);
+                holder.homePredictionContainer = ViewUtil.findById(convertView,
+                        R.id.home_prediction_container);
                 holder.spread = ViewUtil.findById(convertView, R.id.spread);
 
                 holder.ranking.setTypeface(FontHelper.getYantramanavRegular(getContext()));
@@ -227,43 +233,42 @@ public class PredictionFragment extends Fragment implements GameStateChangeListe
 
             if (isPregame) {
                 /* Show the users who have submitted predictions, but don't display their predictions. */
-                holder.awayFlipCard.setVisibility(View.INVISIBLE);
-                holder.homeFlipCard.setVisibility(View.INVISIBLE);
-                holder.spread.setVisibility(View.INVISIBLE);
-                holder.spreadStatus.setVisibility(View.INVISIBLE);
+                holder.awayPredictionContainer.hidePrediction();
+                holder.homePredictionContainer.hidePrediction();
+
+                holder.spread.setVisibility(View.GONE);
 
                 holder.ranking.setText("");
             } else {
                 /* Display predictions. */
-                holder.awayFlipCard.setVisibility(View.VISIBLE);
-                holder.homeFlipCard.setVisibility(View.VISIBLE);
+                holder.awayPredictionContainer.showPrediction();
+                holder.homePredictionContainer.showPrediction();
+
                 holder.spread.setVisibility(View.VISIBLE);
-                holder.spreadStatus.setVisibility(View.VISIBLE);
 
                 if (info.userId.equals(LocalAccountManager.get().getId()))
                     holder.root.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.me_in_ranking));
                 else
                     holder.root.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.friend_prediction_list_item_background));
 
-                holder.awayFlipCard.setScore(info.awayPredictedScore);
-                holder.homeFlipCard.setScore(info.homePredictedScore);
+                holder.awayPredictionContainer.setPredictedScore(info.awayPredictedScore);
+                holder.homePredictionContainer.setPredictedScore(info.homePredictedScore);
 
-                holder.spread.setText(String.valueOf(info.spread));
-                holder.spreadStatus.setProgress(100 - info.spread);
+                holder.spread.setSpread(info.spread);
 
                 int difference = info.awayPredictedScore - info.homePredictedScore;
                 if (difference > 0) {
-                    holder.awayFlipCard.solidBackground(ColorUtil.WHITE, info.awayColor);
-                    holder.homeFlipCard.strokedBackground(ColorUtil.STANDARD_TEXT, ColorUtil.STANDARD_TEXT);
-                    holder.spreadStatus.getProgressDrawable().setColorFilter(info.awayColor, PorterDuff.Mode.SRC_IN);
+                    holder.awayPredictionContainer.color(info.awayColor);
+                    holder.homePredictionContainer.uncolor();
+                    holder.spread.setColor(info.awayColor);
                 } else if (difference == 0) {
-                    holder.awayFlipCard.strokedBackground(ColorUtil.STANDARD_TEXT, ColorUtil.STANDARD_TEXT);
-                    holder.homeFlipCard.strokedBackground(ColorUtil.STANDARD_TEXT, ColorUtil.STANDARD_TEXT);
-                    holder.spreadStatus.getProgressDrawable().setColorFilter(ColorUtil.STANDARD_TEXT, PorterDuff.Mode.SRC_IN);
+                    holder.awayPredictionContainer.uncolor();
+                    holder.homePredictionContainer.uncolor();
+                    holder.spread.setColor(ColorUtil.STANDARD_TEXT);
                 } else {
-                    holder.awayFlipCard.strokedBackground(ColorUtil.STANDARD_TEXT, ColorUtil.STANDARD_TEXT);
-                    holder.homeFlipCard.solidBackground(ColorUtil.WHITE, info.homeColor);
-                    holder.spreadStatus.getProgressDrawable().setColorFilter(info.homeColor, PorterDuff.Mode.SRC_IN);
+                    holder.awayPredictionContainer.uncolor();
+                    holder.homePredictionContainer.color(info.homeColor);
+                    holder.spread.setColor(info.homeColor);
                 }
             }
 
@@ -370,8 +375,10 @@ public class PredictionFragment extends Fragment implements GameStateChangeListe
         TextView ranking;
         TextView username;
 
-        PredictionView awayPrediction;
-        PredictionView homePrediction;
+        PredictionListItemPredictionContainer awayPredictionContainer;
+        PredictionListItemPredictionContainer homePredictionContainer;
+
+        FrameLayout spreadLayoutContainer;
         SpreadView spread;
     }
 }

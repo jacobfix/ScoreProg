@@ -63,8 +63,14 @@ public class SpreadView extends FrameLayout {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
+    public void setColor(int color) {
+        spread.setTextColor(color);
+        setProgressBarColor(color);
+    }
+
     public void setSpread(int s) {
         spread.setText(String.valueOf(s));
+        setProgress(s);
     }
 
     public void setProgress(int p) {

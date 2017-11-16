@@ -53,7 +53,7 @@ public class LobbyListItemScoreContainer extends LinearLayout {
         int suggestedWidth = MeasureSpec.getSize(widthMeasureSpec);
         int suggestedHeight = MeasureSpec.getSize(heightMeasureSpec);
 
-        int desiredWidth = (int) (suggestedWidth * PredictionView.SIZE_RATIO);
+        int desiredWidth = (int) (suggestedWidth * PredictionView.DEFAULT_SIZE_RATIO);
         ViewUtil.fitTextToWidth(actualScore, desiredWidth, "99");
 
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);

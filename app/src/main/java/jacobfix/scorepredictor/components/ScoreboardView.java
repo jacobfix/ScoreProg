@@ -53,7 +53,7 @@ public class ScoreboardView extends FrameLayout {
     
     private int scoreboardColor;
 
-    public static final int DEFAULT_COLOR = ColorUtil.STANDARD_TEXT;
+    public static final int DEFAULT_COLOR = ColorUtil.DEFAULT_SCOREBOARD_COLOR;
 
     public ScoreboardView(Context context) {
         this(context, null);
