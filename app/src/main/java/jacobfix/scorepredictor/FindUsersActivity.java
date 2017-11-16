@@ -62,7 +62,7 @@ public class FindUsersActivity extends AppCompatActivity {
 
     private void initializeToolbar() {
         toolbar = ViewUtil.findById(this, R.id.toolbar);
-        ViewUtil.initializeToolbar(this, toolbar);
+        ViewUtil.initToolbar(this, toolbar);
         toolbar.setBackgroundColor(ColorUtil.STANDARD_COLOR);
 
         if (Build.VERSION.SDK_INT >= 21)

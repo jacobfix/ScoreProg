@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jacobfix.scorepredictor.components.ScoreboardPredictionStatusContainer xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="0dp"
+    android:paddingRight="0dp">
+
+    <TextView
+        android:id="@+id/predicted_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:textAllCaps="true"
+        android:textColor="@android:color/white"
+        android:textSize="32sp"
+        android:text="Predicted"/>
+
+    <ProgressBar
+        android:id="@+id/submitting_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:indeterminateTint="@android:color/white"
+        android:indeterminateTintMode="src_in"
+        android:indeterminate="true"/>
+
+    <!-- SpreadView -->
+    <ProgressBar
+        android:id="@+id/prediction_spread"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:indeterminate="false"
+        android:progressDrawable="@drawable/circular_progress_bar"
+        android:progressTint="@android:color/white"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:max="100"
+        android:progress="65"/>
+
+</jacobfix.scorepredictor.components.ScoreboardPredictionStatusContainer>

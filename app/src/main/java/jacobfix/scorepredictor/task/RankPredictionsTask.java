@@ -2,11 +2,9 @@ package jacobfix.scorepredictor.task;
 
 import java.util.Collection;
 
-import jacobfix.scorepredictor.AtomicGame;
 import jacobfix.scorepredictor.FullGame;
 import jacobfix.scorepredictor.Prediction;
 import jacobfix.scorepredictor.PredictionComparator;
-import jacobfix.scorepredictor.PredictionsComparator;
 
 public class RankPredictionsTask extends SortTask<Prediction> {
 

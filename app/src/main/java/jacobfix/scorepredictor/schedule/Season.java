@@ -228,7 +228,6 @@ public class Season {
             super(Schedule.POS);
         }
 
-
     }
 
     public class Week {

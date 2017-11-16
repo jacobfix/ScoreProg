@@ -1,19 +1,21 @@
 package jacobfix.scorepredictor.sync;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 
 import jacobfix.scorepredictor.AsyncCallback;
 import jacobfix.scorepredictor.FullGame;
-import jacobfix.scorepredictor.task.BaseTask;
 import jacobfix.scorepredictor.task.SyncFullGamesTask;
 
 public class FullGameCache extends SyncableMap<String, FullGame> {
 
-    private HashSet<FullGame> gamesToSync = new HashSet<>();
+    private static final String TAG = FullGameCache.class.getSimpleName();
+
+    private HashSet<FullGame> gamesToSync;
 
     @Override
     public String key(FullGame game) {
@@ -22,13 +24,17 @@ public class FullGameCache extends SyncableMap<String, FullGame> {
 
     @Override
     public SyncFullGamesTask getSyncTask() {
+        gamesToSync = new HashSet<>();
         return new SyncFullGamesTask(gamesToSync, getTaskFinishedListener(scheduledSyncCallback));
     }
 
     public void sync(FullGame game, final AsyncCallback<FullGame> callback) {
+        Log.d(TAG, "Syncing: " + game.getId());
         sync(Collections.singletonList(game), new AsyncCallback<ArrayList<FullGame>>() {
             @Override
             public void onSuccess(ArrayList<FullGame> result) {
+                /* Guaranteed to return FullGame objects for all Game objects provided, regardless
+                   of each game's state. */
                 callback.onSuccess(result.get(0));
             }
 
@@ -43,9 +49,8 @@ public class FullGameCache extends SyncableMap<String, FullGame> {
         new SyncFullGamesTask(games, getTaskFinishedListener(callback)).start();
     }
 
-    public void setGamesToSync(Collection<FullGame> games) {
-        gamesToSync.clear();
-        gamesToSync.addAll(games);
+    public void setGamesToSync() {
+
     }
 
     public void addGameToSync(FullGame game) {
@@ -55,5 +60,4 @@ public class FullGameCache extends SyncableMap<String, FullGame> {
     public void clearGamesToSync() {
         gamesToSync.clear();
     }
-
 }

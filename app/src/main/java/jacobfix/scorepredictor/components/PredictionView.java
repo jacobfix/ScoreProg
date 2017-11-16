@@ -1,22 +1,27 @@
-package jacobfix.scorepredictor;
+package jacobfix.scorepredictor.components;
 
 import android.content.Context;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Typeface;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.res.ResourcesCompat;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import jacobfix.scorepredictor.Prediction;
+import jacobfix.scorepredictor.R;
 import jacobfix.scorepredictor.util.FontHelper;
+import jacobfix.scorepredictor.util.Util;
 import jacobfix.scorepredictor.util.ViewUtil;
 
 public class PredictionView extends FrameLayout {
+
+    private static final String TAG = PredictionView.class.getSimpleName();
 
     private int score = Prediction.NULL;
 
@@ -25,8 +30,13 @@ public class PredictionView extends FrameLayout {
 
     private int padding;
 
-    private static final int DEFAULT_PADDING = 6;
-    private static final String BOUNDS_STRING = "22";
+    private boolean modified;
+
+    private static final int NO_SCORE = -1;
+    private static final int MAX_NUMBER_OF_DIGITS = 2;
+
+    public static final float SIZE_RATIO = 0.4f;
+    private static final int BACKGROUND_PADDING = 16;
 
     public PredictionView(Context context) {
         this(context, null);
@@ -38,17 +48,45 @@ public class PredictionView extends FrameLayout {
 
     public PredictionView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        this.padding = DEFAULT_PADDING;
     }
 
     @Override
     public void onFinishInflate() {
         super.onFinishInflate();
-        background = ViewUtil.findById(this, R.id.background);
-        text = ViewUtil.findById(this, R.id.text);
-        text.setTypeface(FontHelper.getYantramanavRegular(getContext()));
 
-        resize();
+        text = ViewUtil.findById(this, R.id.text);
+        background = ViewUtil.findById(this, R.id.background);
+    }
+
+    @Override
+    public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int suggestedWidth = MeasureSpec.getSize(widthMeasureSpec);
+        int suggestedHeight = MeasureSpec.getSize(heightMeasureSpec);
+
+        text.setTypeface(FontHelper.getArimoRegular(getContext()));
+
+        int backgroundPaddingPx = (int) Util.dpToPx(getContext(), BACKGROUND_PADDING);
+
+        String boundsString = "99";
+
+        /* We want to get the maximum text size without the background padding; we'll add it back in
+           later when setting the background size. */
+        int desiredWidth = (int) (suggestedWidth * SIZE_RATIO);
+        float textSize = ViewUtil.fitTextToWidth(text, desiredWidth, boundsString);
+        Log.d(TAG, "PredictionView text size: " + textSize);
+
+        // int desiredWidth = suggestedWidth - getPaddingLeft() - getPaddingRight() - backgroundPaddingPx;
+        // ViewUtil.fitTextToWidth(text, desiredWidth, boundsString);
+
+        Rect bounds = new Rect();
+        text.getPaint().getTextBounds(boundsString, 0, boundsString.length(), bounds);
+        int sideLength = (bounds.width() > bounds.height()) ? bounds.width() : bounds.height();
+        sideLength += backgroundPaddingPx;
+
+        background.getLayoutParams().width = sideLength;
+        background.getLayoutParams().height = sideLength;
+
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
     public void solidBackground(int textColor, int backgroundColor) {
@@ -82,13 +120,44 @@ public class PredictionView extends FrameLayout {
         return score;
     }
 
+    public boolean isModified() {
+        return this.modified;
+    }
+
+    public void setModified(boolean modified) {
+        this.modified = modified;
+    }
+
+    public void append(String digit) {
+        if (text.length() >= MAX_NUMBER_OF_DIGITS)
+            return;
+
+        if (score == 0) {
+            /* If the current value in the prediction view is 0, then we want to clear it before
+               appending a new digit so that we don't end up with something like "08." */
+            text.setText(R.string.empty_string);
+        }
+        text.append(digit);
+        score = Integer.valueOf(text.getText().toString());
+        modified = true;
+        refresh();
+    }
+
+    public void clear() {
+        score = NO_SCORE;
+        text.setText(R.string.empty_string);
+        modified = true;
+        refresh();
+    }
+
     public TextView getTextView() {
         return text;
     }
 
+    // TODO: Is this necessary?
     public void refresh() {
-        if (score == -1)
-            text.setText("");
+        if (score == NO_SCORE)
+            text.setText(R.string.empty_string);
         text.invalidate();
     }
 
@@ -106,7 +175,6 @@ public class PredictionView extends FrameLayout {
         if (resize) resize();
     }
 
-
     public void setTextSize(int dp) {
         setTextSize(dp, true);
     }
@@ -116,39 +184,15 @@ public class PredictionView extends FrameLayout {
         if (resize) resize();
     }
 
-    public void showBackground() {
-        background.setVisibility(View.VISIBLE);
-        invalidate();
-    }
-
-    public void hideBackground() {
-        background.setVisibility(View.INVISIBLE);
-        invalidate();
-    }
-
     public void setPadding(int padding) {
         this.padding = padding;
     }
 
-    public void append(String digit) {
-        if (score == 0)
-            text.setText("");
-        text.append(digit);
-        score = Integer.valueOf(text.getText().toString());
-        refresh();
-    }
-
-    public void clear() {
-        score = -1;
-        text.setText(R.string.empty_string);
-        refresh();
-    }
-
     public void resize() {
         Rect boundingRect = new Rect();
-        text.getPaint().getTextBounds(BOUNDS_STRING, 0, BOUNDS_STRING.length(), boundingRect);
+        text.getPaint().getTextBounds("99", 0, "99".length(), boundingRect);
         int length = (boundingRect.width() > boundingRect.height()) ? boundingRect.width() : boundingRect.height();
-        length += (2 * ViewUtil.convertDpToPx(getResources(), this.padding));
+        length += (2 * ViewUtil.convertDpToPx(getResources(), BACKGROUND_PADDING));
         background.getLayoutParams().width = length;
         background.getLayoutParams().height = length;
         background.requestLayout();

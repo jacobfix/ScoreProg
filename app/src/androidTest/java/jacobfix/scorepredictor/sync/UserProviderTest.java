@@ -12,7 +12,6 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import jacobfix.scorepredictor.AsyncCallback;
-import jacobfix.scorepredictor.OriginalPredictions;
 import jacobfix.scorepredictor.users.UserDetails;
 
 import static org.junit.Assert.*;

@@ -17,8 +17,6 @@ import jacobfix.scorepredictor.GameRetriever;
 import jacobfix.scorepredictor.LockGameManager;
 import jacobfix.scorepredictor.NflGame;
 import jacobfix.scorepredictor.server.ScheduleServerInterface;
-import jacobfix.scorepredictor.sync.GameCache;
-import jacobfix.scorepredictor.sync.OriginalGameSyncableMap;
 import jacobfix.scorepredictor.sync.SyncableMap;
 import jacobfix.scorepredictor.task.BaseTask;
 
@@ -73,6 +71,7 @@ public class Schedule {
                 currentSeasonType = Season.SeasonType.POST;
                 break;
         }
+
         Log.d(TAG, "Current season: " + currentSeason);
         Log.d(TAG, "Current week: " + currentWeek);
         Log.d(TAG, "Current season segment: " + seasonStateJson.getString("type"));
@@ -84,7 +83,6 @@ public class Schedule {
     }
 
     public static synchronized boolean create() throws Exception {
-        Log.d(TAG, "Inside create");
         Bundle seasonState = ScheduleRetriever.get().getCurrentSeasonState();
 
         currentSeason = seasonState.getInt("year");
@@ -119,7 +117,7 @@ public class Schedule {
         Season season = new Season(year);
 
         JSONObject fullSeasonJson = ScheduleServerInterface.getDefault().getFullSeasonSchedule(year);
-        Collection<Game> allGames = season.populate(fullSeasonJson);
+        ArrayList<Game> allGames = season.populate(fullSeasonJson);
 
         for (Game game : allGames) {
             games.put(game.getId(), game);

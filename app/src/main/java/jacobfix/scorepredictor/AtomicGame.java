@@ -1,7 +1,5 @@
 package jacobfix.scorepredictor;
 
-import android.util.Log;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -16,8 +14,8 @@ public class AtomicGame {
     private String gid;
     private boolean locked;
 
-    private Team away = new Team(false);
-    private Team home = new Team(true);
+    private OriginalTeam away = new OriginalTeam(false);
+    private OriginalTeam home = new OriginalTeam(true);
 
     private String awayAbbr;
     private String homeAbbr;
@@ -46,10 +44,32 @@ public class AtomicGame {
     private Season.SeasonType seasonType;
     public Season.WeekType weekType;
 
+    private final Object lock = new Object();
+
     public static final int Q_PREGAME = -1;
     public static final int Q_HALFTIME = -2;
     public static final int Q_FINAL = -3;
     public static final int Q_FINAL_OT = -4;
+
+    public void updateFromScheduleJson(JSONObject json) throws JSONException {
+        synchronized (lock) {
+            gid = json.getString("gid");
+
+            away.updateFromScheduleJson(json.getJSONObject("away"));
+            home.updateFromScheduleJson(json.getJSONObject("home"));
+
+            quarter = json.getInt("quarter");
+
+            startTime = json.getLong("start_time");
+            startTimeDisplay = json.getString("start_time_display");
+
+            week = json.getInt("week");
+
+            dayOfWeek = Util.parseDayOfWeek(json.getString("day"));
+            weekType = Util.parseWeekType(json.getString("type"), week);
+            seasonType = Util.parseSeasonType(json.getString("season_segment"));
+        }
+    }
 
     public void sync(JSONObject json) throws JSONException {
         synchronized (this) {
@@ -189,11 +209,11 @@ public class AtomicGame {
         return homeColor;
     }
 
-    public Team getAwayTeam() {
+    public OriginalTeam getAwayTeam() {
         return away;
     }
 
-    public Team getHomeTeam() {
+    public OriginalTeam getHomeTeam() {
         return home;
     }
 

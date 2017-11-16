@@ -41,6 +41,12 @@ public class GameActivityPagerAdapter extends FragmentStatePagerAdapter {
         return createdFragment;
     }
 
+    @Override
+    public void destroyItem(ViewGroup container, int position, Object object) {
+        registeredFragments.remove(position);
+        super.destroyItem(container, position, object);
+    }
+
     public GameFragment getRegisteredFragment(int position) {
         return registeredFragments.get(position);
     }

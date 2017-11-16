@@ -1,12 +1,7 @@
 package jacobfix.scorepredictor;
 
-import android.app.ActionBar;
 import android.content.Intent;
-import android.graphics.Color;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -25,7 +20,6 @@ import jacobfix.scorepredictor.schedule.Schedule;
 import jacobfix.scorepredictor.schedule.Season;
 import jacobfix.scorepredictor.util.ColorUtil;
 import jacobfix.scorepredictor.util.FontHelper;
-import jacobfix.scorepredictor.util.Util;
 import jacobfix.scorepredictor.util.ViewUtil;
 
 public class LobbyActivity extends AppCompatActivity {
@@ -35,6 +29,8 @@ public class LobbyActivity extends AppCompatActivity {
     private Season season;
 
     private Toolbar toolbar;
+    private TextView toolbarTitle;
+
     private TabLayout tabs;
     private ViewPager pager;
     private LobbyPagerAdapter pagerAdapter;
@@ -47,15 +43,29 @@ public class LobbyActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lobby_new);
 
+        /* LobbyActivity takes a year as an argument and retrieves the Season object corresponding
+           to that year from Schedule. */
         int year = getIntent().getIntExtra("season", Schedule.getCurrentSeason());
         season = Schedule.getSeason(year);
 
-        initializeToolbar();
+        toolbar = ViewUtil.findById(this, R.id.toolbar);
+        ViewUtil.initToolbar(this, toolbar);
+        toolbar.setBackgroundColor(ColorUtil.STANDARD_COLOR);
+
+        toolbarTitle = ViewUtil.findById(toolbar, R.id.title);
+        toolbarTitle.setTypeface(FontHelper.getLobsterRegular(this));
+        toolbarTitle.setAllCaps(false);
+        toolbarTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 32);
+        toolbarTitle.setText(R.string.app_name);
+
+        // initializeToolbar();
         initializeViews();
         initializeTabs();
         initializeCallbacks();
 
-        pager.setCurrentItem(season.getAbsoluteWeekNumber(Schedule.getCurrentWeek(), Schedule.getCurrentSeasonType()));
+        /* Have the current week's tab be selected by default. */
+        pager.setCurrentItem(season.getAbsoluteWeekNumber(Schedule.getCurrentWeek(),
+                Schedule.getCurrentSeasonType()));
     }
 
     @Override
@@ -77,7 +87,7 @@ public class LobbyActivity extends AppCompatActivity {
 
     private void initializeToolbar() {
         toolbar = ViewUtil.findById(this, R.id.toolbar);
-        ViewUtil.initializeToolbar(this, toolbar);
+        // ViewUtil.initializeToolbar(this, toolbar);
 
         toolbar.setBackgroundColor(ColorUtil.STANDARD_COLOR);
         TextView toolbarTitle = ViewUtil.findById(this, R.id.title);
@@ -117,22 +127,12 @@ public class LobbyActivity extends AppCompatActivity {
     }
 
     private void initializeCallbacks() {
-        gameSyncCallback = new AsyncCallback<ArrayList<FullGame>>() {
-            @Override
-            public void onSuccess(ArrayList<FullGame> result) {
-
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-
-            }
-        };
     }
 
     @Override
     public void onStart() {
         super.onStart();
+        /*
         Season currentSeason = Schedule.getSeason(Schedule.getCurrentSeason());
         Season.Week currentWeek = currentSeason.getWeek(Schedule.getCurrentWeek(), Schedule.getCurrentSeasonType());
 
@@ -142,16 +142,16 @@ public class LobbyActivity extends AppCompatActivity {
             Log.d(TAG, game.getAwayTeam().getAbbr() + " @ " + game.getHomeTeam().getAbbr());
             atomicGames.add(game);
         }
+        */
 
-        GameProvider.setGamesToSync(atomicGames);
+        // GameProvider.setGamesToSync(atomicGames);
         // TODO: Don't register the sync callback here, do it in the fragment
-        GameProvider.registerSyncCallback(gameSyncCallback);
+        // GameProvider.registerSyncCallback(gameSyncCallback);
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        GameProvider.unregisterSyncCallback(gameSyncCallback);
     }
 
     private void switchToFindUsersActivity() {

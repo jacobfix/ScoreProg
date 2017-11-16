@@ -1,6 +1,6 @@
 package jacobfix.scorepredictor;
 
 public interface GameStateChangeListener {
-    void onGameStateChanged(FullGame game);
+    void onGameStateChanged(Game game);
     void onPredictionChanged(Prediction prediction);
 }

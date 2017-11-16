@@ -1,10 +1,7 @@
 package jacobfix.scorepredictor;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 
 import jacobfix.scorepredictor.sync.FullGameCache;
@@ -17,26 +14,43 @@ public class GameProvider {
 
     // public static GameSyncableMap gameCache = new GameSyncableMap();
 
-    public static boolean getFullGame(AtomicGame atom, final AsyncCallback<FullGame> callback) {
-        FullGame cachedGame = fullGameCache.get(atom.getId());
+    public static boolean getFullGame(Game game, final AsyncCallback<FullGame> callback) {
+        FullGame cachedGame = fullGameCache.get(game.getId());
         if (cachedGame != null) {
             callback.onSuccess(cachedGame);
             return true;
         }
-        fullGameCache.sync(new FullGame(atom), callback);
+        fullGameCache.sync(new FullGame(game), callback);
         return false;
     }
 
-    public static boolean getFullGames(Collection<AtomicGame> atoms, final AsyncCallback<Map<String, FullGame>> callback) {
-        final Map<String, FullGame> retrieved = new HashMap<>();
-        LinkedList<FullGame> needed = new LinkedList<>();
+    public static boolean getFullGames(Collection<Game> games, final AsyncCallback<Map<String, FullGame>> callback) {
+        return false;
+    }
+
+    /*
+    public static boolean getFullGame(AtomicGame atom, final AsyncCallback<OriginalFullGame> callback) {
+        OriginalFullGame cachedGame = fullGameCache.get(atom.getId());
+        if (cachedGame != null) {
+            callback.onSuccess(cachedGame);
+            return true;
+        }
+        fullGameCache.sync(new OriginalFullGame(atom), callback);
+        return false;
+    }
+    */
+
+    /*
+    public static boolean getFullGames(Collection<AtomicGame> atoms, final AsyncCallback<Map<String, OriginalFullGame>> callback) {
+        final Map<String, OriginalFullGame> retrieved = new HashMap<>();
+        LinkedList<OriginalFullGame> needed = new LinkedList<>();
 
         for (AtomicGame atom : atoms) {
-            FullGame cachedGame = fullGameCache.get(atom.getId());
+            OriginalFullGame cachedGame = fullGameCache.get(atom.getId());
             if (cachedGame != null) {
                 retrieved.put(cachedGame.getId(), cachedGame);
             } else {
-                needed.add(new FullGame(atom));
+                needed.add(new OriginalFullGame(atom));
             }
         }
 
@@ -45,10 +59,10 @@ public class GameProvider {
             return true;
         }
 
-        fullGameCache.sync(needed, new AsyncCallback<ArrayList<FullGame>>() {
+        fullGameCache.sync(needed, new AsyncCallback<ArrayList<OriginalFullGame>>() {
             @Override
-            public void onSuccess(ArrayList<FullGame> result) {
-                for (FullGame game : result)
+            public void onSuccess(ArrayList<OriginalFullGame> result) {
+                for (OriginalFullGame game : result)
                     retrieved.put(game.getId(), game);
                 callback.onSuccess(retrieved);
             }
@@ -60,22 +74,23 @@ public class GameProvider {
         });
         return false;
     }
+    */
 
-    public static void addGameToSync(AtomicGame game) {
-        FullGame cachedGame = fullGameCache.get(game.getId());
-        if (cachedGame == null)
-            cachedGame = new FullGame(game);
-        fullGameCache.addGameToSync(cachedGame);
+    public static void addGameToSync(Game game) {
+        if (game instanceof FullGame) {
+            fullGameCache.addGameToSync((FullGame) game);
+        } else {
+            FullGame cachedGame = fullGameCache.get(game.getId());
+            if (cachedGame == null)
+                cachedGame = new FullGame(game);
+            fullGameCache.addGameToSync(cachedGame);
+        }
     }
 
-    public static void setGamesToSync(Collection<AtomicGame> games) {
+    public static void setGamesToSync(Collection<Game> games) {
         fullGameCache.clearGamesToSync();
-        for (AtomicGame game : games)
+        for (Game game : games)
             addGameToSync(game);
-    }
-
-    public static void setGameToSync(AtomicGame game) {
-        setGamesToSync(Collections.singletonList(game));
     }
 
     public static void registerSyncCallback(AsyncCallback callback) {

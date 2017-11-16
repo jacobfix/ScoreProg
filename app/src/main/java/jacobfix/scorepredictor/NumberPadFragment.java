@@ -21,6 +21,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import jacobfix.scorepredictor.util.ColorUtil;
 import jacobfix.scorepredictor.util.FontHelper;
 import jacobfix.scorepredictor.util.ViewUtil;
 
@@ -34,7 +35,9 @@ public class NumberPadFragment extends Fragment {
     private GridLayout numberGrid;
     private NumberPadFragmentListener listener;
 
-    private FloatingActionButton mConfirmButton;
+    private FloatingActionButton confirmButton;
+    // private FloatingActionButton clearButton;
+    private ImageButton clearButton;
 
     private static final @IdRes int[] KEY_IDS = {
             R.id.key_1, R.id.key_2, R.id.key_3,
@@ -102,18 +105,22 @@ public class NumberPadFragment extends Fragment {
         Button button;
         for (int i = 0; i < numberedKeyIds.length; i++) {
             button = ViewUtil.findById(view, numberedKeyIds[i]);
-            button.setTypeface(FontHelper.getYantramanavRegular(getContext()));
-            button.setTextColor(ContextCompat.getColor(getContext(), R.color.standard_text));
-            // button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 45);
+            // button.setTypeface(FontHelper.getYantramanavRegular(getContext()));
+            button.setTypeface(FontHelper.getArimoRegular(getContext()));
+            button.setTextColor(ColorUtil.STANDARD_TEXT);
             button.setOnClickListener(onClickListener);
             button.setTag(keyValues[i]);
         }
 
-        mConfirmButton = ViewUtil.findById(view, R.id.fab);
-        mConfirmButton.setOnClickListener(onClickListener);
-        mConfirmButton.setTag(Key.KEY_ENTER);
-        mConfirmButton.setBackgroundTintList(ColorStateList.valueOf(getArguments().getInt("teamColor")));
-        // mConfirmButton.setAlpha(1.0f);
+        confirmButton = ViewUtil.findById(view, R.id.confirm_button);
+        confirmButton.setOnClickListener(onClickListener);
+        confirmButton.setTag(Key.KEY_ENTER);
+        confirmButton.setBackgroundTintList(ColorStateList.valueOf(getArguments().getInt("teamColor")));
+
+        clearButton = ViewUtil.findById(view, R.id.key_clear);
+        clearButton.setOnClickListener(onClickListener);
+        clearButton.setTag(Key.KEY_CLEAR);
+        // clearButton.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), android.R.color.darker_gray)));
 
         return view;
     }
@@ -138,6 +145,6 @@ public class NumberPadFragment extends Fragment {
         KEY_8,
         KEY_9,
         KEY_ENTER,
-        KEY_DELETE
+        KEY_CLEAR
     }
 }

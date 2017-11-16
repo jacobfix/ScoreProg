@@ -4,12 +4,16 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.os.Build;
 import android.support.annotation.ColorRes;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.res.ResourcesCompat;
+import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.TextView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,6 +26,7 @@ import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -151,6 +156,11 @@ public class Util {
 
     public static long millisSinceEpoch(Date date) {
         return date.getTime();
+    }
+
+    public static String translateMillisSinceEpochToLocalDateString(long millisSinceEpoch, SimpleDateFormat dateFormat) {
+        Date date = new Date(millisSinceEpoch);
+        return dateFormat.format(date);
     }
 
     public static Date convertTimeZone(String from, String to) {

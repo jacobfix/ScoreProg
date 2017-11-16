@@ -13,8 +13,6 @@ import java.util.HashSet;
 import java.util.Map;
 
 import jacobfix.scorepredictor.schedule.Schedule;
-import jacobfix.scorepredictor.sync.NflGameOracle;
-import jacobfix.scorepredictor.sync.OriginalUserProvider;
 import jacobfix.scorepredictor.sync.SyncListener;
 import jacobfix.scorepredictor.sync.UserProvider;
 import jacobfix.scorepredictor.task.BaseTask;
@@ -143,7 +141,6 @@ public class StartupActivity extends AppCompatActivity {
     @Override
     public void onStop() {
         super.onStop();
-        NflGameOracle.getInstance().unregisterSyncListener(mSyncListener);
     }
 
     private void switchToLobbyActivity() {

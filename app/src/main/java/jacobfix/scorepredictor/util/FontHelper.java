@@ -23,6 +23,16 @@ public class FontHelper {
     private static Typeface mAntonRegular;
     private static Typeface mBitterRegular;
     private static Typeface mBitterBold;
+    private static Typeface mNewsCycleRegular;
+    private static Typeface mNewsCycleBold;
+    private static Typeface mAbelRegular;
+    private static Typeface mAssistantRegular;
+    private static Typeface mPlayRegular;
+    private static Typeface mPlayBold;
+    private static Typeface mFjallaOneRegular;
+
+    private static Typeface mNflFont;
+    private static Typeface mNflFontBold;
 
     private static Typeface getFont(Context context, String fontFile) {
         return Typeface.createFromAsset(context.getAssets(), "fonts/" + fontFile);
@@ -157,5 +167,60 @@ public class FontHelper {
         if (mBitterBold == null)
             mBitterBold = getFont(context, "Bitter-Bold.ttf");
         return mBitterBold;
+    }
+
+    public static Typeface getNewsCycleRegular(Context context) {
+        if (mNewsCycleRegular == null)
+            mNewsCycleRegular = getFont(context, "NewsCycle-Regular.ttf");
+        return mNewsCycleRegular;
+    }
+
+    public static Typeface getNewsCycleBold(Context context) {
+        if (mNewsCycleBold == null)
+            mNewsCycleBold = getFont(context, "NewsCycle-Bold.ttf");
+        return mNewsCycleRegular;
+    }
+
+    public static Typeface getAbelRegular(Context context) {
+        if (mAbelRegular == null)
+            mAbelRegular = getFont(context, "Abel-Regular.ttf");
+        return mAbelRegular;
+    }
+
+    public static Typeface getAssistantRegular(Context context) {
+        if (mAssistantRegular == null)
+            mAssistantRegular = getFont(context, "Assistant-Regular.ttf");
+        return mAssistantRegular;
+    }
+
+    public static Typeface getNflFont(Context context) {
+        if (mNflFont == null)
+            mNflFont = getFont(context, "medium-cond.ttf");
+        return mNflFont;
+    }
+
+    public static Typeface getNflFontBold(Context context) {
+        if (mNflFontBold == null) {
+            mNflFontBold = getFont(context, "bold.ttf");
+        }
+        return mNflFontBold;
+    }
+
+    public static Typeface getFjallOneRegular(Context context) {
+        if (mFjallaOneRegular == null)
+            mFjallaOneRegular = getFont(context, "FjallaOne-Regular.ttf");
+        return mFjallaOneRegular;
+    }
+
+    public static Typeface getPlayRegular(Context context) {
+        if (mPlayRegular == null)
+            mPlayRegular = getFont(context, "Play-Regular.ttf");
+        return mPlayRegular;
+    }
+
+    public static Typeface getPlayBold(Context context) {
+        if (mPlayBold == null)
+            mPlayBold = getFont(context, "Play-Bold.ttf");
+        return mPlayBold;
     }
 }

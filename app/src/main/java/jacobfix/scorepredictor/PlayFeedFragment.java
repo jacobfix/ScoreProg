@@ -24,7 +24,7 @@ public class PlayFeedFragment extends Fragment {
 
     private static final String TAG = PlayFeedFragment.class.getSimpleName();
 
-    FullGame mGame;
+    // OriginalFullGame mGame;
     ArrayList<Play> mPlayFeed;
     PlayFeedAdapter mPlayFeedAdapter;
     LayoutInflater mInflater;
@@ -36,8 +36,8 @@ public class PlayFeedFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        mGame = ((GameActivity) context).getFullGame();
-        mPlayFeed = mGame.getDriveFeed().getPlayFeed();
+        // mGame = ((GameActivity) context).getFullGame();
+        // mPlayFeed = mGame.getDriveFeed().getPlayFeed();
     }
 
     @Override
@@ -80,12 +80,13 @@ public class PlayFeedFragment extends Fragment {
 
                 holder.findViews(convertView);
                 holder.setTypefaces(getContext());
-                holder.initializeStripes(mGame.getAwayTeam().getPrimaryColor(), mGame.getHomeTeam().getPrimaryColor());
+                // holder.initializeStripes(mGame.getAwayTeam().getPrimaryColor(), mGame.getHomeTeam().getPrimaryColor());
                 convertView.setTag(holder);
             }
             Play play = getItem(position);
             ViewHolder holder = (ViewHolder) convertView.getTag();
 
+            /*
             holder.normal.setVisibility(View.VISIBLE);
             holder.special.setVisibility(View.GONE);
             if (play.getPosTeamId() == mGame.getAwayTeam().getId()) {
@@ -101,6 +102,7 @@ public class PlayFeedFragment extends Fragment {
                 holder.specialText.setText(play.getDescription());
                 // holder.description.setText("");
             }
+            */
 
             setSideText(holder.sideTextLeft, play);
             for (int i = 0; i < play.numSequenceItems(); i++) {

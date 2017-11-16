@@ -99,10 +99,11 @@
                     style="@style/number_pad_button"
                     android:text="9"/>
 
-                <!-- <ImageButton android:id="@+id/key_cancel"
+                <ImageButton android:id="@+id/key_clear"
                     android:layout_column="0"
                     style="@style/number_pad_button"
-                    android:src="@drawable/ic_delete_forever_black_36dp"/> -->
+                    android:src="@drawable/ic_delete_black_36dp"
+                    android:tint="@color/standard_text"/>
 
                 <Button android:id="@+id/key_0"
                     android:layout_column="1"
@@ -112,7 +113,7 @@
                 <!-- <ImageButton android:id="@+id/key_enter"
                     android:layout_column="2"
                     style="@style/number_pad_button"
-                    android:src="@drawable/ic_check_circle_black_36dp"/> -->
+                    android:src="@drawable/ic_casino_black_36dp"/> -->
 
             </GridLayout>
         </FrameLayout>
@@ -120,14 +121,41 @@
     </LinearLayout>
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
+        android:id="@+id/confirm_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:clickable="true"
-        android:src="@drawable/ic_check_black_24dp"
-        android:tint="@android:color/white"
+        android:layout_marginRight="16dp"
         app:layout_anchor="@id/header"
-        app:layout_anchorGravity="bottom|right|end"/>
+        app:layout_anchorGravity="bottom|right|end"
+        android:clickable="true"
+        android:src="@drawable/ic_check_black_36dp"
+        android:tint="@android:color/white"/>
+
+    <!-- <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_anchor="@id/header"
+        app:layout_anchorGravity="bottom|right|end"
+        android:layout_margin="16dp">
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/clear_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="16dp"
+            android:clickable="true"
+            android:src="@drawable/ic_delete_black_36dp"
+            android:tint="@android:color/white"/>
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/confirm_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:src="@drawable/ic_check_black_36dp"
+            android:tint="@android:color/white"/>
+
+    </LinearLayout> -->
 
 </android.support.design.widget.CoordinatorLayout>

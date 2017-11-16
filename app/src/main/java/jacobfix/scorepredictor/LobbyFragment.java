@@ -1,37 +1,32 @@
 package jacobfix.scorepredictor;
 
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import jacobfix.scorepredictor.components.LobbyListItemMiddleContainer;
+import jacobfix.scorepredictor.components.LobbyListItemNameContainer;
+import jacobfix.scorepredictor.components.LobbyListItemScoreContainer;
 import jacobfix.scorepredictor.schedule.Schedule;
-import jacobfix.scorepredictor.sync.OriginalUserProvider;
 import jacobfix.scorepredictor.sync.PredictionProvider;
-import jacobfix.scorepredictor.sync.UserProvider;
 import jacobfix.scorepredictor.task.BaseTask;
-import jacobfix.scorepredictor.task.SortGamesTask;
 import jacobfix.scorepredictor.task.TaskFinishedListener;
-import jacobfix.scorepredictor.util.ColorUtil;
-import jacobfix.scorepredictor.util.FontHelper;
 import jacobfix.scorepredictor.util.Util;
 import jacobfix.scorepredictor.util.ViewUtil;
 
@@ -39,16 +34,25 @@ public class LobbyFragment extends Fragment {
 
     private static final String TAG = LobbyFragment.class.getSimpleName();
 
-    private Predictions predictions;
-
-    private ArrayList<String> sortedGameIds = new ArrayList<>();
-    private ArrayList<AtomicGame> sorted = new ArrayList<>();
-
     private String[] gameIds;
 
+    /* Maps containing the games and predictions relevant to this fragment. */
+    private Map<String, Game> games = new HashMap<>();
+    private Map<String, Prediction> predictions = new HashMap<>();
+
+    /* List containing the game IDs in the order that the games should be displayed. */
+    private List<String> sortedGameIds = new ArrayList<>();
+
+    /* List containing the objects used by the adapter to display the list of games. */
+    private List<LobbyFragmentListItem> listItems = new ArrayList<>();
+
+    private String weekTitle;
+
     private ListView list;
-    private ProgressBar loadingSymbol;
+    private ProgressBar loadingIcon;
     private LobbyFragmentAdapter adapter = new LobbyFragmentAdapter();
+
+    private State state = State.LOADING;
 
     private LayoutInflater inflater;
 
@@ -56,7 +60,7 @@ public class LobbyFragment extends Fragment {
         LobbyFragment f = new LobbyFragment();
 
         Bundle args = new Bundle();
-        args.putStringArray("games", gids);
+        args.putStringArray("gameIds", gids);
         f.setArguments(args);
 
         return f;
@@ -65,14 +69,13 @@ public class LobbyFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        gameIds = getArguments().getStringArray("games");
+        gameIds = getArguments().getStringArray("gameIds");
     }
 
     @Override
     public View onCreateView(LayoutInflater inf, ViewGroup container, Bundle savedInstanceState) {
         View view = inf.inflate(R.layout.fragment_lobby, container, false);
         initializeViews(view);
-        showLoading();
 
         inflater = inf;
 
@@ -80,8 +83,9 @@ public class LobbyFragment extends Fragment {
     }
 
     private void initializeViews(View container) {
-        loadingSymbol = ViewUtil.findById(container, R.id.loading_circle);
+        loadingIcon = ViewUtil.findById(container, R.id.loading_circle);
         list = ViewUtil.findById(container, R.id.list);
+
         list.setAdapter(adapter);
 
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -95,100 +99,84 @@ public class LobbyFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        Log.d(TAG, "onStart() w/ " + Util.join(Arrays.asList(gameIds), ", "));
+        Log.d(TAG, "Starting a LobbyFragment with " + gameIds.length + " games");
 
-        final ArrayList<AtomicGame> unsorted = new ArrayList<>();
+        showLoading();
+
+        /* Gather the Game objects themselves from Schedule. */
         for (String gameId : gameIds)
-            unsorted.add(Schedule.getGame(gameId));
+            games.put(gameId, Schedule.getGame(gameId));
 
-        PredictionProvider.getPredictions(Collections.singletonList(LocalAccountManager.get().getId()), Arrays.asList(gameIds), false, new AsyncCallback<Predictions>() {
+        if (games.size() > 0) {
+            Game arbitrary = games.get(gameIds[0]);
+            weekTitle = Util.getWeekTitle(arbitrary.getWeekType(), arbitrary.getWeek());
+        } else {
+            Log.wtf(TAG, "LobbyFragment passed in an array of length 0");
+        }
+
+        /* Retrieve this user's predictions for all the games in the week held by this fragment. */
+        AsyncCallback<Map<String, Prediction>> afterPredictionsRetrieved
+                = new AsyncCallback<Map<String, Prediction>>() {
             @Override
-            public void onSuccess(Predictions result) {
-                predictions = result;
+            public void onSuccess(Map<String, Prediction> result) {
+                LobbyFragment.this.predictions = result;
+                /* Sort the games before displaying them. */
+                new MakeGamesListTask(LobbyFragment.this.games, LobbyFragment.this.predictions,
+                        new TaskFinishedListener<MakeGamesListTask>() {
+                            @Override
+                            public void onTaskFinished(MakeGamesListTask task) {
+                                if (task.errorOccurred()) {
+                                    Log.e(TAG, task.getError().toString());
+                                    return;
+                                }
 
-                new SortGamesTask(unsorted, new TaskFinishedListener() {
-                    @Override
-                    public void onTaskFinished(BaseTask task) {
-                        sorted = (ArrayList<AtomicGame>) task.getResult();
+                                listItems = task.getResult();
+                                Log.d(TAG, "List items size: " + listItems.size());
+                                adapter.notifyDataSetChanged();
+                                showList();
+                            }
+                        }).start();
 
-                        sortedGameIds = new ArrayList<>();
-                        for (AtomicGame atom : sorted)
-                            sortedGameIds.add(atom.getId());
-
-                        adapter.notifyDataSetChanged();
-
-                        showList();
-                    }
-                }).start();
+                // TODO: Have a task that makes the list items
+                // sortedGameIds = new ArrayList<>(Arrays.asList(gameIds));
+                // adapter.notifyDataSetChanged();
+                // showList();
             }
 
             @Override
             public void onFailure(Exception e) {
                 Log.e(TAG, e.toString());
             }
-        });
-
-        /* final ArrayList<NflGame> unsorted = new ArrayList<>();
-        for (String gid : gameIds) {
-            NflGame game = null; //Schedule.getGame(gid);
-            if (game != null)
-                unsorted.add(game);
-        } */
-
-        /*
-        final ArrayList<AtomicGame> unsorted = new ArrayList<>();
-        for (String gid : gameIds) {
-            AtomicGame game = Schedule.getGame(gid);
-            unsorted.add(game);
-        }
-        sorted.clear();
-        sorted.addAll(unsorted);
-        adapter.notifyDataSetChanged();
-        loadingSymbol.setVisibility(View.GONE);
-        list.setVisibility(View.VISIBLE);
-        */
-
-        /*
-        OriginalUserProvider.getUserPredictions(Arrays.asList(gameIds), LocalAccountManager.getId(), new AsyncCallback<Map<String, OriginalPredictions>>() {
-            @Override
-            public void onSuccess(Map<String, OriginalPredictions> result) {
-                predictions = result.get(LocalAccountManager.getId());
-
-                new SortGamesTask(unsorted, new TaskFinishedListener() {
-                    @Override
-                    public void onTaskFinished(BaseTask task) {
-                        sorted = (ArrayList<NflGame>) task.getResult();
-                        adapter.notifyDataSetChanged();
-
-                        loadingSymbol.setVisibility(View.GONE);
-                        list.setVisibility(View.VISIBLE);
-                    }
-                }).start();
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-
-            }
-        });
-        */
+        };
+        PredictionProvider.getPredictions(LocalAccountManager.get().getId(), Arrays.asList(gameIds),
+                afterPredictionsRetrieved);
     }
 
     private void showList() {
-        list.setVisibility(View.VISIBLE);
-        loadingSymbol.setVisibility(View.GONE);
+        setVisibleComponents(View.VISIBLE, View.GONE);
+        state = State.LIST;
     }
 
     private void showLoading() {
-        list.setVisibility(View.GONE);
-        loadingSymbol.setVisibility(View.VISIBLE);
+        setVisibleComponents(View.GONE, View.VISIBLE);
+        state = State.LOADING;
+    }
+
+    private void setVisibleComponents(int listVisibility, int loadingIconVisibility) {
+        list.setVisibility(listVisibility);
+        loadingIcon.setVisibility(loadingIconVisibility);
     }
 
     private void switchToGameActivity(int currentIndex) {
-        Intent intent = new Intent(getActivity(), NewGameActivity.class);
-        intent.putExtra("gameIds", sortedGameIds.toArray(new String[sortedGameIds.size()]));
+        String[] gameIds = new String[listItems.size()];
+        for (int i = 0; i < listItems.size(); i++)
+            gameIds[i] = listItems.get(i).gameId;
+
+        Intent intent = new Intent(getActivity(), GameActivity.class);
+        // intent.putExtra("gameIds", sortedGameIds.toArray(new String[sortedGameIds.size()]));
+        intent.putExtra("gameIds", gameIds);
         intent.putExtra("current", currentIndex);
-        intent.putExtra("title", Util.getWeekTitle(sorted.get(0).getWeekType(), sorted.get(0).getWeek()));
+        intent.putExtra("title", weekTitle);
         getActivity().startActivity(intent);
     }
 
@@ -196,12 +184,12 @@ public class LobbyFragment extends Fragment {
 
         @Override
         public int getCount() {
-            return sorted.size();
+            return listItems.size();
         }
 
         @Override
-        public AtomicGame getItem(int position) {
-            return sorted.get(position);
+        public LobbyFragmentListItem getItem(int position) {
+            return listItems.get(position);
         }
 
         @Override
@@ -212,117 +200,184 @@ public class LobbyFragment extends Fragment {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
-                convertView = inflater.inflate(R.layout.list_item_lobby_new_new, parent, false);
+                convertView = inflater.inflate(R.layout.list_item_lobby_constraint, parent, false);
+
+                // TODO: Static variable indicating whether or not the measurements have been made, that way it applies to all LobbyFragments
 
                 ViewHolder holder = new ViewHolder();
 
                 holder.middleContainer = ViewUtil.findById(convertView, R.id.middle_container);
 
-                holder.awayAbbr = ViewUtil.findById(convertView, R.id.away_abbr);
-                holder.homeAbbr = ViewUtil.findById(convertView, R.id.home_abbr);
-                holder.awayName = ViewUtil.findById(convertView, R.id.away_name);
-                holder.homeName = ViewUtil.findById(convertView, R.id.home_name);
                 holder.awayNameContainer = ViewUtil.findById(convertView, R.id.away_name_container);
                 holder.homeNameContainer = ViewUtil.findById(convertView, R.id.home_name_container);
 
-                holder.awayScore = ViewUtil.findById(convertView, R.id.away_score);
-                holder.homeScore = ViewUtil.findById(convertView, R.id.home_score);
+                holder.awayScoreContainer = ViewUtil.findById(convertView,
+                        R.id.away_score_container);
+                holder.homeScoreContainer = ViewUtil.findById(convertView,
+                        R.id.home_score_container);
 
-                holder.awayPrediction = ViewUtil.findById(convertView, R.id.away_prediction);
-                holder.homePrediction = ViewUtil.findById(convertView, R.id.home_prediction);
+                Log.d(TAG, "Prediction text size: " + holder.awayScoreContainer.getPredictedScoreTextSize());
+                holder.awayScoreContainer.setActualScoreTextSize(TypedValue.COMPLEX_UNIT_PX,
+                        holder.awayScoreContainer.getPredictedScoreTextSize());
+                holder.homeScoreContainer.setActualScoreTextSize(TypedValue.COMPLEX_UNIT_PX,
+                        holder.homeScoreContainer.getPredictedScoreTextSize());
 
-                Typeface abbrTypeface = FontHelper.getYantramanavBold(getContext());
-                holder.awayAbbr.setTypeface(abbrTypeface);
-                holder.homeAbbr.setTypeface(abbrTypeface);
-
-                Typeface nameTypeface = FontHelper.getYantramanavRegular(getContext());
-                holder.awayName.setTypeface(nameTypeface);
-                holder.homeName.setTypeface(nameTypeface);
-
-                Typeface scoreTypeface = FontHelper.getYantramanavRegular(getContext());
-                holder.awayScore.setTypeface(scoreTypeface);
-                holder.homeScore.setTypeface(scoreTypeface);
-
-                holder.awayPrediction.setTypeface(scoreTypeface, false);
-                holder.homePrediction.setTypeface(scoreTypeface, false);
-                holder.awayPrediction.setTextSize(32);
-                holder.homePrediction.setTextSize(32);
+//                holder.awayAbbr = ViewUtil.findById(convertView, R.id.away_abbr);
+//                holder.homeAbbr = ViewUtil.findById(convertView, R.id.home_abbr);
+//                holder.awayName = ViewUtil.findById(convertView, R.id.away_name);
+//                holder.homeName = ViewUtil.findById(convertView, R.id.home_name);
+//                holder.awayNameContainer = ViewUtil.findById(convertView, R.id.away_name_container);
+//                holder.homeNameContainer = ViewUtil.findById(convertView, R.id.home_name_container);
+//                holder.awayNameBackgroundContainer = ViewUtil.findById(convertView, R.id.away_name_outer_container);
+//                holder.homeNameBackgroundContainer = ViewUtil.findById(convertView, R.id.home_name_outer_container);
+//
+//                holder.awayScoreContainer = ViewUtil.findById(convertView, R.id.away_score_container);
+//                holder.homeScoreContainer = ViewUtil.findById(convertView, R.id.home_score_container);
+//
+//                String b = "WWW";
+//                Rect boundingRect = new Rect();
+//                holder.awayAbbr.getPaint().getTextBounds(b, 0, b.length(), boundingRect);
+//                holder.awayNameContainer.getLayoutParams().width = boundingRect.width();
+//                holder.homeNameContainer.getLayoutParams().width = boundingRect.width();
+//                holder.awayNameBackgroundContainer.getLayoutParams().width = boundingRect.width();
+//                holder.homeNameBackgroundContainer.getLayoutParams().width = boundingRect.width();
+//                holder.awayNameContainer.requestLayout();
+//                holder.homeNameContainer.requestLayout();
+//
+//                holder.awayScore = ViewUtil.findById(convertView, R.id.away_score);
+//                holder.homeScore = ViewUtil.findById(convertView, R.id.home_score);
+//
+//                holder.awayPrediction = ViewUtil.findById(convertView, R.id.away_prediction);
+//                holder.homePrediction = ViewUtil.findById(convertView, R.id.home_prediction);
+//
+//                Typeface abbrTypeface = FontHelper.getYantramanavBold(getContext());
+//                holder.awayAbbr.setTypeface(abbrTypeface);
+//                holder.homeAbbr.setTypeface(abbrTypeface);
+//                ViewUtil.applyDeboss(holder.awayAbbr);
+//                ViewUtil.applyDeboss(holder.homeAbbr);
+//
+//                Typeface nameTypeface = FontHelper.getYantramanavBold(getContext());
+//                holder.awayName.setTypeface(nameTypeface);
+//                holder.homeName.setTypeface(nameTypeface);
+//                ViewUtil.applyDeboss(holder.awayName);
+//                ViewUtil.applyDeboss(holder.homeName);
+//
+//                Typeface scoreTypeface = FontHelper.getArimoRegular(getContext());
+//                holder.awayScore.setTypeface(scoreTypeface);
+//                holder.homeScore.setTypeface(scoreTypeface);
+//
+//                holder.awayPrediction.setTypeface(scoreTypeface, false);
+//                holder.homePrediction.setTypeface(scoreTypeface, false);
+//                holder.awayPrediction.setTextSize(32);
+//                holder.homePrediction.setTextSize(32);
+//
+//                holder.awayScore.setTextSize(TypedValue.COMPLEX_UNIT_SP, 32);
+//                holder.homeScore.setTextSize(TypedValue.COMPLEX_UNIT_SP, 32);
 
                 convertView.setTag(holder);
             }
-
-            AtomicGame game = getItem(position);
-            Prediction prediction;
-
-            LinkedList<Prediction> userPredictions = predictions.get(game.getId());
-            if (userPredictions == null || ((prediction = userPredictions.getFirst()) == null)) {
-                prediction = new Prediction(LocalAccountManager.get().getId(), game.getId());
-            }
-
-            Log.d(TAG, "Prediction for game " + game.getId() + " (" + game.getAwayTeam().getAbbr() + " @ " + game.getHomeTeam().getAbbr() + ") retrieved");
-            Log.d(TAG, "Away: " + prediction.getAwayScore() + ", Home: " + prediction.getHomeScore());
-
             ViewHolder holder = (ViewHolder) convertView.getTag();
 
-            holder.middleContainer.setStartTime(game.getStartTimeDisplay());
-            // holder.middleContainer.setClock(game.getClock());
-            holder.middleContainer.setQuarter(game.getQuarter());
+            LobbyFragmentListItem listItem = listItems.get(position);
 
-            if (game.isLocked()) holder.middleContainer.lock();
-            else                 holder.middleContainer.unlock();
+            if (listItem.isLocked) holder.middleContainer.lock();
+            else                   holder.middleContainer.unlock();
 
-            holder.awayAbbr.setText(game.getAwayTeam().getAbbr());
-            holder.homeAbbr.setText(game.getHomeTeam().getAbbr());
-            holder.awayName.setText(game.getAwayTeam().getName());
-            holder.homeName.setText(game.getHomeTeam().getName());
+//            holder.awayAbbr.setText(listItem.awayAbbr);
+//            holder.homeAbbr.setText(listItem.homeAbbr);
+//            holder.awayName.setText(listItem.awayName);
+//            holder.homeName.setText(listItem.homeName);
 
-            holder.awayScore.setText(String.valueOf(game.getAwayTeam().getScore()));
-            holder.homeScore.setText(String.valueOf(game.getHomeTeam().getScore()));
+            holder.awayNameContainer.setAbbr(listItem.awayAbbr);
+            holder.homeNameContainer.setAbbr(listItem.homeAbbr);
+            holder.awayNameContainer.setName(listItem.awayName);
+            holder.homeNameContainer.setName(listItem.homeName);
 
-            holder.awayPrediction.setScore(prediction.getAwayScore());
-            holder.homePrediction.setScore(prediction.getHomeScore());
+            holder.awayScoreContainer.setActualScore(listItem.awayScore);
+            holder.homeScoreContainer.setActualScore(listItem.homeScore);
 
-            Log.d(TAG, "Game is pregame: " + game.isPregame());
-            int visibility;
-            /* Visibility of score display. */
-            if (game.isPregame()) visibility = View.GONE;
-            else                  visibility = View.VISIBLE;
-            holder.awayScore.setVisibility(visibility);
-            holder.homeScore.setVisibility(visibility);
+//            holder.awayScore.setText(String.valueOf(listItem.awayScore));
+//            holder.homeScore.setText(String.valueOf(listItem.homeScore));
 
-            /* Visibility of prediction display. */
-            if (game.isLocked() && !prediction.isComplete()) {
-                visibility = View.GONE;
+//            holder.awayNameBackgroundContainer.setBackgroundColor(listItem.awayColor);
+//            holder.homeNameBackgroundContainer.setBackgroundColor(listItem.homeColor);
 
+            if (listItem.predictionExists) {
+                /* If this game has been predicted, show the prediction. */
+//                holder.awayPrediction.setScore(listItem.awayPredictedScore);
+//                holder.homePrediction.setScore(listItem.homePredictedScore);
+                holder.awayScoreContainer.setPredictedScore(listItem.awayPredictedScore);
+                holder.homeScoreContainer.setPredictedScore(listItem.homePredictedScore);
+                holder.awayScoreContainer.showPredictedScore();
+                holder.homeScoreContainer.showPredictedScore();
+
+//                holder.awayPrediction.setVisibility(View.VISIBLE);
+//                holder.homePrediction.setVisibility(View.VISIBLE);
+            } else {
+                /* Hide the prediction boxes if this game has not been predicted. */
+                holder.awayScoreContainer.hidePredictedScore();
+                holder.homeScoreContainer.hidePredictedScore();
+
+//                holder.awayPrediction.setVisibility(View.GONE);
+//                holder.homePrediction.setVisibility(View.GONE);
+            }
+
+            if (listItem.isPregame) {
+                /* Don't show the score if the game has not yet begun (i.e., don't show 0-0). */
+//                holder.awayScore.setVisibility(View.GONE);
+//                holder.homeScore.setVisibility(View.GONE);
+                holder.awayScoreContainer.hideActualScore();
+                holder.homeScoreContainer.hideActualScore();
+            } else {
+//                holder.awayScore.setVisibility(View.VISIBLE);
+//                holder.homeScore.setVisibility(View.VISIBLE);
+                holder.awayScoreContainer.showActualScore();
+                holder.homeScoreContainer.showActualScore();
+            }
+
+
+            if (listItem.isLocked && !listItem.predictionComplete) {
+                /* If the game is locked and a complete prediction was not made, don't color either
+                   side. */
                 holder.unhighlightAway();
                 holder.unhighlightHome();
+                holder.awayScoreContainer.hidePredictedScore();
+                holder.homeScoreContainer.hidePredictedScore();
             } else {
-                visibility = View.VISIBLE;
-
-                switch (prediction.winner()) {
-                    case Prediction.W_AWAY:
-                        holder.highlightAway(game);
-                        holder.unhighlightHome();
-                        break;
-                    case Prediction.W_HOME:
-                        holder.unhighlightAway();
-                        holder.highlightHome(game);
-                        break;
-                    default:
-                        holder.unhighlightAway();
-                        holder.unhighlightHome();
+                holder.awayScoreContainer.showPredictedScore();
+                holder.homeScoreContainer.showPredictedScore();
+                int diff = listItem.awayPredictedScore - listItem.homePredictedScore;
+                if (diff > 0) {
+                    holder.highlightAway(listItem.awayColor);
+                    holder.unhighlightHome();
+                } else if (diff < 0) {
+                    holder.unhighlightAway();
+                    holder.highlightHome(listItem.homeColor);
+                } else {
+                    holder.unhighlightAway();
+                    holder.unhighlightHome();
                 }
             }
-            holder.awayPrediction.setVisibility(visibility);
-            holder.homePrediction.setVisibility(visibility);
 
-            if (game.isPregame()) {
-                holder.middleContainer.pregameDisplay(game);
-            } else if (game.isFinal()) {
-                holder.middleContainer.finalDisplay(game);
-            } else {
-                holder.middleContainer.inProgressDisplay(game);
-            }
+//            if (listItem.awayColor % 2 == 0) {
+//                holder.highlightAway(listItem.awayColor);
+//                holder.unhighlightHome();
+//            } else {
+//                holder.unhighlightAway();
+//                holder.highlightHome(listItem.homeColor);
+//            }
+
+//            if (listItem.awayColor % 2 == 0) {
+//                holder.highlightAway(listItem.awayColor);
+//                holder.unhighlightHome();
+//            } else {
+//                holder.unhighlightAway();
+//                holder.highlightHome(listItem.homeColor);
+//            }
+
+            if (listItem.isPregame)    holder.middleContainer.pregameDisplay(listItem.startTimeDisplay, listItem.dayOfWeek, listItem.dateDisplay);
+            else if (listItem.isFinal) holder.middleContainer.finalDisplay();
+            else                       holder.middleContainer.inProgressDisplay(listItem.quarter, listItem.clock);
 
             return convertView;
         }
@@ -332,48 +387,194 @@ public class LobbyFragment extends Fragment {
 
         LobbyListItemMiddleContainer middleContainer;
 
-        TextView awayAbbr;
-        TextView homeAbbr;
-        TextView awayName;
-        TextView homeName;
+        LobbyListItemNameContainer awayNameContainer;
+        LobbyListItemNameContainer homeNameContainer;
 
-        LinearLayout awayNameContainer;
-        LinearLayout homeNameContainer;
+        LobbyListItemScoreContainer awayScoreContainer;
+        LobbyListItemScoreContainer homeScoreContainer;
 
-        TextView awayScore;
-        TextView homeScore;
-
-        PredictionView awayPrediction;
-        PredictionView homePrediction;
-
-        void highlightAway(AtomicGame game) {
-            awayAbbr.setTextColor(ColorUtil.WHITE);
-            awayName.setTextColor(ColorUtil.WHITE);
-            awayNameContainer.setBackgroundColor(game.getAwayTeam().getPrimaryColor());
-            // awayPrediction.solidBackground(ColorUtil.WHITE, game.getAwayTeam().getPrimaryColor());
-            awayPrediction.strokedBackground(game.getAwayTeam().getPrimaryColor(), game.getAwayTeam().getPrimaryColor());
-        }
-
-        void highlightHome(AtomicGame game) {
-            homeAbbr.setTextColor(ColorUtil.WHITE);
-            homeName.setTextColor(ColorUtil.WHITE);
-            homeNameContainer.setBackgroundColor(game.getHomeTeam().getPrimaryColor());
-            // homePrediction.solidBackground(ColorUtil.WHITE, game.getHomeTeam().getPrimaryColor());
-            homePrediction.strokedBackground(game.getHomeTeam().getPrimaryColor(), game.getHomeTeam().getPrimaryColor());
+        void highlightAway(int color) {
+            awayNameContainer.color(color);
+            awayScoreContainer.color(color);
         }
 
         void unhighlightAway() {
-            awayAbbr.setTextColor(ColorUtil.STANDARD_TEXT);
-            awayName.setTextColor(ColorUtil.STANDARD_TEXT);
-            awayNameContainer.setBackgroundColor(ColorUtil.TRANSPARENT);
-            awayPrediction.strokedBackground(ColorUtil.STANDARD_TEXT, ColorUtil.STANDARD_TEXT);
+            awayNameContainer.uncolor();
+            awayScoreContainer.uncolor();
+        }
+
+        void highlightHome(int color) {
+            homeNameContainer.color(color);
+            homeScoreContainer.color(color);
         }
 
         void unhighlightHome() {
-            homeAbbr.setTextColor(ColorUtil.STANDARD_TEXT);
-            homeName.setTextColor(ColorUtil.STANDARD_TEXT);
-            homeNameContainer.setBackgroundColor(ColorUtil.TRANSPARENT);
-            homePrediction.strokedBackground(ColorUtil.STANDARD_TEXT, ColorUtil.STANDARD_TEXT);
+            homeNameContainer.uncolor();
+            homeScoreContainer.uncolor();
+        }
+//
+//        void highlightAway(int color) {
+//            awayAbbr.setTextColor(ColorUtil.WHITE);
+//            awayName.setTextColor(ColorUtil.WHITE);
+//            awayNameContainer.setBackgroundColor(color);
+//            // awayPrediction.solidBackground(ColorUtil.WHITE, game.getAwayTeam().getPrimaryColor());
+//            // awayPrediction.strokedBackground(color, color);
+//            awayPrediction.strokedBackground(ColorUtil.STANDARD_TEXT, ColorUtil.STANDARD_TEXT);
+//
+//            awayScoreContainer.setBackgroundColor(color);
+//            awayPrediction.solidBackground(color, ColorUtil.WHITE);
+//        }
+
+//        void highlightHome(int color) {
+//            homeAbbr.setTextColor(ColorUtil.WHITE);
+//            homeName.setTextColor(ColorUtil.WHITE);
+//            homeNameContainer.setBackgroundColor(color);
+//            // homePrediction.solidBackground(ColorUtil.WHITE, game.getHomeTeam().getPrimaryColor());
+//            // homePrediction.strokedBackground(color, color);
+//            homePrediction.strokedBackground(ColorUtil.STANDARD_TEXT, ColorUtil.STANDARD_TEXT);
+//
+//            homeScoreContainer.setBackgroundColor(color);
+//            homePrediction.solidBackground(color, ColorUtil.WHITE);
+//        }
+//
+//        void unhighlightAway() {
+//            awayAbbr.setTextColor(ColorUtil.STANDARD_TEXT);
+//            awayName.setTextColor(ColorUtil.STANDARD_TEXT);
+//            awayNameContainer.setBackgroundColor(ColorUtil.WHITE);
+//            awayPrediction.strokedBackground(ColorUtil.STANDARD_TEXT, ColorUtil.STANDARD_TEXT);
+//
+//            homeScoreContainer.setBackgroundColor(ColorUtil.WHITE);
+//        }
+//
+//        void unhighlightHome() {
+//            homeAbbr.setTextColor(ColorUtil.STANDARD_TEXT);
+//            homeName.setTextColor(ColorUtil.STANDARD_TEXT);
+//            homeNameContainer.setBackgroundColor(ColorUtil.WHITE);
+//            homePrediction.strokedBackground(ColorUtil.STANDARD_TEXT, ColorUtil.STANDARD_TEXT);
+//
+//            homeScoreContainer.setBackgroundColor(ColorUtil.WHITE);
+//        }
+    }
+
+    public enum State {
+        LOADING,
+        LIST
+    }
+
+    static class MakeGamesListTask extends BaseTask<List<LobbyFragmentListItem>> {
+
+        Map<String, Game> games;
+        Map<String, Prediction> predictions;
+
+        public MakeGamesListTask(Map<String, Game> games, Map<String, Prediction> predictions,
+                                 TaskFinishedListener listener) {
+            super(listener);
+            this.games = games;
+            this.predictions = predictions;
+        }
+
+        @Override
+        public void execute() {
+            try {
+                ArrayList<LobbyFragmentListItem> listItems = new ArrayList<>();
+
+                Set<String> gameIds = games.keySet();
+                for (String gameId : gameIds) {
+                    Game game = games.get(gameId);
+                    Prediction prediction = predictions.get(gameId);
+
+                    LobbyFragmentListItem listItem = new LobbyFragmentListItem();
+
+                    synchronized (game.acquireLock()) {
+                        listItem.copyGameInfo(game);
+                    }
+
+                    if (prediction != null) {
+                        synchronized (prediction.acquireLock()) {
+                            listItem.copyPredictionInfo(prediction);
+                        }
+                    }
+                    listItems.add(listItem);
+                }
+
+                setResult(listItems);
+            } catch (Exception e) {
+                reportError(e);
+            }
+        }
+    }
+
+    static class LobbyFragmentListItem {
+
+        String gameId;
+        boolean isLocked;
+        boolean isPregame;
+        boolean isFinal;
+        int quarter;
+        long startTime;
+        String startTimeDisplay;
+        String dateDisplay;
+        Schedule.Day dayOfWeek;
+
+        String awayAbbr;
+        String awayName;
+
+        String homeAbbr;
+        String homeName;
+
+        int awayScore;
+        int homeScore;
+
+        int awayColor;
+        int homeColor;
+
+        int awayPredictedScore;
+        int homePredictedScore;
+        int spread;
+        boolean predictionComplete;
+
+        String clock;
+
+        boolean gameExists = false;
+        boolean predictionExists = false;
+
+        public void copyGameInfo(Game game) {
+            this.gameId = game.getId();
+            this.isLocked = game.isLocked;
+
+            this.isPregame = game.isPregame();
+            this.isFinal = game.isFinal();
+
+            this.quarter = game.quarter;
+            this.startTime = game.startTime;
+            this.startTimeDisplay = game.startTimeDisplay;
+            this.dateDisplay = game.getDateDisplay();
+            this.dayOfWeek = game.dayOfWeek;
+
+            this.awayAbbr = game.getAwayAbbr();
+            this.homeAbbr = game.getHomeAbbr();
+            this.awayName = game.getAwayName();
+            this.homeName = game.getHomeName();
+
+            this.awayScore = game.getAwayScore();
+            this.homeScore = game.getHomeScore();
+
+            this.awayColor = game.getAwayColor();
+            this.homeColor = game.getHomeColor();
+
+            gameExists = true;
+        }
+
+        public void copyPredictionInfo(Prediction prediction) {
+            this.awayPredictedScore = prediction.getAwayScore();
+            this.homePredictedScore = prediction.getHomeScore();
+            this.predictionComplete = prediction.isComplete();
+
+            if (gameExists) {
+                spread = Prediction.computeSpread(awayPredictedScore, homePredictedScore, awayScore,
+                        homeScore);
+            }
+            predictionExists = true;
         }
     }
 

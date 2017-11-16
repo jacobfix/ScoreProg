@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jacobfix.scorepredictor.components.ScoreboardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true">
+
+    <LinearLayout
+        android:id="@+id/main_content_container"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/top_half"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.5">
+
+            <android.support.constraint.Guideline
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/upper_vertical_guideline_1"
+                app:layout_constraintGuide_percent="0.25"
+                android:orientation="vertical"/>
+
+            <android.support.constraint.Guideline
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/upper_vertical_guideline_2"
+                app:layout_constraintGuide_percent="0.4"
+                android:orientation="vertical"/>
+            <!-- originally 0.4 -->
+
+            <android.support.constraint.Guideline
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/upper_vertical_guideline_3"
+                app:layout_constraintGuide_percent="0.6"
+                android:orientation="vertical"/>
+            <!-- originally 0.6 -->
+
+            <android.support.constraint.Guideline
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/upper_vertical_guideline_4"
+                app:layout_constraintGuide_percent="0.75"
+                android:orientation="vertical"/>
+
+            <include layout="@layout/view_scoreboard_name_container"
+                android:id="@+id/away_name_container"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toLeftOf="@id/upper_vertical_guideline_1"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"/>
+            <!-- Have to set gravity programmatically. -->
+
+            <include layout="@layout/view_scoreboard_score_container"
+                android:id="@+id/away_score_container"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintLeft_toRightOf="@id/upper_vertical_guideline_1"
+                app:layout_constraintRight_toLeftOf="@id/upper_vertical_guideline_2"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
+            <include layout="@layout/view_scoreboard_game_state_container"
+                android:id="@+id/game_state_container"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintLeft_toRightOf="@id/upper_vertical_guideline_2"
+                app:layout_constraintRight_toLeftOf="@id/upper_vertical_guideline_3"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
+            <include layout="@layout/view_scoreboard_score_container"
+                android:id="@+id/home_score_container"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintLeft_toRightOf="@id/upper_vertical_guideline_3"
+                app:layout_constraintRight_toLeftOf="@id/upper_vertical_guideline_4"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
+            <include layout="@layout/view_scoreboard_name_container"
+                android:id="@+id/home_name_container"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintLeft_toLeftOf="@id/upper_vertical_guideline_4"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"/>
+        </android.support.constraint.ConstraintLayout>
+
+            <!-- <include layout="@layout/view_scoreboard_prediction_container"
+                android:id="@+id/away_prediction_container"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toLeftOf="@id/second_vertical_guideline"
+                app:layout_constraintTop_toBottomOf="@id/horizontal_guideline"
+                app:layout_constraintBottom_toBottomOf="parent"/> -->
+
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/bottom_half"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.5">
+
+            <android.support.constraint.Guideline
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/lower_vertical_guideline_1"
+                app:layout_constraintGuide_percent="0.4"
+                android:orientation="vertical"/>
+
+            <android.support.constraint.Guideline
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/lower_vertical_guideline_2"
+                app:layout_constraintGuide_percent="0.6"
+                android:orientation="vertical"/>
+
+            <LinearLayout
+                android:id="@+id/away_prediction_container"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toLeftOf="@id/lower_vertical_guideline_1"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:gravity="center">
+
+                <include layout="@layout/view_prediction"
+                    android:id="@+id/away_prediction"/>
+
+            </LinearLayout>
+
+            <include layout="@layout/view_scoreboard_prediction_status_container"
+                android:id="@+id/prediction_status_container"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintLeft_toRightOf="@id/lower_vertical_guideline_1"
+                app:layout_constraintRight_toLeftOf="@id/lower_vertical_guideline_2"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
+            <LinearLayout
+                android:id="@+id/home_prediction_container"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintLeft_toRightOf="@id/lower_vertical_guideline_2"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:gravity="center">
+
+                <include layout="@layout/view_prediction"
+                    android:id="@+id/home_prediction"/>
+
+            </LinearLayout>
+
+        </android.support.constraint.ConstraintLayout>
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/loading_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:indeterminate="true"
+        android:indeterminateTint="@android:color/white"
+        android:indeterminateTintMode="src_in"/>
+
+</jacobfix.scorepredictor.components.ScoreboardView>

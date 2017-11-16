@@ -216,7 +216,7 @@ public class NflGame {
     public void setPosTeam(NflTeam team) {
         /*
         if (team != awayTeam && team != homeTeam) {
-            throw new AssertionError("Team with possession does not belong to game");
+            throw new AssertionError("OriginalTeam with possession does not belong to game");
         }
         */
         this.posTeam = team;

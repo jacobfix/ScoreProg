@@ -10,7 +10,6 @@ import java.util.LinkedList;
 import jacobfix.scorepredictor.AsyncCallback;
 import jacobfix.scorepredictor.Prediction;
 import jacobfix.scorepredictor.task.BaseTask;
-import jacobfix.scorepredictor.task.OriginalSyncPredictionsTask;
 import jacobfix.scorepredictor.task.SyncPredictionsTask;
 import jacobfix.scorepredictor.task.TaskFinishedListener;
 

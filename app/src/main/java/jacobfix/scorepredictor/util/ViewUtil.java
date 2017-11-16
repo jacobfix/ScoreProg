@@ -14,11 +14,14 @@ import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.TextView;
 
 public class ViewUtil {
+
+    private static final String TAG = ViewUtil.class.getSimpleName();
 
     private static final float SATURATION_SCALE_FACTOR = 0.50f;
 
@@ -30,14 +33,42 @@ public class ViewUtil {
         return (T) parent.findViewById(resId);
     }
 
-    public static void initializeToolbar(AppCompatActivity activity, Toolbar toolbar) {
+    public static float fitTextToWidth(TextView textView, int desiredWidth, String boundsString) {
+        Paint paint = new Paint();
+        // Rect bounds = new Rect();
+
+        paint.setTypeface(textView.getTypeface());
+        float textSize = textView.getTextSize();
+        paint.setTextSize(textSize);
+
+        // paint.getTextBounds(boundsString, 0, boundsString.length(), bounds);
+        while (paint.measureText(boundsString) > desiredWidth) {
+            textSize--;
+            paint.setTextSize(textSize);
+        }
+
+        textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
+        return textSize;
+    }
+
+    public static void initToolbar(AppCompatActivity activity, Toolbar toolbar) {
         toolbar.setPadding(0, getStatusBarHeight(activity), 0, 0);
         toolbar.getLayoutParams().height += getStatusBarHeight(activity);
 
         activity.setSupportActionBar(toolbar);
         activity.getSupportActionBar().setDisplayShowTitleEnabled(false);
         activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        activity.getSupportActionBar().setHomeButtonEnabled(true);
     }
+
+//    public static void initializeToolbar(AppCompatActivity activity, Toolbar toolbar) {
+//        toolbar.setPadding(0, getStatusBarHeight(activity), 0, 0);
+//        toolbar.getLayoutParams().height += getStatusBarHeight(activity);
+//
+//        activity.setSupportActionBar(toolbar);
+//        activity.getSupportActionBar().setDisplayShowTitleEnabled(false);
+//        activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+//    }
 
     public static void setCompoundDrawablesColor(TextView view, int color) {
         for (Drawable d : view.getCompoundDrawables())

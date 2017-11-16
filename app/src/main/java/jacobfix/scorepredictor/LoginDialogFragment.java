@@ -14,7 +14,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
-import jacobfix.scorepredictor.sync.OriginalUserProvider;
 import jacobfix.scorepredictor.task.BaseTask;
 import jacobfix.scorepredictor.task.LoginTask;
 import jacobfix.scorepredictor.task.TaskFinishedListener;

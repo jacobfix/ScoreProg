@@ -2,6 +2,7 @@ package jacobfix.scorepredictor;
 
 import java.util.Comparator;
 
+/* Requires external synchronization. */
 public class PredictionComparator implements Comparator<Prediction> {
 
     private FullGame game;

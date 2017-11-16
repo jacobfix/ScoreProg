@@ -1,43 +1,34 @@
 package jacobfix.scorepredictor;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
 
+import jacobfix.scorepredictor.components.PredictionView;
+import jacobfix.scorepredictor.components.ScoreboardGameStateContainer;
+import jacobfix.scorepredictor.components.ScoreboardPredictionStatusContainer;
+import jacobfix.scorepredictor.components.ScoreboardView;
 import jacobfix.scorepredictor.schedule.Schedule;
 import jacobfix.scorepredictor.sync.PredictionProvider;
-import jacobfix.scorepredictor.sync.UserProvider;
 import jacobfix.scorepredictor.task.BaseTask;
-import jacobfix.scorepredictor.task.RankPredictionsTask;
-import jacobfix.scorepredictor.task.SortPredictionsTask;
 import jacobfix.scorepredictor.task.SubmitPredictionTask;
 import jacobfix.scorepredictor.task.TaskFinishedListener;
-import jacobfix.scorepredictor.users.UserDetails;
 import jacobfix.scorepredictor.util.ColorUtil;
 import jacobfix.scorepredictor.util.FontHelper;
-import jacobfix.scorepredictor.util.Pair;
-import jacobfix.scorepredictor.util.Util;
 import jacobfix.scorepredictor.util.ViewUtil;
 
 public class GameFragment extends Fragment implements PredictionFragment.PredictionFragmentListener,
@@ -45,8 +36,7 @@ public class GameFragment extends Fragment implements PredictionFragment.Predict
 
     private static final String TAG = GameFragment.class.getSimpleName();
 
-    private AtomicGame atom;
-    private FullGame full;
+    private FullGame game;
 
     private Prediction prediction;
 
@@ -54,38 +44,16 @@ public class GameFragment extends Fragment implements PredictionFragment.Predict
 
     private Map<String, Prediction> participants;
 
-    private ProgressBar loadingCircle;
+    private Team selectedPredictionTeam;
+    private boolean predictionsModified;
 
-    private LinearLayout scoreboardContainer;
+    private boolean inPredictSession;
 
-    private RelativeLayout upperScoreboardContainer;
-    private RelativeLayout lowerScoreboardContainer;
+    // private PredictionView activePrediction;
+    // private OriginalTeam activeTeam;
+    // private boolean predictSession;
 
-    private UpperMiddleContainer upperMiddleContainer;
-    private LowerMiddleContainer lowerMiddleContainer;
-
-    private ImageView lock;
-
-    private RelativeLayout awayTeamContainer;
-    private RelativeLayout homeTeamContainer;
-
-    private TextView awayAbbr;
-    private TextView homeAbbr;
-    private TextView awayName;
-    private TextView homeName;
-
-    private TextView awayScore;
-    private TextView homeScore;
-
-    private FrameLayout awayPredictionContainer;
-    private FrameLayout homePredictionContainer;
-
-    private PredictionView awayPrediction;
-    private PredictionView homePrediction;
-
-    private PredictionView activePrediction;
-    private Team activeTeam;
-    private boolean predictSession;
+    private ScoreboardView scoreboard;
 
     private ViewPager pager;
     private GameFragmentPagerAdapter pagerAdapter;
@@ -93,7 +61,7 @@ public class GameFragment extends Fragment implements PredictionFragment.Predict
 
     private int scoreboardColor;
 
-    private NewGameActivity activity;
+    private GameActivity activity;
     private NumberPadFragment numberPadFragment;
     private PredictionFragment predictionFragment;
 
@@ -103,6 +71,8 @@ public class GameFragment extends Fragment implements PredictionFragment.Predict
     private boolean fullGameRetrieved;
     private boolean predictionRetrieved;
 
+    private State state;
+
     private static final int AWAY_TAG = 0;
     private static final int HOME_TAG = 1;
 
@@ -111,6 +81,7 @@ public class GameFragment extends Fragment implements PredictionFragment.Predict
     // TODO: AsyncCallbacks here?
 
     public static GameFragment newInstance(String gameId) {
+        Log.d(TAG, "Creating a new instance of GameFragment");
         GameFragment fragment = new GameFragment();
         Bundle args = new Bundle();
         args.putString("gameId", gameId);
@@ -121,7 +92,7 @@ public class GameFragment extends Fragment implements PredictionFragment.Predict
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        activity = (NewGameActivity) context;
+        activity = (GameActivity) context;
     }
 
     @Override
@@ -131,14 +102,17 @@ public class GameFragment extends Fragment implements PredictionFragment.Predict
 
         final String gameId = getArguments().getString("gameId");
 
-        this.atom = Schedule.getGame(gameId);
+        Game scheduledGame = Schedule.getGame(gameId);
 
         PredictionProvider.getPrediction(LocalAccountManager.get().getId(), gameId, new AsyncCallback<Prediction>() {
             @Override
-            public void onSuccess(Prediction result) {
-                prediction = (result != null) ? result : new Prediction(LocalAccountManager.get().getId(), gameId);
+            public void onSuccess(@Nullable Prediction result) {
+                /* Result can be null, indicating that prediction for this game from this user does
+                   not yet exist. */
+                prediction = (result != null) ? result
+                        : new Prediction(LocalAccountManager.get().getId(), gameId);
 
-                Log.d(TAG, atom.getId() + " prediction retrieved");
+                Log.d(TAG, "Prediction retrieved");
                 predictionRetrieved = true;
                 if (fullGameRetrieved && uiInitialized)
                     finishedInitializing();
@@ -150,13 +124,14 @@ public class GameFragment extends Fragment implements PredictionFragment.Predict
             }
         });
 
-        GameProvider.getFullGame(atom, new AsyncCallback<FullGame>() {
+        GameProvider.getFullGame(scheduledGame, new AsyncCallback<FullGame>() {
             @Override
-            public void onSuccess(FullGame result) {
-                // TODO: If null?
-                full = result;
+            public void onSuccess(@NonNull FullGame result) {
+                /* Result will not be null. A FullGame corresponding the provided Game will always
+                   be returned by GameProvider, regardless of the game's state. */
+                GameFragment.this.game = result;
 
-                Log.d(TAG, atom.getId() + " full game retrieved");
+                Log.d(TAG, "Full game retrieved");
                 fullGameRetrieved = true;
                 if (predictionRetrieved && uiInitialized)
                     finishedInitializing();
@@ -170,13 +145,26 @@ public class GameFragment extends Fragment implements PredictionFragment.Predict
     }
 
     private void finishedInitializing() {
-        updateDisplayedGameState();
-        updateDisplayedPredictions();
-        showScoreboard();
+        // scoreboard.updateGameState(game);
+        // scoreboard.updatePrediction(prediction);
+        // scoreboard.show();
+
+        // updateDisplayedGameState();
+        // updateDisplayedPredictions();
+        // showScoreboard(true);
+
+        updateScoreboardDisplay();
+        scoreboard.show();
+
+//        scoreboard.updateGameState(game);
+//        scoreboard.updatePredictionState(game, prediction);
+//        scoreboard.show();
 
         PredictionFragment fragment = getPredictionFragment();
-        if (fragment != null)
-            fragment.onGameStateChanged(full);
+        if (fragment != null) {
+            fragment.onGameStateChanged(game);
+            fragment.setHeaderColor(getScoreboardColor());
+        }
 
         showPredictionFragmentLoading();
 
@@ -184,10 +172,11 @@ public class GameFragment extends Fragment implements PredictionFragment.Predict
             @Override
             public void onSuccess(Map<String, Prediction> result) {
                 GameFragment.this.participants = result;
+                Log.d(TAG, "Got the game's participants. Size: " + result.size());
                 PredictionFragment fragment = getPredictionFragment();
-                if (fragment != null) {
+                if (fragment != null)
                     fragment.updateParticipants(participants);
-                }
+                
                 showPredictionFragmentList();
             };
 
@@ -203,7 +192,8 @@ public class GameFragment extends Fragment implements PredictionFragment.Predict
         getPotentialParticipants(exposure, new AsyncCallback<Collection<String>>() {
             @Override
             public void onSuccess(Collection<String> potentialParticipants) {
-                PredictionProvider.getPredictions(potentialParticipants, full.getId(), callback);
+                // TODO: Make PredictionProvider not return a Prediction if the prediction does not exist
+                PredictionProvider.getPredictions(potentialParticipants, game.getId(), callback);
             }
 
             @Override
@@ -228,26 +218,81 @@ public class GameFragment extends Fragment implements PredictionFragment.Predict
         }
     }
 
-    private void showScoreboard() {
-        loadingCircle.setVisibility(View.GONE);
-        scoreboardContainer.setVisibility(View.VISIBLE);
-    }
+    /*
+    private void showScoreboard(boolean animate) {
+        // We want to animate this
+        if (animate) {
 
+        }
+        scoreboardContainer.setVisibility(View.VISIBLE);
+        loadingIcon.setVisibility(View.GONE);
+        state = State.SCOREBOARD;
+    }
+    */
+
+    /*
     private void showLoading() {
         scoreboardContainer.setVisibility(View.INVISIBLE);
-        loadingCircle.setVisibility(View.VISIBLE);
+        loadingIcon.setVisibility(View.VISIBLE);
     }
+    */
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_game, container, false);
-        initializeViews(view);
-        initializeTabs(view);
+        // View view = inflater.inflate(R.layout.fragment_game, container, false);
+        View view = inflater.inflate(R.layout.fragment_game_new, container, false);
+        scoreboard = ViewUtil.findById(view, R.id.scoreboard);
 
-        setScoreboardColor(ColorUtil.STANDARD_TEXT);
-        showLoading();
+        scoreboard.setTeamSelectedListener(new ScoreboardView.TeamSelectedListener() {
+            @Override
+            public void onTeamSelected(Team teamSelected) {
+                if (game.isLocked())
+                    return;
 
-        Log.d(TAG, atom.getId() + " ui initialized");
+                if (GameFragment.this.selectedPredictionTeam != null) {
+                    if (teamSelected == GameFragment.this.selectedPredictionTeam)
+                        return;
+                    confirmPrediction();
+                }
+
+                GameFragment.this.selectedPredictionTeam = teamSelected;
+                String teamName;
+                int teamColor;
+                switch (teamSelected) {
+                    case AWAY:
+                        synchronized (game.acquireLock()) {
+                            teamName = game.getAwayLocale() + " " + game.getAwayName();
+                            teamColor = game.getAwayColor();
+                        }
+                        break;
+
+                    case HOME:
+                        synchronized (game.acquireLock()) {
+                            teamName = game.getHomeLocale() + " " + game.getHomeName();
+                            teamColor = game.getHomeColor();
+                        }
+                        break;
+
+                    default:
+                        throw new RuntimeException();
+                }
+
+                showNumberPadFragment(teamName, teamColor, teamSelected == Team.AWAY);
+                // showNumberPadFragment();
+            }
+        });
+
+        pager = ViewUtil.findById(view, R.id.pager);
+        pagerAdapter = new GameFragmentPagerAdapter(getChildFragmentManager());
+        pager.setAdapter(pagerAdapter);
+
+        tabs = ViewUtil.findById(view, R.id.tabs);
+        tabs.setupWithViewPager(pager);
+
+        setScoreboardColor(ScoreboardView.DEFAULT_COLOR);
+        scoreboard.loading();
+
+        Log.d(TAG, "UI initialized");
         uiInitialized = true;
         if (predictionRetrieved && fullGameRetrieved)
             finishedInitializing();
@@ -255,262 +300,322 @@ public class GameFragment extends Fragment implements PredictionFragment.Predict
         return view;
     }
 
-    private void initializeViews(View container) {
-        loadingCircle = ViewUtil.findById(container, R.id.loading_circle);
-        scoreboardContainer = ViewUtil.findById(container, R.id.scoreboard_container);
-
-        upperScoreboardContainer = ViewUtil.findById(container, R.id.upper_scoreboard_container);
-        lowerScoreboardContainer = ViewUtil.findById(container, R.id.lower_scoreboard_container);
-
-        upperMiddleContainer = ViewUtil.findById(container, R.id.upper_middle_container);
-        lowerMiddleContainer = ViewUtil.findById(container, R.id.lower_middle_container);
-
-        lock = ViewUtil.findById(container, R.id.lock);
-
-        awayTeamContainer = ViewUtil.findById(container, R.id.away_block);
-        homeTeamContainer = ViewUtil.findById(container, R.id.home_block);
-
-        awayAbbr = ViewUtil.findById(container, R.id.away_abbr);
-        homeAbbr = ViewUtil.findById(container, R.id.home_abbr);
-        awayName = ViewUtil.findById(container, R.id.away_name);
-        homeName = ViewUtil.findById(container, R.id.home_name);
-
-        awayScore = ViewUtil.findById(container, R.id.away_score_actual);
-        homeScore = ViewUtil.findById(container, R.id.home_score_actual);
-
-        awayPredictionContainer = ViewUtil.findById(container, R.id.away_prediction_block);
-        homePredictionContainer = ViewUtil.findById(container, R.id.home_prediction_block);
-
-        awayPrediction = ViewUtil.findById(container, R.id.away_flip_card);
-        homePrediction = ViewUtil.findById(container, R.id.home_flip_card);
-
-        Typeface nameTypeface = FontHelper.getYantramanavBold(getContext());
-        awayAbbr.setTypeface(nameTypeface);
-        homeAbbr.setTypeface(nameTypeface);
-        awayName.setTypeface(nameTypeface);
-        homeName.setTypeface(nameTypeface);
-
-        Typeface scoreTypeface = FontHelper.getYantramanavRegular(getContext());
-        awayScore.setTypeface(scoreTypeface);
-        homeScore.setTypeface(scoreTypeface);
-
-        awayPrediction.setTypeface(scoreTypeface);
-        homePrediction.setTypeface(scoreTypeface);
-
-        awayPrediction.strokedBackground(ColorUtil.WHITE, ColorUtil.WHITE);
-        homePrediction.strokedBackground(ColorUtil.WHITE, ColorUtil.WHITE);
-
-        View.OnClickListener onTeamClickedListener = new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (full.isLocked())
-                    return;
-
-                PredictionView selected;
-                Team selectedTeam;
-
-                switch((int) view.getTag()) {
-                    case AWAY_TAG:
-                        selected = awayPrediction;
-                        selectedTeam = full.getAwayTeam();
-                        break;
-
-                    case HOME_TAG:
-                        selected = homePrediction;
-                        selectedTeam = full.getHomeTeam();
-                        break;
-
-                    default:
-                        throw new RuntimeException("Selected PredictionView had neither a HOME nor an AWAY tag");
-
-                }
-
-                if (activePrediction != null) {
-                    if (selected == activePrediction)
-                        return;
-                    confirmPrediction();
-                }
-
-                activePrediction = selected;
-                activeTeam = selectedTeam;
-
-                showNumberPadFragment(activeTeam, scoreboardColor, !activeTeam.isHome());
-            }
-        };
-
-        awayTeamContainer.setTag(AWAY_TAG);
-        awayTeamContainer.setOnClickListener(onTeamClickedListener);
-
-        homeTeamContainer.setTag(HOME_TAG);
-        homeTeamContainer.setOnClickListener(onTeamClickedListener);
-
-        awayPredictionContainer.setTag(AWAY_TAG);
-        awayPredictionContainer.setOnClickListener(onTeamClickedListener);
-
-        homePredictionContainer.setTag(HOME_TAG);
-        homePredictionContainer.setOnClickListener(onTeamClickedListener);
-
-        awayPrediction.setTag(AWAY_TAG);
-        homePrediction.setTag(HOME_TAG);
-    }
-
-    private void initializeTabs(View container) {
-        pager = ViewUtil.findById(container, R.id.pager);
-        pagerAdapter = new GameFragmentPagerAdapter(getChildFragmentManager());
-        pager.setAdapter(pagerAdapter);
-        tabs = ViewUtil.findById(container, R.id.tabs);
-        tabs.setupWithViewPager(pager);
-    }
-
-    private void updateDisplayedGameState() {
-        if (full.isLocked()) lock.setVisibility(View.VISIBLE);
-        else                 lock.setVisibility(View.GONE);
-
-        if (full.isPregame()) {
-            /* Don't show 0-0 as the score prior to game time. */
-            awayScore.setVisibility(View.GONE);
-            homeScore.setVisibility(View.GONE);
-            upperMiddleContainer.pregameDisplay(full);
-        } else if (full.isFinal()) {
-            awayScore.setVisibility(View.VISIBLE);
-            homeScore.setVisibility(View.VISIBLE);
-            upperMiddleContainer.finalDisplay(full);
-        } else {
-            awayScore.setVisibility(View.VISIBLE);
-            homeScore.setVisibility(View.VISIBLE);
-            upperMiddleContainer.inProgressDisplay(full);
-        }
-
-        awayAbbr.setText(full.getAwayTeam().getAbbr());
-        homeAbbr.setText(full.getHomeTeam().getAbbr());
-        awayName.setText(full.getAwayTeam().getName());
-        homeName.setText(full.getHomeTeam().getName());
-
-        awayScore.setText(String.valueOf(full.getAwayTeam().getScore()));
-        homeScore.setText(String.valueOf(full.getHomeTeam().getScore()));
-
-        // notifyGameStateChanged();
-    }
-
-    private void updateDisplayedPredictions() {
-        if (full.isLocked()) {
-            lowerMiddleContainer.showSpread();
-            if (!prediction.isComplete()) lowerScoreboardContainer.setVisibility(View.GONE);
-            else                          lowerScoreboardContainer.setVisibility(View.VISIBLE);
-        } else {
-            lowerScoreboardContainer.setVisibility(View.VISIBLE);
-            if (!prediction.isComplete()) lowerMiddleContainer.showUnpredictedText();
-            else                          lowerMiddleContainer.showPredictedText();
-        }
-
-        awayPrediction.setScore(prediction.getAwayScore());
-        homePrediction.setScore(prediction.getHomeScore());
-
-        lowerMiddleContainer.getSpreadView().setSpread(prediction.getSpread(full));
-        lowerMiddleContainer.getSpreadView().setProgress(prediction.getSpread(full));
-
-        markPredictedWinner();
-    }
-
     private void confirmPrediction() {
-        synchronized (prediction.getLock()) {
-            int tag = (int) activePrediction.getTag();
-            switch (tag) {
-                case AWAY_TAG:
-                    prediction.setAwayScore(awayPrediction.getScore());
+        /* When a prediction is confirmed, we update the Prediction object with the values entered
+           in each PredictionView on the scoreboard. confirmPrediction() is called each time a
+           single PredictionView has been updated. */
+        // TODO: Have a way of checking that the predictions have changed, so that we don't unnecessarily send predictions to the server
+        // if (!predictionsModified)
+        //    return;
+
+        int predictedWinner;
+        synchronized (prediction) {
+            switch (selectedPredictionTeam) {
+                case AWAY:
+                    prediction.setAwayScore(scoreboard.getAwayPredictedScore());
                     break;
 
-                case HOME_TAG:
-                    prediction.setHomeScore((homePrediction.getScore()));
+                case HOME:
+                    prediction.setHomeScore(scoreboard.getHomePredictedScore());
                     break;
-
-                default:
-                    throw new RuntimeException("PredictionView had neither a HOME nor an AWAY tag");
             }
+            predictedWinner = prediction.winner();
+        }
+        submitPrediction();
+        highlightPredictedWinner(predictedWinner);
 
-            submitPrediction();
+        hideNumberPadFragment(selectedPredictionTeam == Team.AWAY);
+        selectedPredictionTeam = null;
+        inPredictSession = false;
+    }
+
+    private void clearPrediction() {
+        synchronized (prediction) {
+            switch (selectedPredictionTeam) {
+                case AWAY:
+                    prediction.setAwayScore(Prediction.NULL);
+                    scoreboard.clearAwayPrediction();
+                    break;
+
+                case HOME:
+                    prediction.setHomeScore(Prediction.NULL);
+                    scoreboard.clearHomePrediction();
+                    break;
+            }
+        }
+    }
+
+    private void highlightPredictedWinner(int predictedWinner) {
+        int color;
+        switch (predictedWinner) {
+            case Prediction.W_NONE:
+                color = ScoreboardView.DEFAULT_COLOR;
+                scoreboard.highlightNeitherPrediction();
+                break;
+
+            case Prediction.W_AWAY:
+                synchronized (game.acquireLock()) {
+                    color = game.getAwayColor();
+                }
+                scoreboard.highlightAwayPrediction(color);
+                break;
+
+            case Prediction.W_HOME:
+                synchronized (game.acquireLock()) {
+                    color = game.getHomeColor();
+                }
+                scoreboard.highlightHomePrediction(color);
+                break;
+
+            case Prediction.W_TIE:
+                color = ScoreboardView.DEFAULT_COLOR;
+                scoreboard.highlightNeitherPrediction();
+                break;
+
+            default:
+                throw new RuntimeException();
+        }
+        setScoreboardColor(color);
+    }
+
+    private void updateScoreboardDisplay() {
+        boolean locked;
+        int awayScore, homeScore;
+        int awayColor, homeColor;
+        Game.State gameState;
+        synchronized (game.acquireLock()) {
+            locked = game.isLocked();
+
+            if (locked) scoreboard.showLock();
+            else        scoreboard.hideLock();
+
+            scoreboard.setAwayName(game.getAwayAbbr(), game.getAwayName());
+            scoreboard.setHomeName(game.getHomeAbbr(), game.getHomeName());
+
+            awayScore = game.getAwayScore();
+            homeScore = game.getHomeScore();
+            scoreboard.setAwayScore(awayScore);
+            scoreboard.setHomeScore(homeScore);
+
+            awayColor = game.getAwayColor();
+            homeColor = game.getHomeColor();
+
+            if (game.isPregame()) {
+                scoreboard.hideScores();
+                scoreboard.pregameDisplay(game.getStartTime());
+                gameState = Game.State.PREGAME;
+            } else if (game.isFinal()) {
+                scoreboard.showScores();
+                scoreboard.finalDisplay();
+                gameState = Game.State.FINAL;
+            } else {
+                scoreboard.showScores();
+                scoreboard.inProgressDisplay(game.getClock(), game.getQuarter());
+                gameState = Game.State.IN_PROGRESS;
+            }
         }
 
-        markPredictedWinner();
-        hideNumberPadFragment(!activeTeam.isHome());
-        activePrediction = null;
-        activeTeam = null;
-        predictSession = false;
+        int predictedWinner;
+        synchronized (prediction.acquireLock()) {
+            if (locked) {
+                if (!prediction.isComplete()) {
+                    /* Game is locked and a prediction was not made. Don't show the incomplete
+                       predictions; hide the lower half of the scoreboard. */
+                    scoreboard.hidePredictions();
+                } else {
+                    /* Game is locked and a full prediction was made. Show the prediction. */
+                    scoreboard.setPredictionState(ScoreboardPredictionStatusContainer.State.SPREAD);
+                    scoreboard.showPredictions();
+                }
+            } else {
+                /* Game is not locked, so a prediction can still be made. Show the blank predictions
+                   while it is still possible for them to be set. */
+                scoreboard.showPredictions();
+                if (!prediction.isComplete()) {
+                    scoreboard.setPredictionState(ScoreboardPredictionStatusContainer
+                            .State.UNPREDICTED);
+                } else {
+                    scoreboard.setPredictionState(ScoreboardPredictionStatusContainer
+                            .State.PREDICTED);
+                }
+            }
+
+            scoreboard.setAwayPrediction(prediction.getAwayScore());
+            scoreboard.setHomePrediction(prediction.getHomeScore());
+
+            int spread = Prediction.computeSpread(prediction.getAwayScore(),
+                    prediction.getHomeScore(), awayScore, homeScore);
+            scoreboard.setPredictionSpread(spread);
+
+            predictedWinner = prediction.winner();
+        }
+
+        Log.d(TAG, "Predicted winner: " + predictedWinner);
+        highlightPredictedWinner(predictedWinner);
     }
 
     private void submitPrediction() {
-        prediction.setModified(true);
-        prediction.setOnServer(false);
+        Prediction.disableUpdates(prediction);
 
-        lowerMiddleContainer.showLoading();
+        scoreboard.setPredictionState(ScoreboardPredictionStatusContainer.State.SUBMITTING);
 
-        new SubmitPredictionTask(LocalAccountManager.get().getId(), full.getId(), prediction.getAwayScore(), prediction.getHomeScore(), new TaskFinishedListener() {
+        String gameId;
+        synchronized (game.acquireLock()) {
+            gameId = game.getId();
+        }
+
+        new SubmitPredictionTask(LocalAccountManager.get().getId(), gameId,
+                prediction.getAwayScore(), prediction.getHomeScore(), new TaskFinishedListener() {
             @Override
             public void onTaskFinished(BaseTask task) {
                 if (task.errorOccurred()) {
-                    // TODO: Show a snackbar or something
                     Log.e(TAG, task.getError().toString());
                     return;
                 }
 
-                synchronized (prediction.getLock()) {
-                    prediction.setOnServer(true);
-                    if (!prediction.isComplete()) lowerMiddleContainer.showUnpredictedText();
-                    else                          lowerMiddleContainer.showPredictedText();
-                }
+                Prediction.enableUpdates(prediction);
 
+                synchronized (prediction.acquireLock()) {
+                    if (!prediction.isComplete()) scoreboard.setPredictionState(ScoreboardPredictionStatusContainer.State.UNPREDICTED);
+                    else                          scoreboard.setPredictionState(ScoreboardPredictionStatusContainer.State.PREDICTED);
+                }
             }
         }).start();
     }
 
-    private void markPredictedWinner() {
-        switch (prediction.winner()) {
-            case Prediction.W_AWAY:
-                if (numberPadFragment != null)
-                    numberPadFragment.setBufferColor(full.getAwayTeam().getPrimaryColor());
+//    private void submitPrediction() {
+//        prediction.setModified(true);
+//        prediction.setOnServer(false);
+//
+//        lowerMiddleContainer.showLoading();
+//
+//        new SubmitPredictionTask(LocalAccountManager.get().getId(), game.getId(),
+//                prediction.getAwayScore(), prediction.getHomeScore(), new TaskFinishedListener() {
+//            @Override
+//            public void onTaskFinished(BaseTask task) {
+//                if (task.errorOccurred()) {
+//                    // TODO: Show a snackbar or something
+//                    Log.e(TAG, task.getError().toString());
+//                    return;
+//                }
+//
+//                synchronized (prediction.getLock()) {
+//                    prediction.setOnServer(true);
+//                    if (!prediction.isComplete()) lowerMiddleContainer.showUnpredictedText();
+//                    else                          lowerMiddleContainer.showPredictedText();
+//                }
+//
+//            }
+//        }).start();
+//    }
 
-                awayPrediction.solidBackground(full.getAwayTeam().getPrimaryColor(), ColorUtil.WHITE);
-                homePrediction.strokedBackground(ColorUtil.WHITE, ColorUtil.WHITE);
-
-                setScoreboardColor(full.getAwayTeam().getPrimaryColor());
-                break;
-
-            case Prediction.W_HOME:
-                if (numberPadFragment != null)
-                    numberPadFragment.setBufferColor(full.getHomeTeam().getPrimaryColor());
-
-                awayPrediction.strokedBackground(ColorUtil.WHITE, ColorUtil.WHITE);
-                homePrediction.solidBackground(full.getHomeTeam().getPrimaryColor(), ColorUtil.WHITE);
-
-                setScoreboardColor(full.getHomeTeam().getPrimaryColor());
-                break;
-
-            default:
-                if (numberPadFragment != null)
-                    numberPadFragment.setBufferColor(ColorUtil.STANDARD_TEXT);
-
-                awayPrediction.strokedBackground(ColorUtil.WHITE, ColorUtil.WHITE);
-                homePrediction.strokedBackground(ColorUtil.WHITE, ColorUtil.WHITE);
-
-                setScoreboardColor(ColorUtil.STANDARD_TEXT);
-        }
-    }
+//    private void markPredictedWinner() {
+//        int predictedWinner, color;
+//        /* Do we need these to be synchronized? */
+//        synchronized (prediction.acquireLock()) {
+//            predictedWinner = prediction.winner();
+//        }
+//
+//        switch (predictedWinner) {
+//            case Prediction.W_AWAY:
+//                synchronized (game.acquireLock()) {
+//                    color = game.getAwayColor();
+//                }
+//
+//                if (numberPadFragment != null)
+//                    numberPadFragment.setBufferColor(color);
+//
+//                awayPrediction.solidBackground(color, ColorUtil.WHITE);
+//                homePrediction.strokedBackground(ColorUtil.WHITE, ColorUtil.WHITE);
+//
+//                setScoreboardColor(color);
+//                break;
+//
+//            case Prediction.W_HOME:
+//                synchronized (game.acquireLock()) {
+//                    color = game.getHomeColor();
+//                }
+//
+//                if (numberPadFragment != null)
+//                    numberPadFragment.setBufferColor(color);
+//
+//                awayPrediction.strokedBackground(ColorUtil.WHITE, ColorUtil.WHITE);
+//                homePrediction.solidBackground(color, ColorUtil.WHITE);
+//
+//                setScoreboardColor(color);
+//                break;
+//
+//            default:
+//                if (numberPadFragment != null)
+//                    numberPadFragment.setBufferColor(ColorUtil.STANDARD_TEXT);
+//
+//                awayPrediction.strokedBackground(ColorUtil.WHITE, ColorUtil.WHITE);
+//                homePrediction.strokedBackground(ColorUtil.WHITE, ColorUtil.WHITE);
+//
+//                setScoreboardColor(ColorUtil.STANDARD_TEXT);
+//        }
+//    }
 
     public void setScoreboardColor(int color) {
-        // TODO: put the scoreboard color change method in the activity?
-        scoreboardColor = color;
-        // activity.setStatusBarColor(color, this);
+        scoreboard.setColor(color);
         activity.setToolbarColor(color, this);
-
-        upperScoreboardContainer.setBackgroundColor(color);
-        lowerScoreboardContainer.setBackgroundColor(color);
         tabs.setBackgroundColor(color);
 
         if (predictionFragment != null)
             predictionFragment.setHeaderColor(color & 0xc0ffffff);
     }
 
-    private void showNumberPadFragment(Team team, int bufferColor, boolean fromLeft) {
+    public int getScoreboardColor() {
+        return scoreboard.getColor();
+    }
+
+    private void showNumberPadFragment(String teamName, int teamColor, boolean fromLeft) {
+        numberPadFragment = NumberPadFragment.newInstance(teamName, teamColor, scoreboardColor);
+        FragmentTransaction fragmentTransaction = getChildFragmentManager().beginTransaction();
+
+        if (fromLeft)
+            fragmentTransaction.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_left);
+        else
+            fragmentTransaction.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_right);
+
+        fragmentTransaction.add(R.id.container, numberPadFragment);
+        fragmentTransaction.commit();
+    }
+
+    private void showNumberPadFragment(Team team, int bufferColor) {
+        String locale, name;
+        int color;
+        synchronized (game.acquireLock()) {
+            switch (team) {
+                case AWAY:
+                    locale = game.getAwayLocale();
+                    name = game.getAwayName();
+                    color = game.getAwayColor();
+                    break;
+
+                case HOME:
+                    locale = game.getHomeLocale();
+                    name = game.getHomeName();
+                    color = game.getHomeColor();
+                    break;
+
+                default:
+                    throw new RuntimeException("Team value was neither HOME nor AWAY");
+            }
+        }
+
+        numberPadFragment = NumberPadFragment.newInstance(locale + " " + name, color, bufferColor);
+        FragmentTransaction fragmentTransaction = getChildFragmentManager().beginTransaction();
+
+        if (team == Team.AWAY) fragmentTransaction.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_left);
+        else                   fragmentTransaction.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_right);
+
+        fragmentTransaction.add(R.id.container, numberPadFragment);
+        fragmentTransaction.commit();
+    }
+
+    /*
+    private void showNumberPadFragment(OriginalTeam team, int bufferColor, boolean fromLeft) {
         numberPadFragment = NumberPadFragment.newInstance(team.getLocale() + " " + team.getName(), team.getPrimaryColor(), bufferColor);
         FragmentTransaction fragmentTransaction = getChildFragmentManager().beginTransaction();
 
@@ -520,6 +625,7 @@ public class GameFragment extends Fragment implements PredictionFragment.Predict
         fragmentTransaction.add(R.id.container, numberPadFragment);
         fragmentTransaction.commit();
     }
+    */
 
     private void hideNumberPadFragment(boolean fromLeft) {
         FragmentTransaction fragmentTransaction = getChildFragmentManager().beginTransaction();
@@ -564,13 +670,8 @@ public class GameFragment extends Fragment implements PredictionFragment.Predict
     }
 
     @Override
-    public int getScoreboardColor() {
-        return scoreboardColor;
-    }
-
-    @Override
     public FullGame getGame() {
-        return full;
+        return game;
     }
 
     @Override
@@ -578,31 +679,34 @@ public class GameFragment extends Fragment implements PredictionFragment.Predict
         return prediction;
     }
 
-    private void clearPrediction() {
-        activePrediction.clear();
-    }
-
     private void addDigitToPrediction(String digit) {
-        Log.d(TAG, "Adding digit: " + digit);
-        if (!predictSession) {
+        if (!inPredictSession) {
             clearPrediction();
-            predictSession = true;
+            inPredictSession = true;
         }
-        if (activePrediction.getTextView().length() < MAX_PREDICTION_DIGITS)
-            activePrediction.append(digit);
+
+        switch (selectedPredictionTeam) {
+            case AWAY:
+                scoreboard.appendDigitToAwayPrediction(digit);
+                break;
+
+            case HOME:
+                scoreboard.appendDigitToHomePrediction(digit);
+                break;
+        }
     }
 
     @Override
     public void keyPressed(NumberPadFragment.Key k) {
-        Log.d(TAG, "Key pressed");
-        if (activePrediction == null)
+        if (selectedPredictionTeam == null)
             return;
 
+        Log.d(TAG, "Key pressed: " + k.toString());
         switch (k) {
             case KEY_ENTER:
                 confirmPrediction();
                 break;
-            case KEY_DELETE:
+            case KEY_CLEAR:
                 clearPrediction();
                 break;
             case KEY_0:
@@ -636,5 +740,10 @@ public class GameFragment extends Fragment implements PredictionFragment.Predict
                 addDigitToPrediction("9");
                 break;
         }
+    }
+
+    public enum State {
+        LOADING,
+        SCOREBOARD
     }
 }

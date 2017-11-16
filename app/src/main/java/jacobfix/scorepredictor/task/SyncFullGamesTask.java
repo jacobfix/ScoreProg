@@ -6,16 +6,12 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 
 import jacobfix.scorepredictor.FullGame;
-import jacobfix.scorepredictor.NflGame;
-import jacobfix.scorepredictor.schedule.ScheduleRetriever;
 import jacobfix.scorepredictor.server.GameServerInterface;
 
-public class SyncFullGamesTask extends BaseTask<Collection<FullGame>> {
+public class SyncFullGamesTask extends BaseTask<ArrayList<FullGame>> {
 
     private static final String TAG = SyncFullGamesTask.class.getSimpleName();
 
@@ -23,26 +19,26 @@ public class SyncFullGamesTask extends BaseTask<Collection<FullGame>> {
 
     public SyncFullGamesTask(Collection<FullGame> games, TaskFinishedListener listener) {
         super(listener);
+        Log.d(TAG, games.toString());
         this.games = new HashSet<>(games);
     }
 
     @Override
     public void execute() {
-        ArrayList<FullGame> result = new ArrayList<>();
         try {
+            Thread.sleep(4000);
+            ArrayList<FullGame> result = new ArrayList<>();
             for (FullGame game : games) {
                 JSONObject json = GameServerInterface.getDefault().getFullGameJson(game.getId());
                 if (json != null) {
-                    synchronized (game) {
-                        game.sync(json);
-                    }
+                    /* Update method has internal synchronization. */
+                    game.updateFromFullJson(json);
                 }
                 result.add(game);
             }
+            setResult(result);
         } catch (Exception e) {
             reportError(e);
-        } finally {
-            setResult(result);
         }
     }
 }

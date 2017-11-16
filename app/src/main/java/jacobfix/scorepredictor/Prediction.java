@@ -1,7 +1,5 @@
 package jacobfix.scorepredictor;
 
-import android.util.Log;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -77,8 +75,24 @@ public class Prediction {
         return mHomeScore;
     }
 
+    public int getSpread(Game game) {
+        return 0;
+    }
+
+    /*
     public int getSpread(FullGame game) {
-        return Math.abs(mAwayScore - game.getAwayTeam().getScore()) + Math.abs(mHomeScore - game.getHomeTeam().getScore());
+        return Math.abs(mAwayScore - game.getAwayScore()) + Math.abs(mHomeScore - game.getHomeScore().getScore());
+    }
+    */
+
+    /*
+    public int getSpread(Game game) {
+        return Math.abs(mAwayScore - game.getAwayScore()) + Math.abs(mHomeScore - game.getHomeScore());
+    }
+    */
+
+    public static int computeSpread(int awayPredictedScore, int homePredictedScore, int awayActualScore, int homeActualScore) {
+        return Math.abs(awayPredictedScore - awayActualScore) + Math.abs(homePredictedScore - homeActualScore);
     }
 
     public int getExposure() {
@@ -99,6 +113,10 @@ public class Prediction {
         if (t < 0)
             return W_HOME;
         return W_TIE;
+    }
+
+    public Object acquireLock() {
+        return lock;
     }
 
     public void updateFromJson(JSONObject json) throws JSONException {

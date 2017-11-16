@@ -25,7 +25,7 @@
 
     <style name="TabLayoutStyle" parent="Theme.AppCompat">
         <item name="tabIndicatorColor">@android:color/white</item>
-        <item name="tabTextColor">#bdc3c7</item>
+        <item name="tabTextColor">#80ffffff</item>
         <item name="tabSelectedTextColor">@android:color/white</item>
         <item name="tabIndicatorHeight">4dp</item>
     </style>

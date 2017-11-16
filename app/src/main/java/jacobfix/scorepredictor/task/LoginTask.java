@@ -15,7 +15,6 @@ import jacobfix.scorepredictor.ApplicationContext;
 import jacobfix.scorepredictor.AsyncCallback;
 import jacobfix.scorepredictor.LocalAccountManager;
 import jacobfix.scorepredictor.server.UserServerInterface;
-import jacobfix.scorepredictor.sync.OriginalUserProvider;
 import jacobfix.scorepredictor.sync.UserProvider;
 import jacobfix.scorepredictor.users.User;
 import jacobfix.scorepredictor.users.UserDetails;

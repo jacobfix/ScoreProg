@@ -20,10 +20,11 @@
             android:screenOrientation="portrait"
             android:theme="@style/MaterialTheme" />
         <activity
-            android:name=".NewGameActivity"
+            android:name=".TestActivity"
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="portrait"
-            android:theme="@style/MaterialTheme" />
+            android:theme="@style/MaterialTheme">
+        </activity>
         <activity
             android:name=".LobbyActivity"
             android:configChanges="orientation|keyboardHidden"

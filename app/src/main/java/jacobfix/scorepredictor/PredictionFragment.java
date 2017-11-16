@@ -1,12 +1,10 @@
 package jacobfix.scorepredictor;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,13 +19,9 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 
-import jacobfix.scorepredictor.sync.OriginalUserProvider;
-import jacobfix.scorepredictor.sync.PredictionProvider;
+import jacobfix.scorepredictor.components.PredictionView;
 import jacobfix.scorepredictor.sync.UserProvider;
 import jacobfix.scorepredictor.task.BaseTask;
 import jacobfix.scorepredictor.task.RankPredictionsTask;
@@ -86,7 +80,7 @@ public class PredictionFragment extends Fragment implements GameStateChangeListe
         View view = inflater.inflate(R.layout.fragment_friend_prediction_list_new, container, false);
 
         header = ViewUtil.findById(view, R.id.header);
-        setHeaderColor(listener.getScoreboardColor() & 0xc0ffffff);
+        setHeaderColor(listener.getScoreboardColor());
 
         awayHeader = ViewUtil.findById(view, R.id.away_abbr);
         homeHeader = ViewUtil.findById(view, R.id.home_abbr);
@@ -112,12 +106,16 @@ public class PredictionFragment extends Fragment implements GameStateChangeListe
         if (game != null)
             onGameStateChanged(game);
 
+        setHeaderColor(listener.getScoreboardColor());
+
         switch (listener.getPredictionFragmentState()) {
             case LOADING:
+                Log.d(TAG, "Got GameFragment state: LOADING");
                 showLoading();
                 break;
 
             case LIST:
+                Log.d(TAG, "Got GameFragment state: LIST");
                 showList();
                 break;
         }
@@ -134,7 +132,7 @@ public class PredictionFragment extends Fragment implements GameStateChangeListe
     }
 
     public void setHeaderColor(int color) {
-        header.setBackgroundColor(color);
+        header.setBackgroundColor(color & 0xc0ffffff);
     }
 
     public void updateParticipants(final Map<String, Prediction> participants) {
@@ -167,11 +165,11 @@ public class PredictionFragment extends Fragment implements GameStateChangeListe
     }
 
     @Override
-    public void onGameStateChanged(FullGame game) {
-        synchronized (game.getLock()) {
+    public void onGameStateChanged(Game game) {
+        synchronized (game.acquireLock()) {
             isPregame = game.isPregame();
-            awayAbbr = game.getAwayTeam().getAbbr();
-            homeAbbr = game.getHomeTeam().getAbbr();
+            awayAbbr = game.getAwayAbbr();
+            homeAbbr = game.getHomeAbbr();
         }
         awayHeader.setText(awayAbbr);
         homeHeader.setText(homeAbbr);
@@ -286,14 +284,14 @@ public class PredictionFragment extends Fragment implements GameStateChangeListe
             try {
                 Collection<Prediction> unsorted = predictions.values();
 
-                FullGame.disableUpdates(game);
+                Game.disableUpdates(game);
                 Prediction.disableUpdates(unsorted);
 
                 RankPredictionsTask rankPredictionsTask = new RankPredictionsTask(game, unsorted, null);
                 rankPredictionsTask.execute();
 
                 if (rankPredictionsTask.errorOccurred()) {
-                    FullGame.enableUpdates(game);
+                    Game.enableUpdates(game);
                     Prediction.enableUpdates(unsorted);
                     throw rankPredictionsTask.getError();
                 }
@@ -311,7 +309,7 @@ public class PredictionFragment extends Fragment implements GameStateChangeListe
                     ranking.add(new Pair<>(currentRank, new PredictionFragmentListItem(userDetails.get(p.getUserId()), p, game)));
                 }
 
-                FullGame.enableUpdates(game);
+                Game.enableUpdates(game);
                 Prediction.enableUpdates(unsorted);
 
                 setResult(ranking);
@@ -332,14 +330,14 @@ public class PredictionFragment extends Fragment implements GameStateChangeListe
         int awayColor;
         int homeColor;
 
-        public PredictionFragmentListItem(UserDetails userDetails, Prediction prediction, FullGame game) {
+        public PredictionFragmentListItem(UserDetails userDetails, Prediction prediction, Game game) {
             this.userId = userDetails.getId();
             this.username = userDetails.getUsername();
             this.awayPredictedScore = prediction.getAwayScore();
             this.homePredictedScore = prediction.getHomeScore();
             this.spread = prediction.getSpread(game);
-            this.awayColor = game.getAwayTeam().getPrimaryColor();
-            this.homeColor = game.getHomeTeam().getPrimaryColor();
+            this.awayColor = game.getAwayColor();
+            this.homeColor = game.getHomeColor();
         }
     }
 
