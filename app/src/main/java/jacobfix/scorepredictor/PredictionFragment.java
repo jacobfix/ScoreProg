@@ -3,6 +3,7 @@ package jacobfix.scorepredictor;
 import android.content.Context;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -195,18 +196,20 @@ public class PredictionFragment extends Fragment implements GameStateChangeListe
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
-                convertView = getActivity().getLayoutInflater().inflate(R.layout.list_item_friend_prediction_new_new, parent, false);
+                convertView = getActivity().getLayoutInflater().inflate(R.layout.list_item_friend_prediction_constraint, parent, false);
                 ViewHolder holder = new ViewHolder();
-                holder.findViews(convertView);
+
+                holder.ranking = ViewUtil.findById(convertView, R.id.ranking);
+                holder.username = ViewUtil.findById(convertView, R.id.username);
+                holder.awayPrediction = ViewUtil.findById(convertView, R.id.away_prediction);
+                holder.homePrediction = ViewUtil.findById(convertView, R.id.home_prediction);
+                holder.spread = ViewUtil.findById(convertView, R.id.spread);
 
                 holder.ranking.setTypeface(FontHelper.getYantramanavRegular(getContext()));
                 holder.username.setTypeface(FontHelper.getYantramanavRegular(getContext()));
 
                 holder.ranking.setTextColor(ColorUtil.STANDARD_TEXT);
                 holder.username.setTextColor(ColorUtil.STANDARD_TEXT);
-
-                holder.awayFlipCard.getTextView().setTypeface(FontHelper.getYantramanavRegular(getContext()));
-                holder.homeFlipCard.getTextView().setTypeface(FontHelper.getYantramanavRegular(getContext()));
 
                 convertView.setTag(holder);
             }
@@ -219,6 +222,8 @@ public class PredictionFragment extends Fragment implements GameStateChangeListe
 
             holder.ranking.setText(String.valueOf(rank));
             holder.username.setText(info.username);
+
+            // TODO: Fit username to width
 
             if (isPregame) {
                 /* Show the users who have submitted predictions, but don't display their predictions. */
@@ -361,31 +366,12 @@ public class PredictionFragment extends Fragment implements GameStateChangeListe
     }
 
     static class ViewHolder {
-        LinearLayout root;
+        ConstraintLayout root;
         TextView ranking;
-        ImageView profilePic;
         TextView username;
 
-        PredictionView awayFlipCard;
-        PredictionView homeFlipCard;
-        TextView spread;
-        ProgressBar spreadStatus;
-
-        void findViews(View parent) {
-            root = ViewUtil.findById(parent, R.id.root);
-            ranking = ViewUtil.findById(parent, R.id.ranking);
-            profilePic = ViewUtil.findById(parent, R.id.icon);
-            username = ViewUtil.findById(parent, R.id.username);
-
-            awayFlipCard = ViewUtil.findById(parent, R.id.away_prediction);
-            homeFlipCard = ViewUtil.findById(parent, R.id.home_prediction);
-            spread = ViewUtil.findById(parent, R.id.spread);
-            spreadStatus = ViewUtil.findById(parent, R.id.spread_progress_bar);
-
-            awayFlipCard.setTextSize(28);
-            homeFlipCard.setTextSize(28);
-            awayFlipCard.resize();
-            homeFlipCard.resize();
-        }
+        PredictionView awayPrediction;
+        PredictionView homePrediction;
+        SpreadView spread;
     }
 }

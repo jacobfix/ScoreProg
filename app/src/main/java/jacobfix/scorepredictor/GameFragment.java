@@ -561,8 +561,13 @@ public class GameFragment extends Fragment implements PredictionFragment.Predict
         activity.setToolbarColor(color, this);
         tabs.setBackgroundColor(color);
 
-        if (predictionFragment != null)
-            predictionFragment.setHeaderColor(color & 0xc0ffffff);
+        PredictionFragment predictionFragment = getPredictionFragment();
+        if (predictionFragment != null) {
+            Log.d(TAG, "PredictionFragment was not null");
+            predictionFragment.setHeaderColor(color);
+        } else {
+            Log.d(TAG, "PredictionFragment was null");
+        }
     }
 
     public int getScoreboardColor() {

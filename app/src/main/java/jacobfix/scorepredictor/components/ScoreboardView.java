@@ -1,5 +1,7 @@
 package jacobfix.scorepredictor.components;
 
+import android.animation.ArgbEvaluator;
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Color;
 import android.support.constraint.ConstraintLayout;
@@ -285,7 +287,11 @@ public class ScoreboardView extends FrameLayout {
     }
 
     public void show() {
+        // TODO: Have an animation when the scoreboard changes state
         scoreboardContentContainer.setVisibility(View.VISIBLE);
+//        ObjectAnimator colorFade = ObjectAnimator.ofObject(scoreboardContentContainer, "backgroundColor", new ArgbEvaluator(), ScoreboardView.DEFAULT_COLOR, scoreboardColor);
+//        colorFade.setDuration(500);
+//        colorFade.start();
         loadingIcon.setVisibility(View.GONE);
     }
 

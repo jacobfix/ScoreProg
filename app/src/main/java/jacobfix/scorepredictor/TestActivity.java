@@ -14,8 +14,9 @@ public class TestActivity extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_test_new);
+        setContentView(R.layout.list_item_friend_prediction_constraint);
 
+        /*
         MyToolbar toolbar = ViewUtil.findById(this, R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -32,5 +33,6 @@ public class TestActivity extends AppCompatActivity {
 
         awayNameContainer.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
         homeNameContainer.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
+        */
     }
 }

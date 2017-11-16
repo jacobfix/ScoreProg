@@ -24,6 +24,8 @@ public class SpreadView extends FrameLayout {
     private static final String BOUNDS_STRING = "22";
     private static final int PADDING = 12;
 
+    private static final float SIZE_RATIO = 0.4f;
+
     public SpreadView(Context context) {
         this(context, null);
     }
@@ -42,13 +44,23 @@ public class SpreadView extends FrameLayout {
         spread = ViewUtil.findById(this, R.id.spread);
         progressBar = ViewUtil.findById(this, R.id.spread_progress_bar);
 
-        spread.setTypeface(FontHelper.getYantramanavRegular(getContext()));
-        ViewUtil.applyDeboss(spread);
         // ViewUtil.applyDeboss(spread);
-        // resize();
-        // Log.d(TAG, "" + getLayoutParams().width);
-        // Log.d(TAG, "" + getLayoutParams().height);
-        // setBackgroundColor(Color.RED);
+    }
+
+    @Override
+    public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int suggestedWidth = MeasureSpec.getSize(widthMeasureSpec);
+        int suggestedHeight = MeasureSpec.getSize(heightMeasureSpec);
+
+        int availableWidth = suggestedWidth - getPaddingLeft() - getPaddingRight();
+        int desiredWidth = (int) (availableWidth * SIZE_RATIO);
+
+        spread.setTypeface(FontHelper.getArimoRegular(getContext()));
+        ViewUtil.fitTextToWidth(spread, desiredWidth, "99");
+
+        progressBar.setProgress(80);
+
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
     public void setSpread(int s) {
