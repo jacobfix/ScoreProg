@@ -6,7 +6,7 @@
     <RelativeLayout android:id="@+id/normal"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone">
+        android:visibility="visible">
 
         <!-- <FrameLayout android:id="@+id/side_container_left"
             android:layout_width="44dp"

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/standard_color">
+
+    <LinearLayout
+        android:id="@id/box"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_centerInParent="true"
+        android:layout_marginLeft="25dp"
+        android:layout_marginRight="25dp"
+        android:layout_marginBottom="40dp">
+
+        <include layout="@layout/view_error_message_input_field"
+            android:id="@+id/username_field"/>
+
+        <include layout="@layout/view_error_message_input_field"
+            android:id="@+id/email_field"/>
+
+        <include layout="@layout/view_error_message_input_field"
+            android:id="@+id/password_field"/>
+
+        <include layout="@layout/view_error_message_input_field"
+            android:id="@+id/retyped_password_field"/>
+
+        <CheckBox
+            android:id="@+id/privacy_policy_agreement"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:buttonTint="@android:color/white"
+            android:textSize="18sp"
+            android:textColor="@android:color/white"
+            android:text="By checking this box, you agree to our Privacy Policy."
+            android:paddingLeft="10dp"
+            android:visibility="gone"/>
+
+        <Button
+            android:id="@+id/register_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/rounded_rectangle"
+            android:backgroundTint="@android:color/white"
+            android:text="Create Account"
+            android:textSize="18sp"
+            android:textColor="@color/standard_color"
+            android:textAllCaps="false"/>
+
+        <TextView
+            android:id="@+id/no_account_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:gravity="center"
+            android:text="Already have an account?"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"/>
+
+        <Button
+            android:id="@+id/sign_in_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/rounded_rectangle"
+            android:backgroundTint="#20cccccc"
+            android:text="Sign In"
+            android:textSize="18sp"
+            android:textColor="@android:color/white"
+            android:textAllCaps="false"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_above="@id/box"
+        android:layout_marginBottom="15dp"
+        android:gravity="bottom|center_horizontal">
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="44sp"
+            android:textColor="@android:color/white"
+            android:text="@string/app_name"/>>
+
+    </LinearLayout>
+
+</RelativeLayout>

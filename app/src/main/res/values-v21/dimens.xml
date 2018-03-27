@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="team_name_padding">10dp</dimen>
+    <dimen name="team_locale_text_size">20sp</dimen>
+    <dimen name="lobby_divider_height">8dp</dimen>
+
+    <dimen name="team_abbr_text_size">64sp</dimen>
+    <dimen name="team_name_text_size">18sp</dimen>
+    <dimen name="abbr_name_gap">-14dp</dimen>
+    <dimen name="score_gap">6dp</dimen>
+
+    <dimen name="scoreboard_center_container_width">75dp</dimen>
+    <dimen name="score_text_size">54sp</dimen>
+
+    <dimen name="scoreboard_padding_top">18dp</dimen>
+    <dimen name="scoreboard_padding_bottom">22dp</dimen>
+    <dimen name="scoreboard_padding_left">18dp</dimen>
+    <dimen name="scoreboard_padding_right">18dp</dimen>
+
+    <dimen name="actual_score_text_size">34sp</dimen>
+    <dimen name="predicted_score_text_size">38sp</dimen>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+</resources>

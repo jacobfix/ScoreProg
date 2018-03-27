@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jacobfix.scoreprog.components.PlayFeedListItemContainer xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="90dp"
+    android:background="@android:color/white">
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/play_content_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.constraint.Guideline
+            android:id="@+id/vertical_guideline_1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintGuide_percent="0.23"
+            android:orientation="vertical"/>
+
+        <View
+            android:id="@+id/stripe"
+            android:layout_width="7dp"
+            android:layout_height="match_parent"/>
+
+        <include layout="@layout/view_play_feed_list_item_down_container"
+            android:id="@+id/down_container"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginLeft="7dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@id/vertical_guideline_1"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <include layout="@layout/view_play_feed_list_item_description_container"
+            android:id="@+id/description_container"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintLeft_toRightOf="@id/vertical_guideline_1"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+            <!-- app:layout_constraintHeight_default="wrap"/> -->
+
+    </android.support.constraint.ConstraintLayout>
+
+    <FrameLayout
+        android:id="@+id/game_instance_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/game_instance_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textSize="20sp"
+            android:text="TIMEOUT"/>
+    </FrameLayout>
+</jacobfix.scoreprog.components.PlayFeedListItemContainer>

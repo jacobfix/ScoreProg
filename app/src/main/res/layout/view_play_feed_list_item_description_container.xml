@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jacobfix.scoreprog.components.PlayFeedListItemDescriptionContainer xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp">
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:text="Incomplete Pass"/>
+
+    <TextView
+        android:id="@+id/description"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginTop="4dp"
+        android:gravity="center_vertical"
+        android:maxLines="2"
+        android:textSize="15sp"
+        android:text="Certainty listening no no behaviour existence assurance situation is. Because add why not esteems amiable him. Interested the unaffected mrs law friendship add principles. Indeed on people do merits to. Court heard which up above hoped grave do. Answer living law things either sir bed length. Looked before we an on merely. These no death he at share alone. Yet outward the him compass hearted are tedious. "/>
+
+</jacobfix.scoreprog.components.PlayFeedListItemDescriptionContainer>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<jacobfix.scorepredictor.LobbyFragmentListItem xmlns:android="http://schemas.android.com/apk/res/android"
+<jacobfix.scoreprog.LobbyFragmentListItem xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="120dp"
     android:background="@android:color/white"
@@ -268,4 +268,4 @@
         android:visibility="gone">
     </View> -->
 
-</jacobfix.scorepredictor.LobbyFragmentListItem>
+</jacobfix.scoreprog.LobbyFragmentListItem>

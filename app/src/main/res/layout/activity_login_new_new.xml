@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -22,7 +23,8 @@
             android:layout_height="wrap_content"
             android:textColor="@android:color/white"
             android:textColorHint="@android:color/white"
-            app:hintTextAppearance="@style/TextAppearance.App.TextInputLayout.Hint">
+            app:hintTextAppearance="@style/TextAppearance.App.TextInputLayout.Hint"
+            app:errorTextAppearance="@style/TextAppearance.App.TextInputLayout.Error">
 
             <android.support.design.widget.TextInputEditText
                 android:id="@+id/username_email_field"
@@ -41,7 +43,8 @@
             android:layout_height="wrap_content"
             android:textColor="@android:color/white"
             android:textColorHint="@android:color/white"
-            app:hintTextAppearance="@style/TextAppearance.App.TextInputLayout.Hint">
+            app:hintTextAppearance="@style/TextAppearance.App.TextInputLayout.Hint"
+            app:errorTextAppearance="@style/TextAppearance.App.TextInputLayout.Error">
 
             <android.support.design.widget.TextInputEditText
                 android:id="@+id/password_field"
@@ -94,26 +97,16 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:layout_above="@id/box"
+        android:layout_marginBottom="10dp"
         android:gravity="bottom|center_horizontal">
 
         <TextView
             android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="0dp"
             android:textSize="44sp"
             android:textColor="@color/light_gray"
-            android:text="ScoreProg"/>
-
-        <ProgressBar
-            android:id="@+id/authentication_progress"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingTop="5dp"
-            android:paddingBottom="10dp"
-            android:indeterminate="true"
-            android:indeterminateTint="@android:color/white"
-            android:visibility="invisible"/>
+            android:text="@string/app_name"/>
 
     </LinearLayout>
 

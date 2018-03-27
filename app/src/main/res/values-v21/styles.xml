@@ -1,0 +1,120 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here.263137 -->
+        <item name="colorPrimary">#213642</item>
+        <item name="colorPrimaryDark">#081922</item>
+        <item name="colorAccent">@color/colorPrimary</item>
+    </style>
+
+    <style name="MaterialTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:actionMenuTextColor">@android:color/white</item>
+        <item name="android:windowTranslucentStatus" tools:targetApi="21">true</item>
+        <item name="colorControlNormal">@android:color/white</item>
+    </style>
+
+    <style name="MaterialLightTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:actionMenuTextColor">@android:color/white</item>
+        <item name="android:tabWidgetStyle">@style/TabLayoutStyle</item>
+    </style>
+
+    <style name="TabLayoutStyle" parent="Theme.AppCompat">
+        <item name="tabIndicatorColor">@android:color/white</item>
+        <item name="tabTextColor">#80ffffff</item>
+        <item name="tabSelectedTextColor">@android:color/white</item>
+        <item name="tabIndicatorHeight">4dp</item>
+    </style>
+
+    <style name="SplashTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash_screen</item>
+        <item name="android:statusBarColor" tools:targetApi="21">@color/standard_color</item>
+    </style>
+
+    <style name="SpTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="android:actionBarStyle">@style/TranslucentActionBar</item>
+        <item name="android:windowActionBarOverlay">true</item>
+        <!-- For compatibility -->
+        <item name="actionBarStyle">@style/TranslucentActionBar</item>
+        <item name="windowActionBarOverlay">true</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+    </style>
+
+    <color name="transparent_black">#60000000</color>
+    <style name="TranslucentActionBar" parent="Widget.AppCompat.ActionBar.Solid">
+        <item name="android:background">@color/transparent_black</item>
+        <!-- For compatibility -->
+        <item name="background">@color/transparent_black</item>
+    </style>
+
+    <style name="number_pad_button" parent="Base.Widget.AppCompat.Button">
+        <item name="android:textSize">30sp</item>
+        <item name="android:textColor">@color/standard_text</item>
+        <item name="android:background">?attr/selectableItemBackground</item>
+        <item name="android:paddingTop">10dp</item>
+        <item name="android:paddingBottom">10dp</item>
+    </style>
+
+    <style name="TextInputLayoutAppearance" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@color/standard_color</item>
+        <item name="android:textColorHint">@color/standard_color</item>
+        <item name="colorAccent">@color/standard_color</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="EditTextStyle" parent="Base.V7.Widget.AppCompat.EditText">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:backgroundTint" tools:targetApi="21">@android:color/white</item>
+        <item name="android:paddingBottom">15dp</item>
+        <item name="android:drawablePadding">15dp</item>
+        <item name="android:drawableTint" tools:targetApi="23">@android:color/white</item>
+    </style>
+
+    <style name="TextInputLayoutStyle" parent="Widget.Design.TextInputLayout">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textColorHint">@android:color/white</item>
+    </style>
+
+    <style name="TextAppearance.App.TextInputLayout.Hint" parent="@style/TextAppearance.AppCompat">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="TextAppearance.App.TextInputLayout.Error" parent="@style/TextAppearance.AppCompat">
+        <item name="android:textColor">@color/error_red</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="ErrorTextInputLayoutAppearance" parent="TextInputLayoutAppearance">
+        <item name="android:textColor">@android:color/holo_red_dark</item>
+        <item name="colorAccent">@android:color/holo_green_light</item>
+    </style>
+
+    <style name="TextInputEditTextAppearance" parent="TextAppearance.AppCompat">
+        <item name="android:textColorHint">@color/standard_text</item>
+        <item name="android:backgroundTint" tools:targetApi="21">@color/standard_text</item>
+        <item name="colorAccent">@color/standard_color</item>
+    </style>
+
+    <style name="ErrorTextInputEditTextAppearance" parent="TextInputEditTextAppearance">
+        <item name="colorControlNormal">@android:color/holo_red_dark</item>
+        <item name="colorControlActivated">@android:color/holo_red_dark</item>
+    </style>
+
+    <style name="HelpTextAppearance" parent="@style/TextAppearance.AppCompat">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="colorAccent">@android:color/white</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="NullTextAppearance" parent="TextAppearance.AppCompat">
+        <item name="android:textSize">0sp</item>
+    </style>
+
+</resources>

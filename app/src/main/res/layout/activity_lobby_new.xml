@@ -13,7 +13,7 @@
         style="@style/TabLayoutStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#213642"
+        android:background="@color/standard_color"
         android:elevation="4dp"
         app:tabGravity="center"
         app:tabMode="scrollable"/>
@@ -24,5 +24,5 @@
         android:id="@+id/pager"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/darker_light_gray"/>
+        android:background="@color/background_light_gray"/>
 </LinearLayout>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jacobfix.scoreprog.components.PredictionListItemNameContainer xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/profile_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:gravity="left|center_vertical">
+
+    <TextView
+        android:id="@+id/ranking"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:text="1"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"/>
+
+    <View
+        android:layout_width="2dp"
+        android:layout_height="match_parent"
+        android:background="@android:color/darker_gray"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="left|center_vertical"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp">
+
+        <TextView
+            android:id="@+id/username"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="22sp"
+            android:text="Micrometeorite"/>
+
+        <!--  include medals -->
+    </LinearLayout>
+</jacobfix.scoreprog.components.PredictionListItemNameContainer>

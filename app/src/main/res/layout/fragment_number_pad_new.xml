@@ -57,6 +57,7 @@
                 <Button android:id="@+id/key_1"
                     android:layout_column="0"
                     style="@style/number_pad_button"
+                    android:background="@android:color/holo_red_light"
                     android:text="1"/>
 
                 <Button android:id="@+id/key_2"
@@ -130,6 +131,7 @@
         android:clickable="true"
         android:src="@drawable/ic_check_black_36dp"
         android:tint="@android:color/white"/>
+
 
     <!-- <LinearLayout
         android:layout_width="wrap_content"

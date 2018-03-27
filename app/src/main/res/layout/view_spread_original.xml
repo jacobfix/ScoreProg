@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<jacobfix.scorepredictor.OriginalSpreadView xmlns:android="http://schemas.android.com/apk/res/android"
+<jacobfix.scoreprog.OriginalSpreadView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -26,4 +26,4 @@
         android:tint="#808080"
         android:layout_marginTop="-12dp"
         android:visibility="invisible" />
-</jacobfix.scorepredictor.OriginalSpreadView>
+</jacobfix.scoreprog.OriginalSpreadView>

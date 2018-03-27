@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item
+    <!-- <item
         android:id="@+id/action_set_exposure"
         android:icon="@drawable/ic_public_white_24dp"
         android:title="Set Visibility"
-        app:showAsAction="always"/>
+        app:showAsAction="always"/> -->
+
     <item
-        android:id="@+id/action_find_friends"
+        android:id="@+id/view_friends"
+        android:icon="@drawable/ic_people_white_24dp"
+        android:title="View Friends"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/find_users"
         android:icon="@drawable/ic_person_add_black_24dp"
-        android:title="Find Friends"
+        android:title="Find Users"
         app:showAsAction="never"/>
 </menu>

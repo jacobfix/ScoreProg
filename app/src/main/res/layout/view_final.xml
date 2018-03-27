@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<jacobfix.scorepredictor.components.FinalView xmlns:android="http://schemas.android.com/apk/res/android"
+<jacobfix.scoreprog.components.FinalView xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -11,4 +11,4 @@
         android:textAllCaps="true"
         android:text="Final"/>
 
-</jacobfix.scorepredictor.components.FinalView>
+</jacobfix.scoreprog.components.FinalView>

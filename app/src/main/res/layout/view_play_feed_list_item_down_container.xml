@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jacobfix.scoreprog.components.PlayFeedListItemDownContainer xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:paddingLeft="3dp"
+    android:paddingRight="3dp">
+
+    <TextView
+        android:id="@+id/down_and_to_go"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textColor="@android:color/white"
+        android:textSize="22sp"
+        android:text="2nd &amp; 10"/>
+
+    <TextView
+        android:id="@+id/yard_line"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"
+        android:text="ATL 40"/>
+
+    <!-- <TextView
+        android:id="@+id/to_go"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/white"
+        android:textSize="20sp"
+        android:text="10"/> -->
+
+</jacobfix.scoreprog.components.PlayFeedListItemDownContainer>

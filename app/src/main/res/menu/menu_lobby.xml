@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item
+    <!-- <item
         android:id="@+id/action_find_friends"
         android:icon="@drawable/ic_person_add_black_24dp"
         android:title="Find Friends"
-        app:showAsAction="never"/>
+        app:showAsAction="never"/> -->
 
     <!-- <item
         android:id="@+id/action_change_source"
@@ -16,5 +16,15 @@
 
         </menu>
     </item> -->
+    <item
+        android:id="@+id/view_friends"
+        android:icon="@drawable/ic_people_white_24dp"
+        android:title="View Friends"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/sign_out"
+        android:title="Sign Out"
+        app:showAsAction="never"/>
 
 </menu>
